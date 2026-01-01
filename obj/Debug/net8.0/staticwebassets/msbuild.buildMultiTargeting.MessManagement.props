@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\MessManagement.props" />
-</Project>

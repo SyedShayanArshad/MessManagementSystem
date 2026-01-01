@@ -1,0 +1,7 @@
+# Ignore build outputs
+bin/
+obj/
+
+# Ignore appsettings with secrets
+appsettings.json
+appsettings.*.json
