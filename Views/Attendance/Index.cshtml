@@ -1,0 +1,952 @@
+@model MessManagement.Models.ViewModels.AttendanceMarkViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using MessManagement.Models.ViewModels
+@{
+    ViewData["Title"] = "Attendance Management";
+    var periodCalendarData = ViewBag.PeriodCalendarData as Dictionary<DateTime, CalendarDayData> 
+        ?? new Dictionary<DateTime, CalendarDayData>();
+    var allPeriods = ViewBag.AllPeriods as List<MessManagement.Models.MessPeriod> 
+        ?? new List<MessManagement.Models.MessPeriod>();
+    var selectedPeriod = ViewBag.SelectedPeriod as MessManagement.Models.MessPeriod;
+    var currentPeriod = ViewBag.CurrentPeriod as MessManagement.Models.MessPeriod;
+    var recentPending = ViewBag.RecentPending as List<MessManagement.Models.Attendance>;
+    var totalMembers = ViewBag.TotalMembers != null ? (int)ViewBag.TotalMembers : Model.Items.Count;
+    var todayBreakfast = ViewBag.TodayBreakfastPresent != null ? (int)ViewBag.TodayBreakfastPresent : 0;
+    var todayLunch = ViewBag.TodayLunchPresent != null ? (int)ViewBag.TodayLunchPresent : 0;
+    var todayDinner = ViewBag.TodayDinnerPresent != null ? (int)ViewBag.TodayDinnerPresent : 0;
+    var pendingVerifications = ViewBag.PendingVerifications != null ? (int)ViewBag.PendingVerifications : 0;
+    var isEditable = ViewBag.IsEditable != null ? (bool)ViewBag.IsEditable : true;
+    var daysOfWeek = new[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Attendance Management</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon bg-emerald-100">
+                    <i data-lucide="clipboard-check" class="w-6 h-6 text-emerald-600"></i>
+                </span>
+                Attendance Management
+            </h1>
+            <p class="page-description">Dashboard overview, calendar view, and daily attendance marking.</p>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mb-6" role="alert">
+        <div class="flex items-start gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-green-600 shrink-0"></i>
+            <div class="flex-1">
+                <p>@TempData["SuccessMessage"]</p>
+            </div>
+            <button type="button" class="alert-close" onclick="this.closest('.alert').remove()">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+}
+
+<!-- ============================================== -->
+<!-- SECTION 1: DASHBOARD OVERVIEW -->
+<!-- ============================================== -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+    <!-- Today's Breakfast -->
+    <div class="stat-card">
+        <div class="stat-icon bg-amber-100">
+            <i data-lucide="sunrise" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value text-amber-600">@todayBreakfast / @totalMembers</div>
+            <div class="stat-label">Today's Breakfast</div>
+        </div>
+    </div>
+    <!-- Today's Lunch -->
+    <div class="stat-card">
+        <div class="stat-icon bg-blue-100">
+            <i data-lucide="sun" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value text-blue-600">@todayLunch / @totalMembers</div>
+            <div class="stat-label">Today's Lunch</div>
+        </div>
+    </div>
+    <!-- Today's Dinner -->
+    <div class="stat-card">
+        <div class="stat-icon bg-purple-100">
+            <i data-lucide="moon" class="w-6 h-6 text-purple-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value text-purple-600">@todayDinner / @totalMembers</div>
+            <div class="stat-label">Today's Dinner</div>
+        </div>
+    </div>
+    <!-- Pending Verifications -->
+    <div class="stat-card @(pendingVerifications > 0 ? "ring-2 ring-orange-300" : "")">
+        <div class="stat-icon bg-orange-100">
+            <i data-lucide="clock" class="w-6 h-6 text-orange-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value text-orange-600">@pendingVerifications</div>
+            <div class="stat-label">Pending Verification</div>
+        </div>
+    </div>
+    <!-- Current Period -->
+    <div class="stat-card">
+        <div class="stat-icon bg-emerald-100">
+            <i data-lucide="calendar-range" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div class="stat-content">
+            @if (currentPeriod != null)
+            {
+                <div class="stat-value text-emerald-600 text-sm">@currentPeriod.PeriodName</div>
+                <div class="stat-label">@currentPeriod.StartDate.ToString("MMM dd") - @currentPeriod.EndDate.ToString("MMM dd")</div>
+            }
+            else
+            {
+                <div class="stat-value text-gray-400">No Active</div>
+                <div class="stat-label">Period</div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- SECTION 2: PERIOD CALENDAR & PENDING VERIFICATION -->
+<!-- ============================================== -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Period-Based Attendance Calendar -->
+    <div class="lg:col-span-2 card">
+        <div class="card-header">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <h3 class="card-title">
+                    <i data-lucide="calendar-range" class="w-5 h-5 text-emerald-600"></i>
+                    Period Attendance Calendar
+                </h3>
+                @if (allPeriods.Any())
+                {
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">Period:</label>
+                        <select id="period-selector" class="form-select text-sm py-1.5" onchange="changePeriod(this.value)">
+                            @foreach (var period in allPeriods)
+                            {
+                                var isSelected = selectedPeriod?.PeriodId == period.PeriodId;
+                                var isCurrent = currentPeriod?.PeriodId == period.PeriodId;
+                                <option value="@period.PeriodId" selected="@isSelected">
+                                    @period.PeriodName @(isCurrent ? "(Current)" : "") - @period.StartDate.ToString("MMM dd") to @period.EndDate.ToString("MMM dd, yyyy")
+                                </option>
+                            }
+                        </select>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="card-body">
+            @if (selectedPeriod != null && periodCalendarData.Any())
+            {
+                <!-- Period Info -->
+                <div class="mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="font-semibold text-emerald-800">@selectedPeriod.PeriodName</span>
+                            <span class="text-sm text-emerald-600 ml-2">
+                                @selectedPeriod.StartDate.ToString("MMMM dd") - @selectedPeriod.EndDate.ToString("MMMM dd, yyyy")
+                            </span>
+                        </div>
+                        <span class="badge bg-emerald-100 text-emerald-700">
+                            @((selectedPeriod.EndDate - selectedPeriod.StartDate).Days + 1) Days
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Day Headers -->
+                <div class="grid grid-cols-7 gap-1 mb-2">
+                    @foreach (var day in daysOfWeek)
+                    {
+                        <div class="text-center text-xs font-semibold text-gray-500 py-2">@day</div>
+                    }
+                </div>
+                
+                <!-- Calendar Grid -->
+                <div class="grid grid-cols-7 gap-1">
+                    @{
+                        var startDayOffset = (int)selectedPeriod.StartDate.DayOfWeek;
+                    }
+                    <!-- Empty cells for offset -->
+                    @for (int i = 0; i < startDayOffset; i++)
+                    {
+                        <div class="aspect-square"></div>
+                    }
+                    <!-- Day cells for the period -->
+                    @for (var d = selectedPeriod.StartDate; d <= selectedPeriod.EndDate; d = d.AddDays(1))
+                    {
+                        var dayData = periodCalendarData.ContainsKey(d) ? periodCalendarData[d] : new CalendarDayData();
+                        var isToday = d == DateTime.Today;
+                        var isSelected = d == Model.Date;
+                        var dateStr = d.ToString("yyyy-MM-dd");
+                        var hasData = dayData.HasData;
+                        var totalMeals = dayData.Breakfast + dayData.Lunch + dayData.Dinner;
+                        var isPast = d < DateTime.Today;
+                        
+                        // Color intensity based on attendance
+                        var intensity = hasData ? Math.Min((totalMeals / (decimal)(totalMembers * 3)) * 100, 100) : 0;
+                        var bgClass = !hasData ? "bg-gray-50" 
+                            : intensity > 75 ? "bg-emerald-200 hover:bg-emerald-300" 
+                            : intensity > 50 ? "bg-emerald-100 hover:bg-emerald-200"
+                            : intensity > 25 ? "bg-amber-100 hover:bg-amber-200"
+                            : "bg-red-100 hover:bg-red-200";
+                        
+                        <a href="@Url.Action("Index", new { date = dateStr, periodId = selectedPeriod.PeriodId })"
+                           class="aspect-square rounded-lg p-1 flex flex-col items-center justify-center cursor-pointer transition-all
+                                  @bgClass @(isSelected ? "ring-2 ring-emerald-500 ring-offset-1" : "") @(isToday ? "font-bold ring-2 ring-blue-400" : "") @(isPast && !isSelected ? "opacity-75" : "")">
+                            <span class="text-sm @(isToday ? "text-blue-700" : "text-gray-700")">@d.Day</span>
+                            <span class="text-[10px] text-gray-500">@d.ToString("MMM")</span>
+                            @if (hasData)
+                            {
+                                <div class="flex gap-0.5 mt-0.5">
+                                    <div class="w-1.5 h-1.5 rounded-full @(dayData.Breakfast > 0 ? "bg-amber-500" : "bg-gray-300")" title="Breakfast: @dayData.Breakfast"></div>
+                                    <div class="w-1.5 h-1.5 rounded-full @(dayData.Lunch > 0 ? "bg-blue-500" : "bg-gray-300")" title="Lunch: @dayData.Lunch"></div>
+                                    <div class="w-1.5 h-1.5 rounded-full @(dayData.Dinner > 0 ? "bg-purple-500" : "bg-gray-300")" title="Dinner: @dayData.Dinner"></div>
+                                </div>
+                            }
+                        </a>
+                        
+                        @* Add empty cells if new week starts *@
+                        @if (d.DayOfWeek == DayOfWeek.Saturday && d < selectedPeriod.EndDate)
+                        {
+                            @* Week ends, next row will start *@
+                        }
+                    }
+                </div>
+                
+                <!-- Legend -->
+                <div class="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-gray-200 text-xs text-gray-600">
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-3 h-3 rounded bg-emerald-200 border border-emerald-300"></div>
+                        <span>High (75%+)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-3 h-3 rounded bg-emerald-100 border border-emerald-200"></div>
+                        <span>Good (50-75%)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-3 h-3 rounded bg-amber-100 border border-amber-200"></div>
+                        <span>Low (25-50%)</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-3 h-3 rounded bg-red-100 border border-red-200"></div>
+                        <span>Very Low</span>
+                    </div>
+                    <div class="flex items-center gap-3 ml-auto">
+                        <div class="flex items-center gap-1">
+                            <div class="w-2 h-2 rounded-full bg-amber-500"></div>
+                            <span>Breakfast</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                            <span>Lunch</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                            <span>Dinner</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-12 text-gray-500">
+                    <i data-lucide="calendar-x" class="w-16 h-16 mx-auto text-gray-300 mb-4"></i>
+                    <h4 class="text-lg font-semibold text-gray-700 mb-2">No Periods Found</h4>
+                    <p class="text-sm">Create a mess period to start tracking attendance.</p>
+                    <a href="@Url.Action("Create", "MessPeriod")" class="btn btn-primary mt-4">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Create Period
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Pending Verifications Panel -->
+    <div class="card">
+        <div class="card-header bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
+            <h3 class="card-title text-orange-800">
+                <i data-lucide="clock" class="w-5 h-5 text-orange-600"></i>
+                Pending Verifications
+            </h3>
+        </div>
+        <div class="card-body p-0">
+            @if (recentPending != null && recentPending.Any())
+            {
+                <div class="divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+                    @foreach (var pending in recentPending)
+                    {
+                        <div class="p-3 hover:bg-orange-50/50 transition-colors">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center text-white text-xs font-bold">
+                                        @(pending.User?.FullName?.Substring(0, 1).ToUpper() ?? "?")
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">@pending.User?.FullName</p>
+                                        <p class="text-xs text-gray-500">@pending.Date.ToString("MMM dd, yyyy")</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-1 mt-2 ml-10">
+                                @if (pending.IsBreakfastPresent && !pending.BreakfastVerified)
+                                {
+                                    <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs">Breakfast</span>
+                                }
+                                @if (pending.IsLunchPresent && !pending.LunchVerified)
+                                {
+                                    <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">Lunch</span>
+                                }
+                                @if (pending.IsDinnerPresent && !pending.DinnerVerified)
+                                {
+                                    <span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs">Dinner</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+                @if (pendingVerifications > 10)
+                {
+                    <div class="p-3 border-t border-gray-200 bg-gray-50">
+                        <p class="text-center text-sm text-gray-600">
+                            And @(pendingVerifications - 10) more pending...
+                        </p>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="p-8 text-center text-gray-500">
+                    <i data-lucide="check-circle-2" class="w-12 h-12 mx-auto text-emerald-300 mb-2"></i>
+                    <p class="text-sm">All verifications complete!</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!-- SECTION 3: MARK ATTENDANCE FOR SELECTED DATE -->
+<!-- ============================================== -->
+@if (isEditable)
+{
+<form asp-action="Save" method="post" id="attendance-form">
+    <div class="card">
+        <div class="card-header bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <h3 class="card-title text-emerald-800">
+                    <i data-lucide="clipboard-list" class="w-5 h-5 text-emerald-600"></i>
+                    Mark Attendance - @Model.Date.ToString("dddd, MMMM dd, yyyy")
+                </h3>
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-600">Date:</label>
+                        <input asp-for="Date" 
+                               class="form-input text-sm py-1.5 w-40" 
+                               type="date" 
+                               id="attendance-date" />
+                    </div>
+                    <span class="badge badge-primary">@Model.Items.Count Members</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Stats for Selected Date -->
+        <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+            <div class="flex flex-wrap gap-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                    <span class="text-sm text-gray-600">Breakfast:</span>
+                    <span class="font-semibold text-amber-600" id="breakfast-count">@Model.Items.Count(i => i.IsBreakfastPresent)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span class="text-sm text-gray-600">Lunch:</span>
+                    <span class="font-semibold text-blue-600" id="lunch-count">@Model.Items.Count(i => i.IsLunchPresent)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-purple-500"></div>
+                    <span class="text-sm text-gray-600">Dinner:</span>
+                    <span class="font-semibold text-purple-600" id="dinner-count">@Model.Items.Count(i => i.IsDinnerPresent)</span>
+                </div>
+                <div class="flex items-center gap-2 ml-auto">
+                    <span class="text-sm text-gray-600">Grand Total:</span>
+                    <span class="font-bold text-emerald-600" id="grand-total">Rs. @Model.Items.Sum(i => i.TotalCharge).ToString("N0")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bulk Actions -->
+        <div class="bg-white px-6 py-3 border-b border-gray-200">
+            <div class="flex flex-wrap items-center gap-4 text-sm">
+                <span class="text-gray-600 font-medium">Quick Actions:</span>
+                <button type="button" onclick="setAllMeal('breakfast', true)" class="px-2 py-1 rounded bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors">
+                    <i data-lucide="check-circle" class="w-3 h-3 inline"></i> All Breakfast
+                </button>
+                <button type="button" onclick="setAllMeal('breakfast', false)" class="px-2 py-1 rounded bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors">
+                    <i data-lucide="x-circle" class="w-3 h-3 inline"></i> None Breakfast
+                </button>
+                <span class="text-gray-300">|</span>
+                <button type="button" onclick="setAllMeal('lunch', true)" class="px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors">
+                    <i data-lucide="check-circle" class="w-3 h-3 inline"></i> All Lunch
+                </button>
+                <button type="button" onclick="setAllMeal('lunch', false)" class="px-2 py-1 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors">
+                    <i data-lucide="x-circle" class="w-3 h-3 inline"></i> None Lunch
+                </button>
+                <span class="text-gray-300">|</span>
+                <button type="button" onclick="setAllMeal('dinner', true)" class="px-2 py-1 rounded bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors">
+                    <i data-lucide="check-circle" class="w-3 h-3 inline"></i> All Dinner
+                </button>
+                <button type="button" onclick="setAllMeal('dinner', false)" class="px-2 py-1 rounded bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors">
+                    <i data-lucide="x-circle" class="w-3 h-3 inline"></i> None Dinner
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container overflow-x-auto">
+            <table class="data-table w-full" role="grid" aria-label="Attendance marking table">
+                <thead>
+                    <tr>
+                        <th scope="col" class="min-w-[180px]">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                                Member
+                            </span>
+                        </th>
+                        <th scope="col" class="text-center bg-amber-50 min-w-[200px]">
+                            <span class="flex items-center justify-center gap-2 text-amber-700">
+                                <i data-lucide="sunrise" class="w-4 h-4"></i>
+                                Breakfast
+                            </span>
+                        </th>
+                        <th scope="col" class="text-center bg-blue-50 min-w-[200px]">
+                            <span class="flex items-center justify-center gap-2 text-blue-700">
+                                <i data-lucide="sun" class="w-4 h-4"></i>
+                                Lunch
+                            </span>
+                        </th>
+                        <th scope="col" class="text-center bg-purple-50 min-w-[200px]">
+                            <span class="flex items-center justify-center gap-2 text-purple-700">
+                                <i data-lucide="moon" class="w-4 h-4"></i>
+                                Dinner
+                            </span>
+                        </th>
+                        <th scope="col" class="text-right min-w-[100px]">
+                            <span class="flex items-center justify-end gap-2">
+                                <i data-lucide="banknote" class="w-4 h-4"></i>
+                                Total
+                            </span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Items.Count; i++)
+                    {
+                        var item = Model.Items[i];
+                        <tr class="@(i % 2 == 0 ? "bg-white" : "bg-gray-50/50")" data-user-index="@i">
+                            <td>
+                                <input type="hidden" asp-for="Items[i].UserId" />
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-semibold text-sm">
+                                        @item.FullName?.Substring(0, 1).ToUpper()
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900 text-sm">@item.FullName</p>
+                                        <div class="flex gap-1 mt-0.5">
+                                            @if (item.BreakfastVerified)
+                                            {
+                                                <span class="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center" title="Breakfast Verified">
+                                                    <i data-lucide="check" class="w-2.5 h-2.5 text-white"></i>
+                                                </span>
+                                            }
+                                            @if (item.LunchVerified)
+                                            {
+                                                <span class="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center" title="Lunch Verified">
+                                                    <i data-lucide="check" class="w-2.5 h-2.5 text-white"></i>
+                                                </span>
+                                            }
+                                            @if (item.DinnerVerified)
+                                            {
+                                                <span class="w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center" title="Dinner Verified">
+                                                    <i data-lucide="check" class="w-2.5 h-2.5 text-white"></i>
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <!-- Breakfast Column -->
+                            <td class="bg-amber-50/50">
+                                <div class="flex flex-col gap-2">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input asp-for="Items[i].IsBreakfastPresent" 
+                                               type="checkbox" 
+                                               class="form-checkbox meal-checkbox"
+                                               data-meal="breakfast"
+                                               data-index="@i" />
+                                        <span class="text-xs text-gray-600">Present</span>
+                                        @if (item.BreakfastVerified)
+                                        {
+                                            <span class="badge bg-green-100 text-green-700 text-xs">Verified</span>
+                                        }
+                                    </label>
+                                    <select asp-for="Items[i].BreakfastDishPlanId" 
+                                            asp-items="(IEnumerable<SelectListItem>)ViewBag.BreakfastDishes"
+                                            class="form-select text-xs meal-select"
+                                            data-meal="breakfast"
+                                            data-index="@i">
+                                        <option value="">-- Select Dish --</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <!-- Lunch Column -->
+                            <td class="bg-blue-50/50">
+                                <div class="flex flex-col gap-2">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input asp-for="Items[i].IsLunchPresent" 
+                                               type="checkbox" 
+                                               class="form-checkbox meal-checkbox"
+                                               data-meal="lunch"
+                                               data-index="@i" />
+                                        <span class="text-xs text-gray-600">Present</span>
+                                        @if (item.LunchVerified)
+                                        {
+                                            <span class="badge bg-green-100 text-green-700 text-xs">Verified</span>
+                                        }
+                                    </label>
+                                    <select asp-for="Items[i].LunchDishPlanId" 
+                                            asp-items="(IEnumerable<SelectListItem>)ViewBag.LunchDishes"
+                                            class="form-select text-xs meal-select"
+                                            data-meal="lunch"
+                                            data-index="@i">
+                                        <option value="">-- Select Dish --</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <!-- Dinner Column -->
+                            <td class="bg-purple-50/50">
+                                <div class="flex flex-col gap-2">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input asp-for="Items[i].IsDinnerPresent" 
+                                               type="checkbox" 
+                                               class="form-checkbox meal-checkbox"
+                                               data-meal="dinner"
+                                               data-index="@i" />
+                                        <span class="text-xs text-gray-600">Present</span>
+                                        @if (item.DinnerVerified)
+                                        {
+                                            <span class="badge bg-green-100 text-green-700 text-xs">Verified</span>
+                                        }
+                                    </label>
+                                    <select asp-for="Items[i].DinnerDishPlanId" 
+                                            asp-items="(IEnumerable<SelectListItem>)ViewBag.DinnerDishes"
+                                            class="form-select text-xs meal-select"
+                                            data-meal="dinner"
+                                            data-index="@i">
+                                        <option value="">-- Select Dish --</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <!-- Total Column -->
+                            <td class="text-right">
+                                <span class="badge badge-success user-total" data-index="@i">
+                                    Rs. @((item.BreakfastCharge + item.LunchCharge + item.DinnerCharge).ToString("N0"))
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-sm text-gray-600">
+                    <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
+                    Mark presence and select dishes for each meal. Save each meal type separately.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    <button type="submit" formaction="@Url.Action("SaveBreakfast")" class="btn bg-amber-500 hover:bg-amber-600 text-white">
+                        <i data-lucide="sunrise" class="w-4 h-4"></i>
+                        Save Breakfast
+                    </button>
+                    <button type="submit" formaction="@Url.Action("SaveLunch")" class="btn bg-blue-500 hover:bg-blue-600 text-white">
+                        <i data-lucide="sun" class="w-4 h-4"></i>
+                        Save Lunch
+                    </button>
+                    <button type="submit" formaction="@Url.Action("SaveDinner")" class="btn bg-purple-500 hover:bg-purple-600 text-white">
+                        <i data-lucide="moon" class="w-4 h-4"></i>
+                        Save Dinner
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+}
+else
+{
+<!-- READ-ONLY HISTORY VIEW -->
+<div class="card">
+    <div class="card-header bg-gradient-to-r from-gray-100 to-slate-100 border-b border-gray-300">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h3 class="card-title text-gray-700">
+                <i data-lucide="history" class="w-5 h-5 text-gray-500"></i>
+                Attendance History - @Model.Date.ToString("dddd, MMMM dd, yyyy")
+                <span class="badge bg-gray-200 text-gray-600 ml-2">Read Only</span>
+            </h3>
+            <span class="badge badge-secondary">@Model.Items.Count Members</span>
+        </div>
+    </div>
+    
+    <!-- Stats for Selected Date -->
+    <div class="bg-gray-50 px-6 py-3 border-b border-gray-200">
+        <div class="flex flex-wrap gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                <span class="text-sm text-gray-600">Breakfast:</span>
+                <span class="font-semibold text-amber-600">@Model.Items.Count(i => i.IsBreakfastPresent)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                <span class="text-sm text-gray-600">Lunch:</span>
+                <span class="font-semibold text-blue-600">@Model.Items.Count(i => i.IsLunchPresent)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-purple-500"></div>
+                <span class="text-sm text-gray-600">Dinner:</span>
+                <span class="font-semibold text-purple-600">@Model.Items.Count(i => i.IsDinnerPresent)</span>
+            </div>
+            <div class="flex items-center gap-2 ml-auto">
+                <span class="text-sm text-gray-600">Total Charges:</span>
+                <span class="font-bold text-gray-700">Rs. @Model.Items.Sum(i => i.TotalCharge).ToString("N0")</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container overflow-x-auto">
+        <table class="data-table w-full" role="grid" aria-label="Attendance history table">
+            <thead>
+                <tr>
+                    <th scope="col" class="min-w-[180px]">
+                        <span class="flex items-center gap-2">
+                            <i data-lucide="user" class="w-4 h-4"></i>
+                            Member
+                        </span>
+                    </th>
+                    <th scope="col" class="text-center bg-amber-50 min-w-[120px]">
+                        <span class="flex items-center justify-center gap-2 text-amber-700">
+                            <i data-lucide="sunrise" class="w-4 h-4"></i>
+                            Breakfast
+                        </span>
+                    </th>
+                    <th scope="col" class="text-center bg-blue-50 min-w-[120px]">
+                        <span class="flex items-center justify-center gap-2 text-blue-700">
+                            <i data-lucide="sun" class="w-4 h-4"></i>
+                            Lunch
+                        </span>
+                    </th>
+                    <th scope="col" class="text-center bg-purple-50 min-w-[120px]">
+                        <span class="flex items-center justify-center gap-2 text-purple-700">
+                            <i data-lucide="moon" class="w-4 h-4"></i>
+                            Dinner
+                        </span>
+                    </th>
+                    <th scope="col" class="text-right min-w-[100px]">
+                        <span class="flex items-center justify-end gap-2">
+                            <i data-lucide="banknote" class="w-4 h-4"></i>
+                            Total
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Items.Count; i++)
+                {
+                    var item = Model.Items[i];
+                    <tr class="@(i % 2 == 0 ? "bg-white" : "bg-gray-50/50")">
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white font-semibold text-sm">
+                                    @item.FullName?.Substring(0, 1).ToUpper()
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 text-sm">@item.FullName</p>
+                                </div>
+                            </div>
+                        </td>
+                        <!-- Breakfast -->
+                        <td class="text-center bg-amber-50/30">
+                            @if (item.IsBreakfastPresent)
+                            {
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs">
+                                        <i data-lucide="check" class="w-3 h-3"></i> Present
+                                    </span>
+                                    @if (item.BreakfastVerified)
+                                    {
+                                        <span class="text-[10px] text-green-600">✓ Verified</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-[10px] text-orange-500">Pending</span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-500 text-xs">
+                                    <i data-lucide="x" class="w-3 h-3"></i> Absent
+                                </span>
+                            }
+                        </td>
+                        <!-- Lunch -->
+                        <td class="text-center bg-blue-50/30">
+                            @if (item.IsLunchPresent)
+                            {
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs">
+                                        <i data-lucide="check" class="w-3 h-3"></i> Present
+                                    </span>
+                                    @if (item.LunchVerified)
+                                    {
+                                        <span class="text-[10px] text-green-600">✓ Verified</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-[10px] text-orange-500">Pending</span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-500 text-xs">
+                                    <i data-lucide="x" class="w-3 h-3"></i> Absent
+                                </span>
+                            }
+                        </td>
+                        <!-- Dinner -->
+                        <td class="text-center bg-purple-50/30">
+                            @if (item.IsDinnerPresent)
+                            {
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs">
+                                        <i data-lucide="check" class="w-3 h-3"></i> Present
+                                    </span>
+                                    @if (item.DinnerVerified)
+                                    {
+                                        <span class="text-[10px] text-green-600">✓ Verified</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-[10px] text-orange-500">Pending</span>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-500 text-xs">
+                                    <i data-lucide="x" class="w-3 h-3"></i> Absent
+                                </span>
+                            }
+                        </td>
+                        <!-- Total -->
+                        <td class="text-right">
+                            <span class="badge badge-secondary">
+                                Rs. @((item.BreakfastCharge + item.LunchCharge + item.DinnerCharge).ToString("N0"))
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer bg-gray-50">
+        <div class="flex items-center justify-between">
+            <p class="text-sm text-gray-500">
+                <i data-lucide="lock" class="w-4 h-4 inline mr-1"></i>
+                This is a historical record and cannot be modified.
+            </p>
+            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Today
+            </a>
+        </div>
+    </div>
+</div>
+}
+
+@section Scripts {
+    <script>
+        // Period selector change handler
+        function changePeriod(periodId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('periodId', periodId);
+            url.searchParams.delete('date');
+            window.location.href = url.toString();
+        }
+        
+        // Dish prices lookup
+        const dishPrices = {
+            breakfast: {},
+            lunch: {},
+            dinner: {}
+        };
+        
+        // Initialize prices from select options
+        function initPrices() {
+            document.querySelectorAll('select[data-meal="breakfast"]').forEach(select => {
+                if (select.dataset.index === '0') {
+                    Array.from(select.options).forEach(opt => {
+                        if (opt.value) {
+                            const match = opt.text.match(/Rs\.\s*(\d+)/);
+                            if (match) dishPrices.breakfast[opt.value] = parseFloat(match[1]);
+                        }
+                    });
+                }
+            });
+            document.querySelectorAll('select[data-meal="lunch"]').forEach(select => {
+                if (select.dataset.index === '0') {
+                    Array.from(select.options).forEach(opt => {
+                        if (opt.value) {
+                            const match = opt.text.match(/Rs\.\s*(\d+)/);
+                            if (match) dishPrices.lunch[opt.value] = parseFloat(match[1]);
+                        }
+                    });
+                }
+            });
+            document.querySelectorAll('select[data-meal="dinner"]').forEach(select => {
+                if (select.dataset.index === '0') {
+                    Array.from(select.options).forEach(opt => {
+                        if (opt.value) {
+                            const match = opt.text.match(/Rs\.\s*(\d+)/);
+                            if (match) dishPrices.dinner[opt.value] = parseFloat(match[1]);
+                        }
+                    });
+                }
+            });
+        }
+        
+        // Set all checkboxes for a meal
+        function setAllMeal(meal, checked) {
+            document.querySelectorAll(`input[data-meal="${meal}"]`).forEach(cb => {
+                cb.checked = checked;
+            });
+            calculateTotals();
+            updateCounts();
+        }
+        
+        // Update meal counts
+        function updateCounts() {
+            let breakfastCount = 0, lunchCount = 0, dinnerCount = 0;
+            
+            document.querySelectorAll('tbody tr').forEach((row, index) => {
+                const bfCheckbox = row.querySelector(`input[name="Items[${index}].IsBreakfastPresent"]`);
+                const lunchCheckbox = row.querySelector(`input[name="Items[${index}].IsLunchPresent"]`);
+                const dinnerCheckbox = row.querySelector(`input[name="Items[${index}].IsDinnerPresent"]`);
+                
+                if (bfCheckbox?.checked) breakfastCount++;
+                if (lunchCheckbox?.checked) lunchCount++;
+                if (dinnerCheckbox?.checked) dinnerCount++;
+            });
+            
+            document.getElementById('breakfast-count').textContent = breakfastCount;
+            document.getElementById('lunch-count').textContent = lunchCount;
+            document.getElementById('dinner-count').textContent = dinnerCount;
+        }
+        
+        // Calculate totals
+        function calculateTotals() {
+            let grandTotal = 0;
+            
+            document.querySelectorAll('tbody tr').forEach((row, index) => {
+                let userTotal = 0;
+                
+                // Breakfast
+                const bfCheckbox = row.querySelector(`input[name="Items[${index}].IsBreakfastPresent"]`);
+                const bfSelect = row.querySelector(`select[name="Items[${index}].BreakfastDishPlanId"]`);
+                if (bfCheckbox?.checked && bfSelect?.value) {
+                    const price = dishPrices.breakfast[bfSelect.value] || 0;
+                    userTotal += price;
+                }
+                
+                // Lunch
+                const lunchCheckbox = row.querySelector(`input[name="Items[${index}].IsLunchPresent"]`);
+                const lunchSelect = row.querySelector(`select[name="Items[${index}].LunchDishPlanId"]`);
+                if (lunchCheckbox?.checked && lunchSelect?.value) {
+                    const price = dishPrices.lunch[lunchSelect.value] || 0;
+                    userTotal += price;
+                }
+                
+                // Dinner
+                const dinnerCheckbox = row.querySelector(`input[name="Items[${index}].IsDinnerPresent"]`);
+                const dinnerSelect = row.querySelector(`select[name="Items[${index}].DinnerDishPlanId"]`);
+                if (dinnerCheckbox?.checked && dinnerSelect?.value) {
+                    const price = dishPrices.dinner[dinnerSelect.value] || 0;
+                    userTotal += price;
+                }
+                
+                grandTotal += userTotal;
+                
+                // Update user total
+                const totalBadge = row.querySelector('.user-total');
+                if (totalBadge) {
+                    totalBadge.textContent = `Rs. ${userTotal.toLocaleString()}`;
+                }
+            });
+            
+            // Update grand total
+            document.getElementById('grand-total').textContent = `Rs. ${grandTotal.toLocaleString()}`;
+        }
+        
+        // Initialize attendance page
+        function initAttendancePage() {
+            lucide.createIcons();
+            initPrices();
+            calculateTotals();
+            updateCounts();
+            
+            // Add event listeners for checkboxes and selects
+            document.querySelectorAll('.meal-checkbox, .meal-select').forEach(el => {
+                el.addEventListener('change', () => {
+                    calculateTotals();
+                    updateCounts();
+                });
+            });
+            
+            // Handle date change to load attendance for new date
+            document.getElementById('attendance-date')?.addEventListener('change', function() {
+                const newDate = this.value;
+                if (newDate) {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('date', newDate);
+                    window.location.href = url.toString();
+                }
+            });
+        }
+        
+        // Initialize on page load
+        initAttendancePage();
+        
+        // Also reinitialize when SPA loads this content
+        document.addEventListener('spa:contentLoaded', initAttendancePage);
+    </script>
+}

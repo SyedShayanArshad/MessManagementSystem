@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Mess Management System - Manage attendance, payments, and meal plans efficiently" />
+    <meta name="theme-color" content="#1e40af" />
+    <title>@ViewData["Title"] - Mess Management</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    
+    <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
+</head>
+<body class="app-container">
+    <!-- Skip Link for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Header / Navigation -->
+    <header class="app-header" role="banner">
+        <div class="app-header-inner">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="@Url.Action("Index", "Home")" class="app-logo" aria-label="Mess Management Home">
+                    <div class="app-logo-icon">
+                        <i data-lucide="utensils" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <div>
+                        <div class="app-logo-text">MessHub</div>
+                        <div class="app-logo-subtitle">Management System</div>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex items-center space-x-1" role="navigation" aria-label="Main navigation">
+                    <a href="@Url.Action("Index", "Home")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+                        <i data-lucide="home" class="w-4 h-4 inline mr-1"></i>
+                        Dashboard
+                    </a>
+                    
+                    @if (User?.IsInRole("Admin") == true)
+                    {
+                        <a href="@Url.Action("Index", "Users")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Users" ? "active" : "")">
+                            <i data-lucide="users" class="w-4 h-4 inline mr-1"></i>
+                            Members
+                        </a>
+                        <a href="@Url.Action("Index", "DishPlan")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "DishPlan" ? "active" : "")">
+                            <i data-lucide="chef-hat" class="w-4 h-4 inline mr-1"></i>
+                            Dishes
+                        </a>
+                        <a href="@Url.Action("Index", "MessPeriod")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "MessPeriod" ? "active" : "")">
+                            <i data-lucide="calendar-range" class="w-4 h-4 inline mr-1"></i>
+                            Periods
+                        </a>
+                        <a href="@Url.Action("Index", "Attendance")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Attendance" ? "active" : "")">
+                            <i data-lucide="clipboard-check" class="w-4 h-4 inline mr-1"></i>
+                            Attendance
+                        </a>
+                        <a href="@Url.Action("Index", "Tea")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tea" ? "active" : "")">
+                            <i data-lucide="coffee" class="w-4 h-4 inline mr-1"></i>
+                            Tea
+                        </a>
+                        <a href="@Url.Action("Index", "Payment")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Payment" ? "active" : "")">
+                            <i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i>
+                            Payments
+                        </a>
+                        <a href="@Url.Action("Index", "Report")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Report" ? "active" : "")">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 inline mr-1"></i>
+                            Reports
+                        </a>
+                    }
+                    else if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="@Url.Action("MyAttendance", "Attendance")" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "MyAttendance" ? "active" : "")">
+                            <i data-lucide="calendar-check" class="w-4 h-4 inline mr-1"></i>
+                            My Attendance
+                        </a>
+                        <a href="@Url.Action("MyTea", "Tea")" class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "MyTea" ? "active" : "")">
+                            <i data-lucide="coffee" class="w-4 h-4 inline mr-1"></i>
+                            My Tea
+                        </a>
+                        <a href="@Url.Action("MyPayments", "Payment")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Payment" ? "active" : "")">
+                            <i data-lucide="credit-card" class="w-4 h-4 inline mr-1"></i>
+                            My Payments
+                        </a>
+                    }
+                </nav>
+
+                <!-- User Menu -->
+                <div class="flex items-center space-x-4">
+                    @if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="user-menu">
+                            <div class="user-menu-button">
+                                <div class="user-avatar" aria-hidden="true">
+                                    @(User.Identity.Name?.Substring(0, 1).ToUpper())
+                                </div>
+                                <div class="user-info">
+                                    <div class="user-name">@User.Identity.Name</div>
+                                    <div class="user-role">@(User.IsInRole("Admin") ? "Administrator" : "Member")</div>
+                                </div>
+                            </div>
+                        </div>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="inline" data-spa-ignore>
+                            <button type="submit" class="nav-link flex items-center gap-1" aria-label="Logout">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                                <span class="hidden lg:inline">Logout</span>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="btn btn-sm bg-white/20 text-white hover:bg-white/30">
+                            <i data-lucide="log-in" class="w-4 h-4 mr-1"></i>
+                            Login
+                        </a>
+                    }
+                    
+                    <!-- Mobile Menu Button -->
+                    <button type="button" class="mobile-menu-button" id="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <nav class="mobile-nav hidden" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
+            <a href="@Url.Action("Index", "Home")" class="mobile-nav-link">
+                <i data-lucide="home" class="w-4 h-4 inline mr-2"></i>
+                Dashboard
+            </a>
+            @if (User?.IsInRole("Admin") == true)
+            {
+                <a href="@Url.Action("Index", "Users")" class="mobile-nav-link">
+                    <i data-lucide="users" class="w-4 h-4 inline mr-2"></i>
+                    Members
+                </a>
+                <a href="@Url.Action("Index", "DishPlan")" class="mobile-nav-link">
+                    <i data-lucide="chef-hat" class="w-4 h-4 inline mr-2"></i>
+                    Dish Plans
+                </a>
+                <a href="@Url.Action("Index", "MessPeriod")" class="mobile-nav-link">
+                    <i data-lucide="calendar-range" class="w-4 h-4 inline mr-2"></i>
+                    Periods
+                </a>
+                <a href="@Url.Action("Index", "Attendance")" class="mobile-nav-link">
+                    <i data-lucide="clipboard-check" class="w-4 h-4 inline mr-2"></i>
+                    Attendance
+                </a>
+                <a href="@Url.Action("Index", "Tea")" class="mobile-nav-link">
+                    <i data-lucide="coffee" class="w-4 h-4 inline mr-2"></i>
+                    Tea
+                </a>
+                <a href="@Url.Action("Index", "Payment")" class="mobile-nav-link">
+                    <i data-lucide="credit-card" class="w-4 h-4 inline mr-2"></i>
+                    Payments
+                </a>
+                <a href="@Url.Action("Index", "Report")" class="mobile-nav-link">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 inline mr-2"></i>
+                    Reports
+                </a>
+            }
+            else if (User?.Identity?.IsAuthenticated == true)
+            {
+                <a href="@Url.Action("MyAttendance", "Attendance")" class="mobile-nav-link">
+                    <i data-lucide="calendar-check" class="w-4 h-4 inline mr-2"></i>
+                    My Attendance
+                </a>
+                <a href="@Url.Action("MyTea", "Tea")" class="mobile-nav-link">
+                    <i data-lucide="coffee" class="w-4 h-4 inline mr-2"></i>
+                    My Tea
+                </a>
+                <a href="@Url.Action("MyPayments", "Payment")" class="mobile-nav-link">
+                    <i data-lucide="credit-card" class="w-4 h-4 inline mr-2"></i>
+                    My Payments
+                </a>
+                <a href="@Url.Action("Create", "Payment")" class="mobile-nav-link">
+                    <i data-lucide="plus-circle" class="w-4 h-4 inline mr-2"></i>
+                    Add Payment
+                </a>
+            }
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main-content" role="main">
+        <div id="spa-content" class="content-container fade-in">
+            @RenderBody()
+        </div>
+    </main>
+
+    <!-- Footer -->
+    @await Html.PartialAsync("_Footer")
+    
+    <!-- Loading Spinner Partial -->
+    @await Html.PartialAsync("_LoadingSpinner")
+    
+    <!-- SPA Loading Bar (top of page) -->
+    <div id="spa-loading-bar" class="spa-loading-bar"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+    
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+            const nav = document.getElementById('mobile-nav');
+            const isHidden = nav.classList.contains('hidden');
+            nav.classList.toggle('hidden');
+            this.setAttribute('aria-expanded', isHidden);
+        });
+
+        // ===========================================
+        // Fetch API Helper - Avoid Page Refresh
+        // ===========================================
+        const MessAPI = {
+            baseUrl: '/api',
+            
+            // Show/hide loading spinner and bar
+            showLoading: function() {
+                document.getElementById('loading-spinner')?.style.setProperty('display', 'block');
+                const bar = document.getElementById('spa-loading-bar');
+                if (bar) {
+                    bar.classList.remove('complete');
+                    bar.classList.add('active');
+                }
+            },
+            hideLoading: function() {
+                document.getElementById('loading-spinner')?.style.setProperty('display', 'none');
+                const bar = document.getElementById('spa-loading-bar');
+                if (bar) {
+                    bar.classList.remove('active');
+                    bar.classList.add('complete');
+                    setTimeout(() => bar.classList.remove('complete'), 300);
+                }
+            },
+            
+            // Generic fetch wrapper with error handling
+            async fetchAsync(url, options = {}) {
+                this.showLoading();
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...options.headers
+                        }
+                    });
+                    const data = await response.json();
+                    return { success: response.ok, data, status: response.status };
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    return { success: false, error: error.message, status: 0 };
+                } finally {
+                    this.hideLoading();
+                }
+            },
+            
+            // GET request
+            async getAsync(endpoint) {
+                return this.fetchAsync(`${this.baseUrl}${endpoint}`);
+            },
+            
+            // POST request
+            async postAsync(endpoint, data) {
+                return this.fetchAsync(`${this.baseUrl}${endpoint}`, {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+            },
+            
+            // DELETE request
+            async deleteAsync(endpoint) {
+                return this.fetchAsync(`${this.baseUrl}${endpoint}`, {
+                    method: 'DELETE'
+                });
+            },
+            
+            // Dashboard Stats - Load without page refresh
+            async loadDashboardStatsAsync() {
+                const result = await this.getAsync('/Api/dashboard/stats');
+                if (result.success && result.data.success) {
+                    const stats = result.data.data;
+                    this.updateElementText('stats-members', stats.activeMembers);
+                    this.updateElementText('stats-attendance', stats.todayAttendance);
+                    this.updateElementText('stats-payments', '$' + stats.totalPayments.toFixed(2));
+                    this.updateElementText('stats-tea', stats.teaServed);
+                }
+                return result;
+            },
+            
+            // Toggle Attendance - AJAX without page refresh
+            async toggleAttendanceAsync(userId, date, isPresent, dishPlanId = null) {
+                return this.postAsync('/Api/attendance/toggle', {
+                    userId,
+                    date,
+                    isPresent,
+                    dishPlanId
+                });
+            },
+            
+            // Bulk Save Attendance
+            async bulkSaveAttendanceAsync(date, items) {
+                return this.postAsync('/Api/attendance/bulk-save', { date, items });
+            },
+            
+            // Delete User
+            async deleteUserAsync(userId) {
+                return this.deleteAsync(`/Api/users/${userId}`);
+            },
+            
+            // Helper to update element text
+            updateElementText(id, value) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = value;
+            },
+            
+            // Show toast notification
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.innerHTML = `
+                    <div class="toast-content">
+                        <i data-lucide="${type === 'success' ? 'check-circle' : 'x-circle'}" class="w-5 h-5"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                lucide.createIcons();
+                
+                setTimeout(() => {
+                    toast.classList.add('toast-show');
+                }, 10);
+                
+                setTimeout(() => {
+                    toast.classList.remove('toast-show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        };
+        
+        // Make available globally
+        window.MessAPI = MessAPI;
+
+        // ===========================================
+        // jQuery Validation Configuration
+        // ===========================================
+        $.validator.setDefaults({
+            errorClass: 'form-error',
+            validClass: 'form-valid',
+            errorElement: 'span',
+            highlight: function(element) {
+                $(element).addClass('input-error');
+            },
+            unhighlight: function(element) {
+                $(element).removeClass('input-error');
+            }
+        });
+
+        // ===========================================
+        // SPA Router - NO PAGE REFRESH
+        // ===========================================
+        const SPA = {
+            contentContainer: null,
+            currentUrl: window.location.href,
+            isNavigating: false,
+
+            // Initialize SPA
+            init() {
+                this.contentContainer = document.getElementById('spa-content');
+                this.bindEvents();
+                this.handlePopState();
+                console.log('SPA Router initialized - No page refresh mode enabled');
+            },
+
+            // Bind all events
+            bindEvents() {
+                // Intercept all link clicks
+                document.addEventListener('click', (e) => this.handleLinkClick(e));
+                
+                // Intercept all form submissions
+                document.addEventListener('submit', (e) => this.handleFormSubmit(e));
+                
+                // Handle browser back/forward buttons
+                window.addEventListener('popstate', (e) => this.handlePopState(e));
+            },
+
+            // Handle link clicks - Load via fetch instead of page refresh
+            handleLinkClick(e) {
+                const link = e.target.closest('a');
+                if (!link) return;
+
+                const href = link.getAttribute('href');
+                
+                // Skip if:
+                // - No href or javascript: or # links
+                // - External links
+                // - Links with target="_blank"
+                // - Links with data-spa-ignore attribute
+                // - Stripe payment links
+                if (!href || 
+                    href.startsWith('javascript:') || 
+                    href.startsWith('#') ||
+                    href.startsWith('http') ||
+                    href.startsWith('https://checkout.stripe.com') ||
+                    link.target === '_blank' ||
+                    link.hasAttribute('data-spa-ignore')) {
+                    return;
+                }
+
+                e.preventDefault();
+                this.navigateTo(href);
+            },
+
+            // Handle form submissions via fetch
+            handleFormSubmit(e) {
+                const form = e.target;
+                if (!form || form.tagName !== 'FORM') return;
+
+                // Skip if form has data-spa-ignore
+                if (form.hasAttribute('data-spa-ignore')) return;
+
+                // Skip Stripe forms
+                if (form.action && form.action.includes('stripe')) return;
+
+                // For POST/DELETE forms (Create, Edit, Delete) - use normal submission
+                // This ensures proper redirect handling by the browser
+                const method = (form.method || 'GET').toUpperCase();
+                if (method === 'POST') {
+                    // Allow normal form submission - browser will handle redirect properly
+                    return;
+                }
+
+                e.preventDefault();
+                this.submitForm(form);
+            },
+
+            // Navigate to URL without refresh
+            async navigateTo(url, pushState = true) {
+                if (this.isNavigating) return;
+                this.isNavigating = true;
+
+                MessAPI.showLoading();
+
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-SPA-Request': 'true'
+                        }
+                    });
+
+                    if (response.redirected) {
+                        // Handle redirects
+                        await this.navigateTo(response.url, true);
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const html = await response.text();
+                    this.updateContent(html, url, pushState);
+                    this.currentUrl = url;
+
+                    // Update active nav links
+                    this.updateActiveNavLinks(url);
+
+                } catch (error) {
+                    console.error('Navigation error:', error);
+                    MessAPI.showToast('Error loading page', 'error');
+                } finally {
+                    this.isNavigating = false;
+                    MessAPI.hideLoading();
+                }
+            },
+
+            // Submit form via fetch (only for GET forms like filters/search)
+            async submitForm(form) {
+                if (this.isNavigating) return;
+                this.isNavigating = true;
+
+                MessAPI.showLoading();
+
+                try {
+                    const formData = new FormData(form);
+                    const action = form.action || window.location.href;
+
+                    // Build URL with query params for GET
+                    const params = new URLSearchParams(formData);
+                    const url = action + (action.includes('?') ? '&' : '?') + params.toString();
+                    await this.navigateTo(url);
+
+                } catch (error) {
+                    console.error('Form submit error:', error);
+                    MessAPI.showToast('Error submitting form', 'error');
+                } finally {
+                    this.isNavigating = false;
+                    MessAPI.hideLoading();
+                }
+            },
+
+            // Update page content
+            updateContent(html, url, pushState) {
+                // Parse the HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Extract content from spa-content or content-container
+                let newContent = doc.getElementById('spa-content');
+                if (!newContent) {
+                    newContent = doc.querySelector('.content-container');
+                }
+                if (!newContent) {
+                    newContent = doc.querySelector('main');
+                }
+                if (!newContent) {
+                    newContent = doc.body;
+                }
+
+                // Update the content with animation
+                this.contentContainer.style.opacity = '0';
+                this.contentContainer.style.transform = 'translateY(10px)';
+
+                setTimeout(() => {
+                    this.contentContainer.innerHTML = newContent.innerHTML;
+                    
+                    // Update page title
+                    const newTitle = doc.querySelector('title');
+                    if (newTitle) {
+                        document.title = newTitle.textContent;
+                    }
+
+                    // Update URL in browser
+                    if (pushState && url !== this.currentUrl) {
+                        history.pushState({ url: url }, '', url);
+                    }
+
+                    // Re-initialize scripts
+                    this.reinitialize();
+
+                    // Animate in
+                    this.contentContainer.style.opacity = '1';
+                    this.contentContainer.style.transform = 'translateY(0)';
+                }, 150);
+            },
+
+            // Handle browser back/forward
+            handlePopState(e) {
+                const url = window.location.href;
+                if (url !== this.currentUrl) {
+                    this.navigateTo(url, false);
+                }
+            },
+
+            // Update active navigation links
+            updateActiveNavLinks(url) {
+                // Remove all active classes
+                document.querySelectorAll('.nav-link.active, .mobile-nav-link.active').forEach(link => {
+                    link.classList.remove('active');
+                });
+
+                // Add active class to matching links
+                document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href && url.includes(href) && href !== '/') {
+                        link.classList.add('active');
+                    } else if (href === '/' && (url.endsWith('/') || url.includes('/Home'))) {
+                        link.classList.add('active');
+                    }
+                });
+            },
+
+            // Re-initialize scripts after content update
+            reinitialize() {
+                // Re-create Lucide icons
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+
+                // Re-initialize jQuery validation
+                if (window.jQuery && $.validator) {
+                    $('form').each(function() {
+                        $.validator.unobtrusive.parse($(this));
+                    });
+                }
+
+                // Execute inline scripts from loaded content
+                this.contentContainer.querySelectorAll('script').forEach(script => {
+                    const newScript = document.createElement('script');
+                    if (script.src) {
+                        newScript.src = script.src;
+                    } else {
+                        newScript.textContent = script.textContent;
+                    }
+                    document.head.appendChild(newScript);
+                    document.head.removeChild(newScript);
+                });
+
+                // Scroll to top smoothly
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Dispatch custom event for page-specific scripts
+                document.dispatchEvent(new CustomEvent('spa:contentLoaded'));
+            }
+        };
+
+        // Initialize SPA when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            SPA.init();
+        });
+
+        // Make SPA available globally
+        window.SPA = SPA;
+    </script>
+    
+    <style>
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 10000;
+        }
+        .toast-show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast-success { border-left: 4px solid #10b981; }
+        .toast-error { border-left: 4px solid #ef4444; }
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toast-success .toast-content i { color: #10b981; }
+        .toast-error .toast-content i { color: #ef4444; }
+
+        /* SPA Content Transitions */
+        #spa-content {
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+        
+        /* Page loading indicator on top */
+        .spa-loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6);
+            background-size: 200% 100%;
+            animation: loading-bar 1s ease-in-out infinite;
+            z-index: 99999;
+            width: 0;
+            transition: width 0.3s ease;
+        }
+        .spa-loading-bar.active {
+            width: 90%;
+        }
+        .spa-loading-bar.complete {
+            width: 100%;
+            opacity: 0;
+        }
+        @@keyframes loading-bar {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+    
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

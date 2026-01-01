@@ -1,0 +1,146 @@
+@model MessManagement.Models.User
+@{
+    ViewData["Title"] = "Member Details";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Users")" class="breadcrumb-link">Members</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Details</span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon">
+            <i data-lucide="user" class="w-6 h-6"></i>
+        </span>
+        Member Details
+    </h1>
+</div>
+
+<div class="flex justify-center">
+    <div class="w-full max-w-xl">
+        <div class="card">
+            <div class="card-body">
+                <!-- Member Profile Header -->
+                <div class="flex items-center gap-6 mb-6 pb-6 border-b border-gray-100">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold @(Model.Role == "Admin" ? "bg-linear-to-br from-purple-500 to-purple-600" : "bg-linear-to-br from-blue-500 to-blue-600")">
+                        @Model.FullName?.Substring(0, 1).ToUpper()
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">@Model.FullName</h2>
+                        <p class="text-gray-500 text-sm">@@@Model.Username</p>
+                        @if (Model.Role == "Admin")
+                        {
+                            <span class="badge badge-info mt-2">
+                                <i data-lucide="shield" class="w-3 h-3 mr-1"></i>
+                                Administrator
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-gray mt-2">
+                                <i data-lucide="user" class="w-3 h-3 mr-1"></i>
+                                Member
+                            </span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Member Details - 2 Column Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
+                            <i data-lucide="user" class="w-4 h-4 text-blue-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Full Name</p>
+                            <p class="font-medium text-gray-900 text-sm">@Model.FullName</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <div class="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center">
+                            <i data-lucide="at-sign" class="w-4 h-4 text-purple-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Username</p>
+                            <p class="font-medium text-gray-900 text-sm">@Model.Username</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center">
+                            <i data-lucide="shield" class="w-4 h-4 text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Role</p>
+                            <p class="font-medium text-gray-900 text-sm">@(Model.Role == "Admin" ? "Administrator" : "Regular Member")</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <div class="w-9 h-9 rounded-lg bg-amber-100 flex items-center justify-center">
+                            <i data-lucide="phone" class="w-4 h-4 text-amber-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Phone Number</p>
+                            <p class="font-medium text-gray-900 text-sm">@(Model.PhoneNumber ?? "Not provided")</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <div class="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center">
+                            <i data-lucide="mail" class="w-4 h-4 text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Email Address</p>
+                            <p class="font-medium text-gray-900 text-sm">@(Model.Email ?? "Not provided")</p>
+                        </div>
+                    </div>
+
+                    <div class="col-span-2 flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                        <div class="w-9 h-9 rounded-lg @(Model.IsActive ? "bg-emerald-100" : "bg-red-100") flex items-center justify-center">
+                            <i data-lucide="@(Model.IsActive ? "check-circle" : "x-circle")" class="w-4 h-4 @(Model.IsActive ? "text-emerald-600" : "text-red-600")"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Account Status</p>
+                            <p class="font-medium text-sm @(Model.IsActive ? "text-emerald-600" : "text-red-600")">@(Model.IsActive ? "Active" : "Inactive")</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-center gap-3 pt-5 border-t border-gray-100 mt-5">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        Back to List
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-primary">
+                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                        Edit Member
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

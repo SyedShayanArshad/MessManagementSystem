@@ -1,0 +1,45 @@
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center max-w-lg">
+        <!-- Icon -->
+        <div class="w-24 h-24 rounded-full bg-linear-to-br from-amber-100 to-amber-200 flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="alert-triangle" class="w-12 h-12 text-amber-500"></i>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-3xl font-bold text-gray-900 mb-3">Something Went Wrong</h1>
+
+        <!-- Message -->
+        <p class="text-gray-600 mb-8">
+            An unexpected error occurred while processing your request. 
+            Please try again later or contact support if the problem persists.
+        </p>
+
+        <!-- Actions -->
+        <div class="flex justify-center gap-4">
+            <a href="javascript:history.back()" class="btn btn-secondary">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Go Back
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                <i data-lucide="home" class="w-4 h-4"></i>
+                Go to Dashboard
+            </a>
+        </div>
+
+        <!-- Support Info -->
+        <div class="mt-8 p-4 bg-gray-50 rounded-xl text-sm text-gray-500">
+            <p>If you continue to experience issues, please contact:</p>
+            <p class="font-medium text-gray-700 mt-1">support@messhub.com</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

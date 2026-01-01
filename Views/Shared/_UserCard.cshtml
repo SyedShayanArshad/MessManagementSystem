@@ -1,0 +1,40 @@
+@* Partial View: _UserCard.cshtml
+   Displays a user card with basic information
+*@
+@model MessManagement.Models.User
+
+<div class="card user-card" data-user-id="@Model.UserId">
+    <div class="card-body">
+        <div class="flex items-center gap-4">
+            <div class="user-avatar-lg @(Model.Role == "Admin" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700")">
+                @Model.FullName.Substring(0, 1).ToUpper()
+            </div>
+            <div class="flex-1">
+                <h4 class="font-semibold text-gray-900">@Model.FullName</h4>
+                <p class="text-sm text-gray-500">@@@Model.Username</p>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="badge @(Model.Role == "Admin" ? "badge-warning" : "badge-info")">
+                        @Model.Role
+                    </span>
+                    <span class="badge @(Model.IsActive ? "badge-success" : "badge-secondary")">
+                        @(Model.IsActive ? "Active" : "Inactive")
+                    </span>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <a asp-controller="Users" asp-action="Edit" asp-route-id="@Model.UserId" 
+                   class="btn btn-sm btn-secondary" title="Edit">
+                    <i data-lucide="edit" class="w-4 h-4"></i>
+                </a>
+                <a asp-controller="Users" asp-action="Details" asp-route-id="@Model.UserId" 
+                   class="btn btn-sm btn-info" title="Details">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                </a>
+                <button type="button" class="btn btn-sm btn-danger delete-user-btn" 
+                        data-user-id="@Model.UserId" data-user-name="@Model.FullName" title="Delete">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

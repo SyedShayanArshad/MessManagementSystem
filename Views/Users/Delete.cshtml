@@ -1,0 +1,138 @@
+@model MessManagement.Models.User
+@{
+    ViewData["Title"] = "Delete Member";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Users")" class="breadcrumb-link">Members</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Delete</span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon bg-linear-to-br from-red-500 to-red-600" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+            <i data-lucide="user-x" class="w-6 h-6"></i>
+        </span>
+        Delete Member
+    </h1>
+</div>
+
+<div class="flex justify-center">
+    <div class="w-full max-w-lg">
+        <div class="card border-red-200">
+            <div class="card-body">
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-error mb-6" role="alert">
+                        <div class="flex items-start gap-3">
+                            <i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0"></i>
+                            <div class="flex-1">
+                                <p>@TempData["ErrorMessage"]</p>
+                            </div>
+                            <button type="button" class="alert-close" onclick="this.closest('.alert').remove()">
+                                <i data-lucide="x" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <!-- Warning Alert -->
+                <div class="alert alert-error mb-6">
+                    <i data-lucide="alert-triangle" class="w-6 h-6 shrink-0"></i>
+                    <div>
+                        <p class="font-semibold">Warning: This action cannot be undone</p>
+                        <p class="text-sm mt-1">Deleting this member will permanently remove their account and all associated data.</p>
+                    </div>
+                </div>
+
+                <!-- Member Info Card -->
+                <div class="bg-gray-50 rounded-xl p-5 mb-6">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-14 h-14 rounded-full bg-linear-to-br from-red-400 to-red-500 flex items-center justify-center text-white text-xl font-bold">
+                            @Model.FullName?.Substring(0, 1).ToUpper()
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">@Model.FullName</h3>
+                            <p class="text-gray-500 text-sm">@@@Model.Username</p>
+                        </div>
+                    </div>
+                    <dl class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <dt class="text-gray-500">Role</dt>
+                            <dd class="font-medium text-gray-900">@Model.Role</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">Phone</dt>
+                            <dd class="font-medium text-gray-900">@(Model.PhoneNumber ?? "—")</dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <!-- Username Confirmation -->
+                <form asp-action="Delete" method="post" id="deleteForm">
+                    <input type="hidden" asp-for="UserId" />
+                    
+                    <div class="form-group mb-5">
+                        <label class="form-label text-red-600">
+                            <i data-lucide="alert-circle" class="w-4 h-4 inline mr-1"></i>
+                            Type <strong>"@Model.Username"</strong> to confirm deletion
+                        </label>
+                        <input type="text" name="confirmUsername" id="confirmUsername" 
+                               class="form-input border-red-300 focus:border-red-500 focus:ring-red-500" 
+                               placeholder="Enter username to confirm" 
+                               autocomplete="off" required />
+                        <p class="form-hint text-red-500 mt-2">This action is permanent and cannot be reversed.</p>
+                    </div>
+
+                    <div class="flex justify-center gap-3">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger" id="deleteBtn">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            Delete Member
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+        
+        // Optional: Add client-side validation for better UX
+        const usernameToMatch = '@Model.Username'.toLowerCase();
+        const confirmInput = document.getElementById('confirmUsername');
+        const deleteBtn = document.getElementById('deleteBtn');
+        
+        confirmInput.addEventListener('input', function() {
+            const matches = this.value.toLowerCase() === usernameToMatch;
+            if (matches) {
+                this.classList.remove('border-red-300');
+                this.classList.add('border-green-500');
+                deleteBtn.disabled = false;
+            } else {
+                this.classList.remove('border-green-500');
+                this.classList.add('border-red-300');
+            }
+        });
+    </script>
+}

@@ -1,0 +1,135 @@
+@model MessManagement.Models.MessPeriod
+@{
+    ViewData["Title"] = "Edit Mess Period";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "MessPeriod")" class="breadcrumb-link">Mess Periods</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Edit</span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon">
+            <i data-lucide="calendar-range" class="w-6 h-6"></i>
+        </span>
+        Edit Mess Period
+    </h1>
+    <p class="page-description">Update period settings and billing rates.</p>
+</div>
+
+<div class="max-w-2xl">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="file-edit" class="w-5 h-5 text-blue-600"></i>
+                Period Information
+            </h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" novalidate>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-error mb-6" role="alert">
+                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                        <div asp-validation-summary="All" class="text-sm"></div>
+                    </div>
+                }
+                <input type="hidden" asp-for="PeriodId" />
+
+                <div class="form-group">
+                    <label asp-for="PeriodName" class="form-label">
+                        <i data-lucide="tag" class="w-4 h-4 inline mr-1"></i>
+                        Period Name <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="PeriodName" class="form-input" placeholder="e.g., January 2024" />
+                    <span asp-validation-for="PeriodName" class="form-error"></span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label asp-for="StartDate" class="form-label">
+                            <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                            Start Date <span class="text-red-500">*</span>
+                        </label>
+                        <input asp-for="StartDate" class="form-input" type="date" />
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="EndDate" class="form-label">
+                            <i data-lucide="calendar-check" class="w-4 h-4 inline mr-1"></i>
+                            End Date <span class="text-red-500">*</span>
+                        </label>
+                        <input asp-for="EndDate" class="form-input" type="date" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label asp-for="FixedWaterCharge" class="form-label">
+                            <i data-lucide="droplets" class="w-4 h-4 inline mr-1"></i>
+                            Water Charge <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                            <input asp-for="FixedWaterCharge" class="form-input pl-8" placeholder="0.00" step="0.01" />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="TeaPricePerCup" class="form-label">
+                            <i data-lucide="coffee" class="w-4 h-4 inline mr-1"></i>
+                            Tea Price/Cup
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                            <input asp-for="TeaPricePerCup" class="form-input pl-8" placeholder="0.00" step="0.01" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input asp-for="IsActive" type="checkbox" class="form-checkbox" />
+                        <span class="form-label mb-0">
+                            <i data-lucide="toggle-right" class="w-4 h-4 inline mr-1"></i>
+                            Active Period
+                        </span>
+                    </label>
+                    <p class="form-hint">Only one period can be active at a time</p>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

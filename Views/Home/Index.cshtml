@@ -1,0 +1,381 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var isAdmin = User?.IsInRole("Admin") == true;
+    var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+}
+
+<!-- Welcome Section -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <i data-lucide="home" class="w-4 h-4 inline"></i>
+            <span class="ml-1">Dashboard</span>
+        </span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon">
+            <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+        </span>
+        @if (isAuthenticated)
+        {
+            <span>Welcome back, @User?.Identity?.Name!</span>
+        }
+        else
+        {
+            <span>Welcome to MessHub</span>
+        }
+    </h1>
+    <p class="page-description">
+        @if (isAdmin)
+        {
+            <text>Manage your mess operations efficiently. View attendance, track payments, and generate reports.</text>
+        }
+        else if (isAuthenticated)
+        {
+            <text>View your attendance records and manage your payments.</text>
+        }
+        else
+        {
+            <text>A comprehensive mess management solution for educational institutions.</text>
+        }
+    </p>
+</div>
+
+@if (isAdmin)
+{
+    <!-- Admin Dashboard -->
+    <!-- Stats Overview Cards - Using Partial Views -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        @await Html.PartialAsync("_StatsCard", new MessManagement.Models.ViewModels.StatsCardViewModel
+        {
+            Id = "members",
+            Title = "Total Members",
+            Value = "-",
+            Description = "Active members",
+            Icon = "users",
+            IconClass = "primary",
+            DescriptionClass = "text-emerald-600 font-medium"
+        })
+
+        @await Html.PartialAsync("_StatsCard", new MessManagement.Models.ViewModels.StatsCardViewModel
+        {
+            Id = "attendance",
+            Title = "Today's Attendance",
+            Value = "-",
+            Description = "Marked for today",
+            Icon = "clipboard-check",
+            IconClass = "success",
+            DescriptionClass = "text-gray-600"
+        })
+
+        @await Html.PartialAsync("_StatsCard", new MessManagement.Models.ViewModels.StatsCardViewModel
+        {
+            Id = "payments",
+            Title = "Payments",
+            Value = "-",
+            Description = "This period",
+            Icon = "credit-card",
+            IconClass = "warning",
+            DescriptionClass = "text-gray-600"
+        })
+
+        @await Html.PartialAsync("_StatsCard", new MessManagement.Models.ViewModels.StatsCardViewModel
+        {
+            Id = "tea",
+            Title = "Tea Served",
+            Value = "-",
+            Description = "Cups this period",
+            Icon = "coffee",
+            IconClass = "info",
+            DescriptionClass = "text-gray-600"
+        })
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i>
+            Quick Actions
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <a href="@Url.Action("Index", "Attendance")" class="quick-action">
+                <div class="quick-action-icon bg-linear-to-br from-blue-500 to-blue-600 text-white">
+                    <i data-lucide="clipboard-check" class="w-8 h-8"></i>
+                </div>
+                <div class="quick-action-title">Mark Attendance</div>
+                <div class="quick-action-description">Record daily presence</div>
+            </a>
+
+            <a href="@Url.Action("Index", "Users")" class="quick-action">
+                <div class="quick-action-icon bg-linear-to-br from-emerald-500 to-emerald-600 text-white">
+                    <i data-lucide="users" class="w-8 h-8"></i>
+                </div>
+                <div class="quick-action-title">Manage Members</div>
+                <div class="quick-action-description">Add or edit users</div>
+            </a>
+
+            <a href="@Url.Action("Index", "DishPlan")" class="quick-action">
+                <div class="quick-action-icon bg-linear-to-br from-orange-500 to-orange-600 text-white">
+                    <i data-lucide="chef-hat" class="w-8 h-8"></i>
+                </div>
+                <div class="quick-action-title">Dish Plans</div>
+                <div class="quick-action-description">Weekly menu setup</div>
+            </a>
+
+            <a href="@Url.Action("Index", "Payment")" class="quick-action">
+                <div class="quick-action-icon bg-linear-to-br from-purple-500 to-purple-600 text-white">
+                    <i data-lucide="credit-card" class="w-8 h-8"></i>
+                </div>
+                <div class="quick-action-title">Payments</div>
+                <div class="quick-action-description">View transactions</div>
+            </a>
+
+            <a href="@Url.Action("Index", "TeaRecord")" class="quick-action">
+                <div class="quick-action-icon bg-linear-to-br from-amber-500 to-amber-600 text-white">
+                    <i data-lucide="coffee" class="w-8 h-8"></i>
+                </div>
+                <div class="quick-action-title">Tea Records</div>
+                <div class="quick-action-description">Track tea serving</div>
+            </a>
+
+            <a href="@Url.Action("Index", "Report")" class="quick-action">
+                <div class="quick-action-icon bg-linear-to-br from-rose-500 to-rose-600 text-white">
+                    <i data-lucide="bar-chart-3" class="w-8 h-8"></i>
+                </div>
+                <div class="quick-action-title">Reports</div>
+                <div class="quick-action-description">View analytics</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid lg:grid-cols-2 gap-6">
+        <!-- Recent Activity Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
+                    Recent Activity
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+                            <i data-lucide="clipboard-check" class="w-5 h-5 text-emerald-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">Attendance marked</p>
+                            <p class="text-xs text-gray-500">View today's attendance records</p>
+                        </div>
+                        <a href="@Url.Action("Index", "Attendance")" class="btn btn-sm btn-secondary">View</a>
+                    </div>
+                    <div class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i data-lucide="credit-card" class="w-5 h-5 text-purple-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">Payment received</p>
+                            <p class="text-xs text-gray-500">View payment history</p>
+                        </div>
+                        <a href="@Url.Action("Index", "Payment")" class="btn btn-sm btn-secondary">View</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Period Info Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="calendar-range" class="w-5 h-5 text-blue-600"></i>
+                    Current Period
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-6">
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4">
+                        <i data-lucide="calendar" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <p class="text-gray-600 mb-4">Manage your mess periods and track billing cycles.</p>
+                    <a href="@Url.Action("Index", "MessPeriod")" class="btn btn-primary">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                        Manage Periods
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (isAuthenticated)
+{
+    <!-- Regular User Dashboard -->
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="calendar-check" class="w-5 h-5 text-emerald-600"></i>
+                    My Attendance
+                </h3>
+            </div>
+            <div class="card-body text-center py-8">
+                <div class="w-20 h-20 mx-auto rounded-2xl bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-4">
+                    <i data-lucide="clipboard-check" class="w-10 h-10 text-white"></i>
+                </div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">View Your Attendance</h4>
+                <p class="text-gray-600 mb-6">Check your attendance records and verify your presence.</p>
+                <a href="@Url.Action("MyAttendance", "Attendance")" class="btn btn-success btn-lg">
+                    <i data-lucide="eye" class="w-5 h-5"></i>
+                    View Attendance
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="credit-card" class="w-5 h-5 text-purple-600"></i>
+                    Payments
+                </h3>
+            </div>
+            <div class="card-body text-center py-8">
+                <div class="w-20 h-20 mx-auto rounded-2xl bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4">
+                    <i data-lucide="wallet" class="w-10 h-10 text-white"></i>
+                </div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">Make a Payment</h4>
+                <p class="text-gray-600 mb-6">Add a new payment to your mess account.</p>
+                <a href="@Url.Action("Create", "Payment")" class="btn btn-primary btn-lg">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    Add Payment
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Card -->
+    <div class="card">
+        <div class="card-body">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                    <i data-lucide="info" class="w-6 h-6 text-blue-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-1">Need Help?</h4>
+                    <p class="text-gray-600">
+                        If you have any questions about your attendance or payments, please contact the mess administrator.
+                        You can verify your attendance records to confirm your presence for each day.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Guest View -->
+    <div class="card">
+        <div class="card-body text-center py-12">
+            <div class="w-24 h-24 mx-auto rounded-3xl bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6">
+                <i data-lucide="utensils" class="w-12 h-12 text-white"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Welcome to MessHub</h2>
+            <p class="text-gray-600 max-w-lg mx-auto mb-8">
+                A comprehensive mess management system designed for educational institutions. 
+                Manage attendance, track payments, plan meals, and generate reports - all in one place.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="@Url.Action("Login", "Account")" class="btn btn-primary btn-lg">
+                    <i data-lucide="log-in" class="w-5 h-5"></i>
+                    Login to Continue
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-gray-900 text-center mb-6">Key Features</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="w-14 h-14 mx-auto rounded-2xl bg-linear-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-4">
+                        <i data-lucide="clipboard-check" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Attendance Tracking</h3>
+                    <p class="text-gray-600 text-sm">Mark and verify daily attendance with real-time updates and confirmations.</p>
+                </div>
+            </div>
+
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="w-14 h-14 mx-auto rounded-2xl bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4">
+                        <i data-lucide="credit-card" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Payment Management</h3>
+                    <p class="text-gray-600 text-sm">Secure payment processing with multiple payment methods including Stripe.</p>
+                </div>
+            </div>
+
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="w-14 h-14 mx-auto rounded-2xl bg-linear-to-br from-rose-500 to-rose-600 flex items-center justify-center mb-4">
+                        <i data-lucide="bar-chart-3" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <h3 class="font-semibold text-gray-900 mb-2">Detailed Reports</h3>
+                    <p class="text-gray-600 text-sm">Generate comprehensive reports for attendance, payments, and meal consumption.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+        
+        // Load dashboard stats using Fetch API (async - avoids page refresh)
+        @if (isAdmin)
+        {
+            <text>
+            // Initialize on page load and SPA navigation
+            function initDashboard() {
+                loadDashboardStatsAsync();
+            }
+            
+            // Run on initial load
+            initDashboard();
+            
+            // Also run when SPA loads this content
+            document.addEventListener('spa:contentLoaded', initDashboard);
+            
+            async function loadDashboardStatsAsync() {
+                try {
+                    const response = await fetch('/api/Api/dashboard/stats');
+                    const result = await response.json();
+                    
+                    if (result.success && result.data) {
+                        const stats = result.data;
+                        // Update stats cards without page refresh
+                        const membersEl = document.getElementById('stats-value-members');
+                        const attendanceEl = document.getElementById('stats-value-attendance');
+                        const paymentsEl = document.getElementById('stats-value-payments');
+                        const teaEl = document.getElementById('stats-value-tea');
+                        
+                        if (membersEl) membersEl.textContent = stats.activeMembers;
+                        if (attendanceEl) attendanceEl.textContent = stats.todayAttendance;
+                        if (paymentsEl) paymentsEl.textContent = 'Rs. ' + stats.totalPayments.toLocaleString();
+                        if (teaEl) teaEl.textContent = stats.teaServed;
+                        
+                        console.log('Dashboard stats loaded via fetch (async)');
+                    }
+                } catch (error) {
+                    console.error('Error loading dashboard stats:', error);
+                }
+            }
+            
+            // Auto-refresh stats every 30 seconds (async polling)
+            setInterval(loadDashboardStatsAsync, 30000);
+            </text>
+        }
+    </script>
+}

@@ -1,0 +1,108 @@
+@model MessManagement.Models.TeaRecord
+@{
+    ViewData["Title"] = "Edit Tea Record";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "TeaRecord")" class="breadcrumb-link">Tea Records</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Edit</span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon">
+            <i data-lucide="coffee" class="w-6 h-6"></i>
+        </span>
+        Edit Tea Record
+    </h1>
+    <p class="page-description">Update tea consumption record details.</p>
+</div>
+
+<div class="max-w-2xl">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="file-edit" class="w-5 h-5 text-blue-600"></i>
+                Tea Record Details
+            </h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" novalidate>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-error mb-6" role="alert">
+                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                        <div asp-validation-summary="All" class="text-sm"></div>
+                    </div>
+                }
+                <input type="hidden" asp-for="TeaRecordId" />
+
+                <div class="form-group">
+                    <label asp-for="PeriodId" class="form-label">
+                        <i data-lucide="calendar-range" class="w-4 h-4 inline mr-1"></i>
+                        Period <span class="text-red-500">*</span>
+                    </label>
+                    <select asp-for="PeriodId" class="form-select"
+                            asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(ViewBag.Periods, "PeriodId", "PeriodName"))">
+                        <option value="">-- Select Period --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Date" class="form-label">
+                        <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                        Date <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="Date" class="form-input" type="date" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="TotalCupsServed" class="form-label">
+                        <i data-lucide="cup-soda" class="w-4 h-4 inline mr-1"></i>
+                        Total Cups Served <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="TotalCupsServed" class="form-input" placeholder="Enter number of cups" type="number" min="0" />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Remarks" class="form-label">
+                        <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>
+                        Remarks
+                    </label>
+                    <input asp-for="Remarks" class="form-input" placeholder="Optional notes..." />
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

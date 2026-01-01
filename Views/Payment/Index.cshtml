@@ -1,0 +1,338 @@
+@model MessManagement.ViewModels.PaymentSummaryViewModel
+@{
+    ViewData["Title"] = "Payment Management";
+    var pendingCount = ViewBag.PendingPaymentsCount as int? ?? 0;
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Payments</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon">
+                    <i data-lucide="credit-card" class="w-6 h-6"></i>
+                </span>
+                Payment Management
+            </h1>
+            <p class="page-description">Track member payments, balances, and collection status for each billing period.</p>
+        </div>
+        <div class="flex gap-2">
+            <a asp-action="PendingApprovals" asp-route-periodId="@Model.CurrentPeriod?.PeriodId" class="btn btn-warning relative">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                Pending Approvals
+                @if (pendingCount > 0)
+                {
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">@pendingCount</span>
+                }
+            </a>
+            <a asp-action="Records" asp-route-periodId="@Model.CurrentPeriod?.PeriodId" class="btn btn-secondary">
+                <i data-lucide="list" class="w-4 h-4"></i>
+                All Records
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mb-6" role="alert">
+        <i data-lucide="check-circle" class="w-5 h-5 shrink-0"></i>
+        <span>@TempData["SuccessMessage"]</span>
+    </div>
+}
+
+<!-- Pending Approvals Alert -->
+@if (pendingCount > 0)
+{
+    <div class="alert alert-warning mb-6" role="alert">
+        <i data-lucide="clock" class="w-5 h-5 shrink-0"></i>
+        <div class="flex-1">
+            <span class="font-semibold">@pendingCount payment(s) pending approval</span>
+            <span class="text-sm ml-2">Members have submitted payments that need your verification.</span>
+        </div>
+        <a asp-action="PendingApprovals" asp-route-periodId="@Model.CurrentPeriod?.PeriodId" class="btn btn-sm btn-warning">
+            Review Now
+        </a>
+    </div>
+}
+
+<!-- Period Selection -->
+<div class="card mb-6">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i data-lucide="calendar-range" class="w-5 h-5 text-blue-600"></i>
+            Select Billing Period
+        </h3>
+    </div>
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex-1">
+                <label class="form-label">
+                    <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                    Billing Period
+                </label>
+                <select name="periodId" class="form-select" onchange="this.form.submit()">
+                    <option value="">-- Select Period --</option>
+                    @foreach (var p in Model.AllPeriods)
+                    {
+                        var isSelected = Model.CurrentPeriod != null && Model.CurrentPeriod.PeriodId == p.PeriodId;
+                        <option value="@p.PeriodId" selected="@isSelected">
+                            @p.PeriodName @(p.IsActive ? "(Active)" : "")
+                        </option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                Load Period
+            </button>
+        </form>
+    </div>
+</div>
+
+@if (Model.CurrentPeriod != null)
+{
+    <!-- Period Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="dashboard-card">
+            <div class="dashboard-card-icon primary">
+                <i data-lucide="calculator" class="w-7 h-7"></i>
+            </div>
+            <div class="dashboard-card-title">Total Charges</div>
+            <div class="dashboard-card-value">Rs. @Model.TotalPeriodCharges.ToString("N0")</div>
+            <div class="dashboard-card-description">For @Model.CurrentPeriod.PeriodName</div>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="dashboard-card-icon success">
+                <i data-lucide="wallet" class="w-7 h-7"></i>
+            </div>
+            <div class="dashboard-card-title">Total Collected</div>
+            <div class="dashboard-card-value text-emerald-600">Rs. @Model.TotalPeriodPaid.ToString("N0")</div>
+            <div class="dashboard-card-description">@Model.TotalPaymentCount payments received</div>
+        </div>
+
+        <div class="dashboard-card">
+            @{
+                var remainingIconClass = Model.TotalPeriodRemaining > 0 ? "warning" : "success";
+                var remainingIcon = Model.TotalPeriodRemaining > 0 ? "alert-triangle" : "check-circle";
+                var remainingTextClass = Model.TotalPeriodRemaining > 0 ? "text-amber-600" : "text-emerald-600";
+            }
+            <div class="dashboard-card-icon @remainingIconClass">
+                <i data-lucide="@remainingIcon" class="w-7 h-7"></i>
+            </div>
+            <div class="dashboard-card-title">Remaining</div>
+            <div class="dashboard-card-value @remainingTextClass">Rs. @Model.TotalPeriodRemaining.ToString("N0")</div>
+            <div class="dashboard-card-description">Outstanding balance</div>
+        </div>
+
+        <div class="dashboard-card">
+            @{
+                var rateIconClass = Model.CollectionPercentage >= 80 ? "success" : (Model.CollectionPercentage >= 50 ? "warning" : "danger");
+                var rateBarClass = Model.CollectionPercentage >= 80 ? "bg-emerald-500" : (Model.CollectionPercentage >= 50 ? "bg-amber-500" : "bg-red-500");
+            }
+            <div class="dashboard-card-icon @rateIconClass">
+                <i data-lucide="percent" class="w-7 h-7"></i>
+            </div>
+            <div class="dashboard-card-title">Collection Rate</div>
+            <div class="dashboard-card-value">@Model.CollectionPercentage.ToString("N1")%</div>
+            <div class="dashboard-card-description">
+                <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div class="h-2 rounded-full @rateBarClass" style="width: @Math.Min(Model.CollectionPercentage, 100)%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Method Breakdown -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-green-100">
+                <i data-lucide="banknote" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value text-green-600">Rs. @Model.TotalCashPayments.ToString("N0")</div>
+                <div class="stat-label">Cash Payments</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-blue-100">
+                <i data-lucide="credit-card" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value text-blue-600">Rs. @Model.TotalStripePayments.ToString("N0")</div>
+                <div class="stat-label">Card Payments</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-purple-100">
+                <i data-lucide="building-2" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value text-purple-600">Rs. @Model.TotalBankTransferPayments.ToString("N0")</div>
+                <div class="stat-label">Bank Transfers</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-gray-100">
+                <i data-lucide="more-horizontal" class="w-6 h-6 text-gray-600"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value text-gray-600">Rs. @Model.TotalOtherPayments.ToString("N0")</div>
+                <div class="stat-label">Other Methods</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Payment Summary Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="flex items-center justify-between">
+                <h3 class="card-title">
+                    <i data-lucide="users" class="w-5 h-5 text-blue-600"></i>
+                    Member Payment Summary
+                </h3>
+                <div class="flex gap-2">
+                    <span class="badge badge-success">@Model.MemberSummaries.Count(m => m.PaymentStatus == "Paid") Paid</span>
+                    <span class="badge badge-warning">@Model.MemberSummaries.Count(m => m.PaymentStatus == "Partial") Partial</span>
+                    <span class="badge badge-error">@Model.MemberSummaries.Count(m => m.PaymentStatus == "Unpaid") Unpaid</span>
+                </div>
+            </div>
+        </div>
+        @if (Model.MemberSummaries.Any())
+        {
+            <div class="table-container">
+                <table class="data-table" role="grid" aria-label="Member payment summary">
+                    <thead>
+                        <tr>
+                            <th scope="col">Member</th>
+                            <th scope="col" class="text-right">Meals</th>
+                            <th scope="col" class="text-right">Water</th>
+                            <th scope="col" class="text-right">Tea</th>
+                            <th scope="col" class="text-right">Total</th>
+                            <th scope="col" class="text-right">Paid</th>
+                            <th scope="col" class="text-right">Remaining</th>
+                            <th scope="col" class="text-center">Status</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var member in Model.MemberSummaries.OrderByDescending(m => m.RemainingBalance))
+                        {
+                            var memberInitial = member.User?.FullName?.Length > 0 ? member.User.FullName.Substring(0, 1).ToUpper() : "?";
+                            var balanceClass = member.RemainingBalance > 0 ? "text-red-600" : "text-emerald-600";
+                            <tr>
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-sm">
+                                            @memberInitial
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900">@member.User?.FullName</p>
+                                            <p class="text-xs text-gray-500">@member.BreakfastCount B / @member.LunchCount L / @member.DinnerCount D</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-right font-medium">Rs. @member.MealCharges.ToString("N0")</td>
+                                <td class="text-right text-gray-600">Rs. @member.WaterCharges.ToString("N0")</td>
+                                <td class="text-right text-gray-600">
+                                    Rs. @member.TeaCharges.ToString("N0")
+                                    <span class="text-xs text-gray-400">(@member.TeaCups)</span>
+                                </td>
+                                <td class="text-right font-semibold">Rs. @member.TotalCharges.ToString("N0")</td>
+                                <td class="text-right font-semibold text-emerald-600">Rs. @member.TotalPaid.ToString("N0")</td>
+                                <td class="text-right font-semibold @balanceClass">Rs. @member.RemainingBalance.ToString("N0")</td>
+                                <td class="text-center">
+                                    @if (member.PaymentStatus == "Paid")
+                                    {
+                                        <span class="badge badge-success">Paid</span>
+                                    }
+                                    else if (member.PaymentStatus == "Partial")
+                                    {
+                                        <span class="badge badge-warning">@member.PaymentPercentage.ToString("N0")%</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-error">Unpaid</span>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <a asp-action="MemberDetail" asp-route-userId="@member.User?.UserId" asp-route-periodId="@Model.CurrentPeriod?.PeriodId"
+                                           class="table-action table-action-view" title="View Details">
+                                            <i data-lucide="eye" class="w-3.5 h-3.5 mr-1"></i>
+                                            Details
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="bg-gray-50">
+                        @{
+                            var footerBalanceClass = Model.TotalPeriodRemaining > 0 ? "text-red-600" : "text-emerald-600";
+                        }
+                        <tr class="font-semibold">
+                            <td>Total (@Model.MemberSummaries.Count members)</td>
+                            <td class="text-right">Rs. @Model.MemberSummaries.Sum(m => m.MealCharges).ToString("N0")</td>
+                            <td class="text-right">Rs. @Model.MemberSummaries.Sum(m => m.WaterCharges).ToString("N0")</td>
+                            <td class="text-right">Rs. @Model.MemberSummaries.Sum(m => m.TeaCharges).ToString("N0")</td>
+                            <td class="text-right">Rs. @Model.TotalPeriodCharges.ToString("N0")</td>
+                            <td class="text-right text-emerald-600">Rs. @Model.TotalPeriodPaid.ToString("N0")</td>
+                            <td class="text-right @footerBalanceClass">Rs. @Model.TotalPeriodRemaining.ToString("N0")</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="card-body">
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i data-lucide="users" class="w-16 h-16 text-gray-300"></i>
+                    </div>
+                    <h3 class="empty-state-title">No Members Found</h3>
+                    <p class="empty-state-description">No active members found for this period.</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i data-lucide="calendar-x" class="w-16 h-16 text-gray-300"></i>
+                </div>
+                <h3 class="empty-state-title">No Period Selected</h3>
+                <p class="empty-state-description">Please select a billing period to view payment summary.</p>
+                <a asp-action="Create" asp-controller="MessPeriod" class="btn btn-primary mt-4">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    Create New Period
+                </a>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

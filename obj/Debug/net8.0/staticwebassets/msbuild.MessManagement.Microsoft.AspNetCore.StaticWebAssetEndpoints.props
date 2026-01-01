@@ -1,0 +1,28 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/MessManagement/css/site.70qrmwcmct.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\site.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"70qrmwcmct"},{"Name":"integrity","Value":"sha256-ma3VTP6Frdrd0\u002Bn4fgw3YBs874D4j4tBJx4gnXR9Ofk="},{"Name":"label","Value":"_content/MessManagement/css/site.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"22845"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022ma3VTP6Frdrd0\u002Bn4fgw3YBs874D4j4tBJx4gnXR9Ofk=\u0022"},{"Name":"Last-Modified","Value":"Sun, 21 Dec 2025 17:27:38 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/MessManagement/css/site.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\site.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-ma3VTP6Frdrd0\u002Bn4fgw3YBs874D4j4tBJx4gnXR9Ofk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"22845"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022ma3VTP6Frdrd0\u002Bn4fgw3YBs874D4j4tBJx4gnXR9Ofk=\u0022"},{"Name":"Last-Modified","Value":"Sun, 21 Dec 2025 17:27:38 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/MessManagement/css/styles.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\styles.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-F6LUPsJcglTmcnpDSU/SDwQT/HL6c2NsdupLqg\u002Bff54="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"104466"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022F6LUPsJcglTmcnpDSU/SDwQT/HL6c2NsdupLqg\u002Bff54=\u0022"},{"Name":"Last-Modified","Value":"Thu, 01 Jan 2026 13:50:09 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/MessManagement/css/styles.lxfxfwiyrk.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\css\styles.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"lxfxfwiyrk"},{"Name":"integrity","Value":"sha256-F6LUPsJcglTmcnpDSU/SDwQT/HL6c2NsdupLqg\u002Bff54="},{"Name":"label","Value":"_content/MessManagement/css/styles.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Accept-Ranges","Value":"bytes"},{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"104466"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022F6LUPsJcglTmcnpDSU/SDwQT/HL6c2NsdupLqg\u002Bff54=\u0022"},{"Name":"Last-Modified","Value":"Thu, 01 Jan 2026 13:50:09 GMT"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>

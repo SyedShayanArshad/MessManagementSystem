@@ -1,0 +1,263 @@
+@model IEnumerable<MessManagement.Models.Payment>
+@{
+    ViewData["Title"] = "Pending Payment Approvals";
+    var periods = ViewBag.Periods as List<MessManagement.Models.MessPeriod>;
+    var currentPeriod = ViewBag.CurrentPeriod as MessManagement.Models.MessPeriod;
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Payment")" class="breadcrumb-link">Payments</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Pending Approvals</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon bg-amber-100">
+                    <i data-lucide="clock" class="w-6 h-6 text-amber-600"></i>
+                </span>
+                Pending Payment Approvals
+            </h1>
+            <p class="page-description">Review and approve member payment submissions.</p>
+        </div>
+        <div class="flex gap-2">
+            <a asp-action="Records" class="btn btn-secondary">
+                <i data-lucide="list" class="w-4 h-4"></i>
+                All Records
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                Summary
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mb-6" role="alert">
+        <i data-lucide="check-circle" class="w-5 h-5 shrink-0"></i>
+        <span>@TempData["SuccessMessage"]</span>
+    </div>
+}
+
+<!-- Period Filter -->
+@if (periods?.Any() == true)
+{
+    <div class="card mb-6">
+        <div class="card-body py-3">
+            <div class="flex flex-wrap items-center gap-4">
+                <span class="text-sm font-medium text-gray-600">
+                    <i data-lucide="filter" class="w-4 h-4 inline mr-1"></i>
+                    Filter by Period:
+                </span>
+                <div class="flex flex-wrap gap-2">
+                    @foreach (var period in periods.Take(5))
+                    {
+                        var isActive = currentPeriod?.PeriodId == period.PeriodId;
+                        <a asp-action="PendingApprovals" asp-route-periodId="@period.PeriodId"
+                           class="btn btn-sm @(isActive ? "btn-primary" : "btn-secondary")">
+                            @period.PeriodName
+                            @if (period.IsActive)
+                            {
+                                <span class="badge badge-success ml-1">Active</span>
+                            }
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Pending Payments List -->
+<div class="card">
+    <div class="card-header flex items-center justify-between">
+        <h3 class="card-title">
+            <i data-lucide="inbox" class="w-5 h-5 text-amber-600"></i>
+            Payments Awaiting Approval
+            @if (Model.Any())
+            {
+                <span class="badge badge-warning ml-2">@Model.Count()</span>
+            }
+        </h3>
+    </div>
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="empty-state py-12">
+                <div class="empty-state-icon bg-emerald-100">
+                    <i data-lucide="check-circle" class="w-8 h-8 text-emerald-600"></i>
+                </div>
+                <h3 class="empty-state-title">All caught up!</h3>
+                <p class="empty-state-text">No pending payments to approve for this period.</p>
+            </div>
+        }
+        else
+        {
+            <div class="divide-y divide-gray-100">
+                @foreach (var payment in Model)
+                {
+                    <div class="p-4 hover:bg-gray-50 transition-colors">
+                        <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                            <!-- User Info -->
+                            <div class="flex items-center gap-3 flex-1">
+                                <div class="w-12 h-12 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                                    @(payment.User?.FullName?.Substring(0, 1).ToUpper() ?? "?")
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">@payment.User?.FullName</h4>
+                                    <p class="text-sm text-gray-500">@payment.PaymentDate.ToString("MMM dd, yyyy 'at' hh:mm tt")</p>
+                                </div>
+                            </div>
+
+                            <!-- Payment Details -->
+                            <div class="flex flex-wrap items-center gap-4 lg:gap-6">
+                                <!-- Amount -->
+                                <div class="text-center">
+                                    <p class="text-2xl font-bold text-gray-900">Rs. @payment.Amount.ToString("N0")</p>
+                                    <p class="text-xs text-gray-500">Amount</p>
+                                </div>
+
+                                <!-- Method -->
+                                <div class="text-center">
+                                    @{
+                                        var methodIcon = payment.PaymentMethod switch
+                                        {
+                                            "Cash" => "banknote",
+                                            "Stripe" => "credit-card",
+                                            "Bank Transfer" => "building-2",
+                                            _ => "wallet"
+                                        };
+                                        var methodBg = payment.PaymentMethod switch
+                                        {
+                                            "Cash" => "bg-green-100 text-green-700",
+                                            "Stripe" => "bg-blue-100 text-blue-700",
+                                            "Bank Transfer" => "bg-purple-100 text-purple-700",
+                                            _ => "bg-gray-100 text-gray-700"
+                                        };
+                                    }
+                                    <div class="inline-flex items-center gap-1 px-3 py-1 rounded-full @methodBg">
+                                        <i data-lucide="@methodIcon" class="w-4 h-4"></i>
+                                        <span class="font-medium">@payment.PaymentMethod</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(payment.ReferenceNumber))
+                                    {
+                                        <p class="text-xs text-gray-500 mt-1">Ref: @payment.ReferenceNumber</p>
+                                    }
+                                </div>
+
+                                <!-- Period -->
+                                <div class="text-center">
+                                    <span class="badge badge-secondary">@payment.MessPeriod?.PeriodName</span>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex items-center gap-2 lg:ml-4">
+                                <form asp-action="Approve" method="post" class="inline">
+                                    <input type="hidden" name="id" value="@payment.PaymentId" />
+                                    <button type="submit" class="btn btn-success" 
+                                            onclick="return confirm('Approve this payment of Rs. @payment.Amount.ToString("N0") from @payment.User?.FullName?')">
+                                        <i data-lucide="check" class="w-4 h-4"></i>
+                                        Approve
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-error" 
+                                        onclick="showRejectModal(@payment.PaymentId, '@payment.User?.FullName', @payment.Amount)">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                    Reject
+                                </button>
+                                <a asp-action="Details" asp-route-id="@payment.PaymentId" class="btn btn-secondary">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Remarks if any -->
+                        @if (!string.IsNullOrEmpty(payment.Remarks))
+                        {
+                            <div class="mt-3 pl-15 lg:pl-15">
+                                <div class="bg-gray-100 rounded-lg p-3 text-sm text-gray-600">
+                                    <i data-lucide="message-square" class="w-4 h-4 inline mr-1"></i>
+                                    <span class="font-medium">Note:</span> @payment.Remarks
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" onclick="hideRejectModal(event)">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6" onclick="event.stopPropagation()">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Reject Payment</h3>
+                <p class="text-sm text-gray-500" id="rejectModalSubtitle">Payment from User</p>
+            </div>
+        </div>
+        <form asp-action="Reject" method="post" id="rejectForm">
+            <input type="hidden" name="id" id="rejectPaymentId" />
+            <div class="mb-4">
+                <label class="form-label">Rejection Reason</label>
+                <textarea name="rejectionReason" class="form-input" rows="3" 
+                          placeholder="Explain why this payment is being rejected (e.g., payment not received, incorrect amount, etc.)"></textarea>
+                <p class="form-hint">This will be visible to the member.</p>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" class="btn btn-secondary" onclick="hideRejectModal()">Cancel</button>
+                <button type="submit" class="btn btn-error">
+                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                    Reject Payment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+
+        function showRejectModal(paymentId, userName, amount) {
+            document.getElementById('rejectPaymentId').value = paymentId;
+            document.getElementById('rejectModalSubtitle').textContent = `Rs. ${amount.toLocaleString()} from ${userName}`;
+            document.getElementById('rejectModal').classList.remove('hidden');
+            document.getElementById('rejectModal').classList.add('flex');
+        }
+
+        function hideRejectModal(event) {
+            if (event && event.target !== document.getElementById('rejectModal')) return;
+            document.getElementById('rejectModal').classList.add('hidden');
+            document.getElementById('rejectModal').classList.remove('flex');
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') hideRejectModal();
+        });
+    </script>
+}

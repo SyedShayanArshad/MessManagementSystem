@@ -1,0 +1,581 @@
+@model IEnumerable<MessManagement.Models.Payment>
+@{
+    ViewData["Title"] = "My Payments";
+    var user = ViewBag.User as MessManagement.Models.User;
+    var allPeriods = ViewBag.AllPeriods as List<MessManagement.Models.MessPeriod> ?? new List<MessManagement.Models.MessPeriod>();
+    var selectedPeriod = ViewBag.SelectedPeriod as MessManagement.Models.MessPeriod;
+    var attendances = ViewBag.Attendances as List<MessManagement.Models.Attendance> ?? new List<MessManagement.Models.Attendance>();
+    var teaEntries = ViewBag.TeaEntries as List<MessManagement.Models.TeaEntry> ?? new List<MessManagement.Models.TeaEntry>();
+    
+    var remainingBalance = ViewBag.RemainingBalance as decimal? ?? 0;
+    var pendingAmount = ViewBag.PendingAmount as decimal? ?? 0;
+    var mealCharges = ViewBag.MealCharges as decimal? ?? 0;
+    var teaCharges = ViewBag.TeaCharges as decimal? ?? 0;
+    var waterCharges = ViewBag.WaterCharges as decimal? ?? 0;
+    var totalCharges = ViewBag.TotalCharges as decimal? ?? 0;
+    var totalPaid = ViewBag.TotalPaid as decimal? ?? 0;
+    var breakfastCount = ViewBag.BreakfastCount as int? ?? 0;
+    var lunchCount = ViewBag.LunchCount as int? ?? 0;
+    var dinnerCount = ViewBag.DinnerCount as int? ?? 0;
+    var teaCups = ViewBag.TeaCups as int? ?? 0;
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">My Payments</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon bg-green-100">
+                    <i data-lucide="wallet" class="w-6 h-6 text-green-600"></i>
+                </span>
+                My Payments & Usage
+            </h1>
+            <p class="page-description">View your payment history, meal charges, and mess usage details.</p>
+        </div>
+        <div class="flex gap-2">
+            <a asp-action="Create" class="btn btn-success">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                Submit Payment
+            </a>
+            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mb-6" role="alert">
+        <i data-lucide="check-circle" class="w-5 h-5 shrink-0"></i>
+        <span>@TempData["SuccessMessage"]</span>
+    </div>
+}
+
+<!-- Period Selector -->
+@if (allPeriods.Any())
+{
+    <div class="card mb-6">
+        <div class="card-body py-3">
+            <div class="flex flex-wrap items-center gap-4">
+                <span class="text-sm font-medium text-gray-600">
+                    <i data-lucide="calendar-range" class="w-4 h-4 inline mr-1"></i>
+                    Select Period:
+                </span>
+                <div class="flex flex-wrap gap-2">
+                    @foreach (var period in allPeriods.Take(6))
+                    {
+                        var isActive = selectedPeriod?.PeriodId == period.PeriodId;
+                        <a asp-action="MyPayments" asp-route-periodId="@period.PeriodId"
+                           class="btn btn-sm @(isActive ? "btn-primary" : "btn-secondary")">
+                            @period.PeriodName
+                            @if (period.IsActive)
+                            {
+                                <span class="badge badge-success ml-1 text-xs">Active</span>
+                            }
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (selectedPeriod != null)
+{
+    <!-- Period Summary Dashboard -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <!-- Left: Balance Overview -->
+        <div class="lg:col-span-1 space-y-4">
+            <!-- Outstanding Balance Card -->
+            <div class="card @(remainingBalance > 0 ? "border-2 border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50" : "border-2 border-green-300 bg-gradient-to-br from-green-50 to-emerald-50")">
+                <div class="card-body">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-sm font-medium @(remainingBalance > 0 ? "text-amber-700" : "text-green-700")">
+                            Outstanding Balance
+                        </span>
+                        <div class="w-10 h-10 rounded-full @(remainingBalance > 0 ? "bg-amber-100" : "bg-green-100") flex items-center justify-center">
+                            <i data-lucide="@(remainingBalance > 0 ? "alert-circle" : "check-circle")" 
+                               class="w-5 h-5 @(remainingBalance > 0 ? "text-amber-600" : "text-green-600")"></i>
+                        </div>
+                    </div>
+                    <p class="text-4xl font-bold @(remainingBalance > 0 ? "text-amber-800" : "text-green-800")">
+                        Rs. @remainingBalance.ToString("N0")
+                    </p>
+                    <p class="text-sm text-gray-500 mt-1">@selectedPeriod.PeriodName</p>
+                    
+                    @if (remainingBalance > 0)
+                    {
+                        <a asp-action="Create" class="btn btn-success w-full mt-4">
+                            <i data-lucide="credit-card" class="w-4 h-4"></i>
+                            Pay Now
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Pending Approval -->
+            @if (pendingAmount > 0)
+            {
+                <div class="card border-blue-200 bg-blue-50">
+                    <div class="card-body py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm text-blue-700">Pending Approval</p>
+                                <p class="text-xl font-bold text-blue-800">Rs. @pendingAmount.ToString("N0")</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Payment Progress -->
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="font-semibold text-gray-900 mb-3">Payment Progress</h4>
+                    @{
+                        var progressPercent = totalCharges > 0 ? Math.Min(100, (totalPaid / totalCharges) * 100) : 0;
+                    }
+                    <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                        <div class="bg-green-500 h-3 rounded-full transition-all" style="width: @progressPercent%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span>Paid: Rs. @totalPaid.ToString("N0")</span>
+                        <span>Total: Rs. @totalCharges.ToString("N0")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Charges Breakdown -->
+        <div class="lg:col-span-2">
+            <div class="card h-full">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i data-lucide="receipt" class="w-5 h-5 text-blue-600"></i>
+                        Charges Breakdown - @selectedPeriod.PeriodName
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Meals Card -->
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center">
+                                    <i data-lucide="utensils" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-blue-700">Meal Charges</p>
+                                    <p class="text-2xl font-bold text-blue-900">Rs. @mealCharges.ToString("N0")</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 text-xs">
+                                <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700">
+                                    <i data-lucide="sunrise" class="w-3 h-3 inline"></i> @breakfastCount Breakfast
+                                </span>
+                                <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                                    <i data-lucide="sun" class="w-3 h-3 inline"></i> @lunchCount Lunch
+                                </span>
+                                <span class="px-2 py-1 rounded-full bg-purple-100 text-purple-700">
+                                    <i data-lucide="moon" class="w-3 h-3 inline"></i> @dinnerCount Dinner
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Tea Card -->
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-lg bg-amber-500 text-white flex items-center justify-center">
+                                    <i data-lucide="coffee" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-amber-700">Tea Charges</p>
+                                    <p class="text-2xl font-bold text-amber-900">Rs. @teaCharges.ToString("N0")</p>
+                                </div>
+                            </div>
+                            <p class="text-xs text-amber-600">
+                                @teaCups cups × Rs. @selectedPeriod.TeaPricePerCup/cup
+                            </p>
+                        </div>
+
+                        <!-- Water Card -->
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-cyan-50 to-sky-50 border border-cyan-200">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-cyan-500 text-white flex items-center justify-center">
+                                    <i data-lucide="droplets" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-cyan-700">Water Charges</p>
+                                    <p class="text-2xl font-bold text-cyan-900">Rs. @waterCharges.ToString("N0")</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Total Card -->
+                        <div class="p-4 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 border border-gray-300">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gray-700 text-white flex items-center justify-center">
+                                    <i data-lucide="calculator" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-600">Total Charges</p>
+                                    <p class="text-2xl font-bold text-gray-900">Rs. @totalCharges.ToString("N0")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Usage Calendar -->
+    <div class="card mb-6">
+        <div class="card-header">
+            <div class="flex items-center justify-between">
+                <h3 class="card-title">
+                    <i data-lucide="calendar-days" class="w-5 h-5 text-indigo-600"></i>
+                    Daily Usage Details
+                </h3>
+                <span class="text-sm text-gray-500">
+                    @selectedPeriod.StartDate.ToString("MMM dd") - @selectedPeriod.EndDate.ToString("MMM dd, yyyy")
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            @{
+                var periodAttendances = attendances
+                    .Where(a => a.Date >= selectedPeriod.StartDate && a.Date <= selectedPeriod.EndDate)
+                    .OrderByDescending(a => a.Date)
+                    .ToList();
+                var periodTeaEntries = teaEntries
+                    .Where(t => t.Date >= selectedPeriod.StartDate && t.Date <= selectedPeriod.EndDate)
+                    .ToList();
+            }
+
+            @if (periodAttendances.Any() || periodTeaEntries.Any())
+            {
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
+                    @foreach (var att in periodAttendances)
+                    {
+                        var teaEntry = periodTeaEntries.FirstOrDefault(t => t.Date.Date == att.Date.Date);
+                        var dayMealCharge = 
+                            (att.IsBreakfastPresent && att.BreakfastDishPlan != null ? att.BreakfastDishPlan.Price : 0) +
+                            (att.IsLunchPresent && att.LunchDishPlan != null ? att.LunchDishPlan.Price : 0) +
+                            (att.IsDinnerPresent && att.DinnerDishPlan != null ? att.DinnerDishPlan.Price : 0);
+                        var dayTeaCharge = teaEntry != null ? teaEntry.Cups * selectedPeriod.TeaPricePerCup : 0;
+                        var dayTotal = dayMealCharge + dayTeaCharge;
+                        var hasAnyMeal = att.IsBreakfastPresent || att.IsLunchPresent || att.IsDinnerPresent;
+                        var hasTea = teaEntry != null && teaEntry.Cups > 0;
+                        
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-all group">
+                            <!-- Date Header -->
+                            <div class="bg-gradient-to-r from-indigo-500 to-purple-500 px-3 py-2 text-center">
+                                <div class="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-sm mx-auto">
+                                    @att.Date.Day
+                                </div>
+                                <p class="text-xs text-white/80 mt-1">@att.Date.ToString("ddd")</p>
+                            </div>
+                            
+                            <!-- Meals -->
+                            <div class="p-2">
+                                <div class="flex justify-center gap-1 mb-2">
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center @(att.IsBreakfastPresent ? "bg-amber-100 text-amber-600" : "bg-gray-100 text-gray-300")" title="@(att.IsBreakfastPresent ? (att.BreakfastDishPlan?.DishName ?? "Breakfast") : "No Breakfast")">
+                                        <i data-lucide="sunrise" class="w-3 h-3"></i>
+                                    </div>
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center @(att.IsLunchPresent ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-300")" title="@(att.IsLunchPresent ? (att.LunchDishPlan?.DishName ?? "Lunch") : "No Lunch")">
+                                        <i data-lucide="sun" class="w-3 h-3"></i>
+                                    </div>
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center @(att.IsDinnerPresent ? "bg-purple-100 text-purple-600" : "bg-gray-100 text-gray-300")" title="@(att.IsDinnerPresent ? (att.DinnerDishPlan?.DishName ?? "Dinner") : "No Dinner")">
+                                        <i data-lucide="moon" class="w-3 h-3"></i>
+                                    </div>
+                                    @if (hasTea && teaEntry != null)
+                                    {
+                                        <div class="w-6 h-6 rounded-full flex items-center justify-center bg-amber-100 text-amber-600" title="@teaEntry.Cups cups tea">
+                                            <span class="text-xs font-bold">@teaEntry.Cups</span>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                <!-- Day Total -->
+                                <div class="text-center">
+                                    <p class="text-sm font-bold text-gray-900">Rs. @dayTotal.ToString("N0")</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Tooltip Details on Hover -->
+                            <div class="hidden group-hover:block absolute z-10 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs w-48 -mt-2">
+                                <p class="font-semibold mb-2">@att.Date.ToString("dddd, MMM dd")</p>
+                                @if (att.IsBreakfastPresent && att.BreakfastDishPlan != null)
+                                {
+                                    <p class="flex justify-between"><span>Breakfast:</span><span>Rs. @att.BreakfastDishPlan.Price</span></p>
+                                }
+                                @if (att.IsLunchPresent && att.LunchDishPlan != null)
+                                {
+                                    <p class="flex justify-between"><span>Lunch:</span><span>Rs. @att.LunchDishPlan.Price</span></p>
+                                }
+                                @if (att.IsDinnerPresent && att.DinnerDishPlan != null)
+                                {
+                                    <p class="flex justify-between"><span>Dinner:</span><span>Rs. @att.DinnerDishPlan.Price</span></p>
+                                }
+                                @if (hasTea && teaEntry != null)
+                                {
+                                    <p class="flex justify-between"><span>Tea (@teaEntry.Cups):</span><span>Rs. @dayTeaCharge</span></p>
+                                }
+                                <hr class="my-1">
+                                <p class="flex justify-between font-bold"><span>Total:</span><span>Rs. @dayTotal</span></p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-8 text-gray-500">
+                    <i data-lucide="calendar-x" class="w-12 h-12 mx-auto text-gray-300 mb-2"></i>
+                    <p>No usage records for this period</p>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<!-- Payment History -->
+<div class="card mb-6">
+    <div class="card-header">
+        <div class="flex items-center justify-between">
+            <h3 class="card-title">
+                <i data-lucide="history" class="w-5 h-5 text-green-600"></i>
+                Payment History
+            </h3>
+            <span class="badge badge-primary">@Model.Count() Payments</span>
+        </div>
+    </div>
+    
+    @if (!Model.Any())
+    {
+        <div class="card-body">
+            <div class="empty-state py-8">
+                <div class="empty-state-icon">
+                    <i data-lucide="credit-card" class="w-12 h-12 text-gray-300"></i>
+                </div>
+                <h3 class="empty-state-title">No payments yet</h3>
+                <p class="empty-state-text">Submit your first payment to get started.</p>
+                <a asp-action="Create" class="btn btn-primary mt-4">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    Submit Payment
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card-body space-y-6">
+            @foreach (var period in allPeriods)
+            {
+                var periodPayments = Model
+                    .Where(p => p.PeriodId == period.PeriodId)
+                    .OrderByDescending(p => p.PaymentDate)
+                    .ToList();
+                
+                if (!periodPayments.Any()) continue;
+                
+                var periodTotalPaid = periodPayments
+                    .Where(p => p.Status == MessManagement.Models.PaymentStatus.Approved || p.Status == MessManagement.Models.PaymentStatus.Completed)
+                    .Sum(p => p.Amount);
+                var periodPending = periodPayments.Count(p => p.Status == MessManagement.Models.PaymentStatus.Pending);
+                
+                <div class="border rounded-xl overflow-hidden">
+                    <!-- Period Header -->
+                    <div class="px-4 py-3 bg-gradient-to-r from-green-50 to-emerald-50 flex flex-wrap items-center justify-between gap-2 cursor-pointer period-toggle" data-period="pay-@period.PeriodId">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-green-500 text-white flex items-center justify-center">
+                                <i data-lucide="wallet" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">@period.PeriodName</h4>
+                                <p class="text-sm text-gray-500">
+                                    @period.StartDate.ToString("MMM dd") - @period.EndDate.ToString("MMM dd, yyyy")
+                                    @if (period.IsActive)
+                                    {
+                                        <span class="badge badge-success ml-2">Active</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-sm font-medium">
+                                Rs. @periodTotalPaid.ToString("N0") Paid
+                            </span>
+                            @if (periodPending > 0)
+                            {
+                                <span class="badge badge-warning">@periodPending Pending</span>
+                            }
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 period-chevron transition-transform"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Payments Grid -->
+                    <div class="period-content p-4 bg-gray-50" id="period-pay-@period.PeriodId">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            @foreach (var payment in periodPayments)
+                            {
+                                var statusColor = payment.Status switch
+                                {
+                                    MessManagement.Models.PaymentStatus.Approved => "green",
+                                    MessManagement.Models.PaymentStatus.Completed => "green",
+                                    MessManagement.Models.PaymentStatus.Pending => "amber",
+                                    MessManagement.Models.PaymentStatus.Rejected => "red",
+                                    _ => "gray"
+                                };
+                                var methodIcon = payment.PaymentMethod switch
+                                {
+                                    "Cash" => "banknote",
+                                    "Stripe" => "credit-card",
+                                    "Bank Transfer" => "building-2",
+                                    _ => "wallet"
+                                };
+                                
+                                <div class="bg-white rounded-lg border border-@(statusColor)-200 shadow-sm overflow-hidden">
+                                    <div class="px-4 py-3 bg-@(statusColor)-50 border-b border-@(statusColor)-200 flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 rounded-full bg-@(statusColor)-100 flex items-center justify-center">
+                                                <i data-lucide="@methodIcon" class="w-4 h-4 text-@(statusColor)-600"></i>
+                                            </div>
+                                            <span class="font-medium text-gray-900">@payment.PaymentMethod</span>
+                                        </div>
+                                        <span class="badge @payment.StatusBadgeClass">
+                                            @payment.StatusDisplayText
+                                        </span>
+                                    </div>
+                                    <div class="p-4">
+                                        <p class="text-2xl font-bold text-gray-900 mb-1">Rs. @payment.Amount.ToString("N0")</p>
+                                        <p class="text-sm text-gray-500">
+                                            <i data-lucide="calendar" class="w-3 h-3 inline"></i>
+                                            @payment.PaymentDate.ToString("MMM dd, yyyy - hh:mm tt")
+                                        </p>
+                                        @if (!string.IsNullOrEmpty(payment.ReferenceNumber))
+                                        {
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                Ref: <code class="bg-gray-100 px-1 rounded">@payment.ReferenceNumber</code>
+                                            </p>
+                                        }
+                                        @if (payment.Status == MessManagement.Models.PaymentStatus.Rejected && !string.IsNullOrEmpty(payment.RejectionReason))
+                                        {
+                                            <p class="text-xs text-red-600 mt-2">
+                                                <i data-lucide="alert-circle" class="w-3 h-3 inline"></i>
+                                                @payment.RejectionReason
+                                            </p>
+                                        }
+                                        @if (payment.Status == MessManagement.Models.PaymentStatus.Approved && payment.ApprovedByUser != null)
+                                        {
+                                            <p class="text-xs text-green-600 mt-2">
+                                                <i data-lucide="check-circle" class="w-3 h-3 inline"></i>
+                                                Approved by @payment.ApprovedByUser.FullName
+                                            </p>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Legend & Info -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <!-- Legend -->
+    <div class="card">
+        <div class="card-body">
+            <h4 class="font-semibold text-gray-900 mb-3">
+                <i data-lucide="info" class="w-4 h-4 inline text-blue-600"></i>
+                Usage Legend
+            </h4>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><i data-lucide="sunrise" class="w-3 h-3"></i></div>
+                    <span>Breakfast</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i data-lucide="sun" class="w-3 h-3"></i></div>
+                    <span>Lunch</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i data-lucide="moon" class="w-3 h-3"></i></div>
+                    <span>Dinner</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-xs">2</div>
+                    <span>Tea Cups</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Status Guide -->
+    <div class="card">
+        <div class="card-body">
+            <h4 class="font-semibold text-gray-900 mb-3">
+                <i data-lucide="help-circle" class="w-4 h-4 inline text-blue-600"></i>
+                Payment Status Guide
+            </h4>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-warning text-xs">Pending</span>
+                    <span>Awaiting approval</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-success text-xs">Approved</span>
+                    <span>Payment verified</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-success text-xs">Completed</span>
+                    <span>Card payment done</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-error text-xs">Rejected</span>
+                    <span>Payment rejected</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+        
+        // Toggle period sections
+        document.querySelectorAll('.period-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const periodId = this.dataset.period;
+                const content = document.getElementById('period-' + periodId);
+                const chevron = this.querySelector('.period-chevron');
+                
+                if (content) {
+                    content.classList.toggle('hidden');
+                    chevron.classList.toggle('rotate-180');
+                }
+            });
+        });
+    </script>
+}

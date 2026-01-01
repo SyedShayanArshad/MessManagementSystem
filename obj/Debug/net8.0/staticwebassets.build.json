@@ -1,0 +1,228 @@
+{
+  "Version": 1,
+  "Hash": "65brpDwo/mlgrfAxrEAk3LI2QjhhtDnOcHl38cE+rmw=",
+  "Source": "MessManagement",
+  "BasePath": "_content/MessManagement",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "MessManagement\\wwwroot",
+      "Source": "MessManagement",
+      "ContentRoot": "E:\\Mess\\MessManagement\\wwwroot\\",
+      "BasePath": "_content/MessManagement",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "E:\\Mess\\MessManagement\\wwwroot\\css\\site.css",
+      "SourceId": "MessManagement",
+      "SourceType": "Discovered",
+      "ContentRoot": "E:\\Mess\\MessManagement\\wwwroot\\",
+      "BasePath": "_content/MessManagement",
+      "RelativePath": "css/site#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "70qrmwcmct",
+      "Integrity": "ma3VTP6Frdrd0+n4fgw3YBs874D4j4tBJx4gnXR9Ofk=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\site.css"
+    },
+    {
+      "Identity": "E:\\Mess\\MessManagement\\wwwroot\\css\\styles.css",
+      "SourceId": "MessManagement",
+      "SourceType": "Discovered",
+      "ContentRoot": "E:\\Mess\\MessManagement\\wwwroot\\",
+      "BasePath": "_content/MessManagement",
+      "RelativePath": "css/styles#[.{fingerprint}]?.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "Fingerprint": "lxfxfwiyrk",
+      "Integrity": "F6LUPsJcglTmcnpDSU/SDwQT/HL6c2NsdupLqg+ff54=",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\styles.css"
+    }
+  ],
+  "Endpoints": [
+    {
+      "Route": "css/site.70qrmwcmct.css",
+      "AssetFile": "E:\\Mess\\MessManagement\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "22845"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ma3VTP6Frdrd0+n4fgw3YBs874D4j4tBJx4gnXR9Ofk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 21 Dec 2025 17:27:38 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "70qrmwcmct"
+        },
+        {
+          "Name": "label",
+          "Value": "css/site.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-ma3VTP6Frdrd0+n4fgw3YBs874D4j4tBJx4gnXR9Ofk="
+        }
+      ]
+    },
+    {
+      "Route": "css/site.css",
+      "AssetFile": "E:\\Mess\\MessManagement\\wwwroot\\css\\site.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "22845"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"ma3VTP6Frdrd0+n4fgw3YBs874D4j4tBJx4gnXR9Ofk=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Sun, 21 Dec 2025 17:27:38 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-ma3VTP6Frdrd0+n4fgw3YBs874D4j4tBJx4gnXR9Ofk="
+        }
+      ]
+    },
+    {
+      "Route": "css/styles.css",
+      "AssetFile": "E:\\Mess\\MessManagement\\wwwroot\\css\\styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "104466"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"F6LUPsJcglTmcnpDSU/SDwQT/HL6c2NsdupLqg+ff54=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 01 Jan 2026 13:50:09 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-F6LUPsJcglTmcnpDSU/SDwQT/HL6c2NsdupLqg+ff54="
+        }
+      ]
+    },
+    {
+      "Route": "css/styles.lxfxfwiyrk.css",
+      "AssetFile": "E:\\Mess\\MessManagement\\wwwroot\\css\\styles.css",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "104466"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "text/css"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"F6LUPsJcglTmcnpDSU/SDwQT/HL6c2NsdupLqg+ff54=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Thu, 01 Jan 2026 13:50:09 GMT"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "lxfxfwiyrk"
+        },
+        {
+          "Name": "label",
+          "Value": "css/styles.css"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-F6LUPsJcglTmcnpDSU/SDwQT/HL6c2NsdupLqg+ff54="
+        }
+      ]
+    }
+  ]
+}

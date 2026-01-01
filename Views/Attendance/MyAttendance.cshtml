@@ -1,0 +1,550 @@
+@model IEnumerable<MessManagement.Models.Attendance>
+@{
+    ViewData["Title"] = "My Attendance";
+    var pendingMeals = Model.Sum(a => a.PendingVerificationCount);
+    var pendingAttendances = Model.Where(a => !a.AllMealsVerified).OrderByDescending(a => a.Date).ToList();
+    var messPeriods = ViewBag.MessPeriods as List<MessManagement.Models.MessPeriod> ?? new List<MessManagement.Models.MessPeriod>();
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">My Attendance</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon">
+                    <i data-lucide="calendar-check" class="w-6 h-6"></i>
+                </span>
+                My Attendance
+            </h1>
+            <p class="page-description">View your attendance records and verify each meal individually.</p>
+        </div>
+        <div class="flex gap-2">
+            @if (pendingMeals > 0)
+            {
+                <form asp-action="VerifyAllMeals" method="post" class="inline">
+                    <button type="submit" class="btn btn-success">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        Verify All (@pendingMeals)
+                    </button>
+                </form>
+            }
+            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mb-6" role="alert">
+        <i data-lucide="check-circle" class="w-5 h-5 shrink-0"></i>
+        <span>@TempData["SuccessMessage"]</span>
+    </div>
+}
+
+<!-- Attendance Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    @{
+        var totalRecords = Model.Count();
+        var breakfastCount = Model.Count(a => a.IsBreakfastPresent);
+        var lunchCount = Model.Count(a => a.IsLunchPresent);
+        var dinnerCount = Model.Count(a => a.IsDinnerPresent);
+        var verifiedBreakfast = Model.Count(a => a.IsBreakfastPresent && a.BreakfastVerified);
+        var verifiedLunch = Model.Count(a => a.IsLunchPresent && a.LunchVerified);
+        var verifiedDinner = Model.Count(a => a.IsDinnerPresent && a.DinnerVerified);
+    }
+    <div class="stat-card">
+        <div class="stat-icon bg-blue-100">
+            <i data-lucide="calendar" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@totalRecords</div>
+            <div class="stat-label">Total Days</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-amber-100">
+            <i data-lucide="sunrise" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@verifiedBreakfast/@breakfastCount</div>
+            <div class="stat-label">Breakfasts</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-emerald-100">
+            <i data-lucide="sun" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@verifiedLunch/@lunchCount</div>
+            <div class="stat-label">Lunches</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-purple-100">
+            <i data-lucide="moon" class="w-6 h-6 text-purple-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@verifiedDinner/@dinnerCount</div>
+            <div class="stat-label">Dinners</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon @(pendingMeals > 0 ? "bg-orange-100" : "bg-green-100")">
+            <i data-lucide="@(pendingMeals > 0 ? "clock" : "shield-check")" class="w-6 h-6 @(pendingMeals > 0 ? "text-orange-600" : "text-green-600")"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@pendingMeals</div>
+            <div class="stat-label">Pending</div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SECTION 1: Pending Verification Section -->
+<!-- ========================================== -->
+@if (pendingAttendances.Any())
+{
+    <div class="card mb-6">
+        <div class="card-header bg-orange-50 border-b border-orange-200">
+            <div class="flex items-center justify-between">
+                <h3 class="card-title text-orange-800">
+                    <i data-lucide="clock" class="w-5 h-5 text-orange-600"></i>
+                    Pending Verification
+                </h3>
+                <span class="badge badge-warning">
+                    @pendingAttendances.Count() Records • @pendingMeals Meals
+                </span>
+            </div>
+        </div>
+        <div class="p-4 bg-orange-50/30">
+            <div class="alert alert-warning mb-4">
+                <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0"></i>
+                <div>
+                    <p class="font-medium">You have @pendingMeals meal(s) pending verification</p>
+                    <p class="text-sm mt-1">Please verify your meals to finalize your attendance records.</p>
+                </div>
+            </div>
+            
+            <!-- Calendar Grid for Pending -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                @foreach (var a in pendingAttendances)
+                {
+                    <div class="bg-white rounded-xl border-2 border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                        <!-- Date Header -->
+                        <div class="bg-orange-100 px-4 py-3 border-b border-orange-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-10 h-10 rounded-lg bg-orange-500 text-white flex items-center justify-center font-bold text-lg">
+                                        @a.Date.Day
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900">@a.Date.ToString("dddd")</p>
+                                        <p class="text-xs text-gray-500">@a.Date.ToString("MMM yyyy")</p>
+                                    </div>
+                                </div>
+                                <span class="badge badge-warning text-xs">@a.PendingVerificationCount pending</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Meals Grid -->
+                        <div class="p-4 space-y-3">
+                            <!-- Breakfast -->
+                            <div class="flex items-center justify-between p-2 rounded-lg @(a.IsBreakfastPresent ? (a.BreakfastVerified ? "bg-green-50" : "bg-amber-50") : "bg-gray-50")">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="sunrise" class="w-4 h-4 text-amber-600"></i>
+                                    <span class="text-sm font-medium">Breakfast</span>
+                                </div>
+                                @if (a.IsBreakfastPresent)
+                                {
+                                    @if (a.BreakfastVerified)
+                                    {
+                                        <span class="badge badge-success text-xs"><i data-lucide="check" class="w-3 h-3"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="VerifyBreakfast" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@a.AttendanceId" />
+                                            <button type="submit" class="btn btn-xs btn-success">Verify</button>
+                                        </form>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-xs text-gray-400">Absent</span>
+                                }
+                            </div>
+                            
+                            <!-- Lunch -->
+                            <div class="flex items-center justify-between p-2 rounded-lg @(a.IsLunchPresent ? (a.LunchVerified ? "bg-green-50" : "bg-blue-50") : "bg-gray-50")">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="sun" class="w-4 h-4 text-blue-600"></i>
+                                    <span class="text-sm font-medium">Lunch</span>
+                                </div>
+                                @if (a.IsLunchPresent)
+                                {
+                                    @if (a.LunchVerified)
+                                    {
+                                        <span class="badge badge-success text-xs"><i data-lucide="check" class="w-3 h-3"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="VerifyLunch" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@a.AttendanceId" />
+                                            <button type="submit" class="btn btn-xs btn-success">Verify</button>
+                                        </form>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-xs text-gray-400">Absent</span>
+                                }
+                            </div>
+                            
+                            <!-- Dinner -->
+                            <div class="flex items-center justify-between p-2 rounded-lg @(a.IsDinnerPresent ? (a.DinnerVerified ? "bg-green-50" : "bg-purple-50") : "bg-gray-50")">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="moon" class="w-4 h-4 text-purple-600"></i>
+                                    <span class="text-sm font-medium">Dinner</span>
+                                </div>
+                                @if (a.IsDinnerPresent)
+                                {
+                                    @if (a.DinnerVerified)
+                                    {
+                                        <span class="badge badge-success text-xs"><i data-lucide="check" class="w-3 h-3"></i></span>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="VerifyDinner" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@a.AttendanceId" />
+                                            <button type="submit" class="btn btn-xs btn-success">Verify</button>
+                                        </form>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-xs text-gray-400">Absent</span>
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- Verify All Button -->
+                        <div class="px-4 pb-4">
+                            <form asp-action="Verify" method="post">
+                                <input type="hidden" name="id" value="@a.AttendanceId" />
+                                <button type="submit" class="btn btn-success btn-sm w-full">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                    Verify All Meals
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-6">
+        <div class="card-body bg-green-50">
+            <div class="flex items-center gap-3 text-green-700">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-green-800">All Caught Up!</p>
+                    <p class="text-sm text-green-600">You have no pending attendance records to verify.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ========================================== -->
+<!-- SECTION 2: Attendance History (Period-wise Calendar) -->
+<!-- ========================================== -->
+<div class="card">
+    <div class="card-header">
+        <div class="flex items-center justify-between">
+            <h3 class="card-title">
+                <i data-lucide="calendar-range" class="w-5 h-5 text-blue-600"></i>
+                Attendance History
+            </h3>
+            <span class="badge badge-primary">
+                @totalRecords Total Days
+            </span>
+        </div>
+    </div>
+    
+    @if (Model.Any())
+    {
+        <div class="card-body space-y-6">
+            @foreach (var period in messPeriods)
+            {
+                var periodAttendances = Model
+                    .Where(a => a.Date >= period.StartDate && a.Date <= period.EndDate)
+                    .OrderByDescending(a => a.Date)
+                    .ToList();
+                
+                if (!periodAttendances.Any()) continue;
+                
+                var periodBreakfasts = periodAttendances.Count(a => a.IsBreakfastPresent);
+                var periodLunches = periodAttendances.Count(a => a.IsLunchPresent);
+                var periodDinners = periodAttendances.Count(a => a.IsDinnerPresent);
+                var periodPending = periodAttendances.Count(a => !a.AllMealsVerified);
+                
+                <div class="border rounded-xl overflow-hidden">
+                    <!-- Period Header -->
+                    <div class="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 flex flex-wrap items-center justify-between gap-2 cursor-pointer period-toggle" data-period="@period.PeriodId">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center">
+                                <i data-lucide="calendar-days" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">@period.PeriodName</h4>
+                                <p class="text-sm text-gray-500">
+                                    @period.StartDate.ToString("MMM dd") - @period.EndDate.ToString("MMM dd, yyyy")
+                                    @if (period.IsActive)
+                                    {
+                                        <span class="badge badge-success ml-2">Active</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex gap-2 text-sm">
+                                <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium" title="Breakfasts">
+                                    <i data-lucide="sunrise" class="w-3 h-3 inline"></i> @periodBreakfasts
+                                </span>
+                                <span class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium" title="Lunches">
+                                    <i data-lucide="sun" class="w-3 h-3 inline"></i> @periodLunches
+                                </span>
+                                <span class="px-2 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-medium" title="Dinners">
+                                    <i data-lucide="moon" class="w-3 h-3 inline"></i> @periodDinners
+                                </span>
+                            </div>
+                            @if (periodPending > 0)
+                            {
+                                <span class="badge badge-warning">@periodPending Pending</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-success">All Verified</span>
+                            }
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 period-chevron transition-transform"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="period-content p-4 bg-gray-50" id="period-@period.PeriodId">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
+                            @foreach (var a in periodAttendances)
+                            {
+                                var isVerified = a.AllMealsVerified;
+                                var cardBorder = isVerified ? "border-green-200" : "border-orange-200";
+                                var headerBg = isVerified ? "bg-green-100" : "bg-orange-100";
+                                var dateBg = isVerified ? "bg-green-500" : "bg-orange-500";
+                                
+                                <div class="bg-white rounded-lg border @cardBorder shadow-sm overflow-hidden hover:shadow-md transition-all">
+                                    <!-- Date Header -->
+                                    <div class="@headerBg px-3 py-2 text-center">
+                                        <div class="w-8 h-8 rounded-full @dateBg text-white flex items-center justify-center font-bold text-sm mx-auto">
+                                            @a.Date.Day
+                                        </div>
+                                        <p class="text-xs text-gray-600 mt-1">@a.Date.ToString("ddd")</p>
+                                    </div>
+                                    
+                                    <!-- Meal Icons -->
+                                    <div class="p-2 flex justify-center gap-1">
+                                        <!-- Breakfast -->
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center @(a.IsBreakfastPresent ? (a.BreakfastVerified ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600") : "bg-gray-100 text-gray-400")" title="Breakfast: @(a.IsBreakfastPresent ? (a.BreakfastVerified ? "Verified" : "Pending") : "Absent")">
+                                            <i data-lucide="sunrise" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                        <!-- Lunch -->
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center @(a.IsLunchPresent ? (a.LunchVerified ? "bg-green-100 text-green-600" : "bg-blue-100 text-blue-600") : "bg-gray-100 text-gray-400")" title="Lunch: @(a.IsLunchPresent ? (a.LunchVerified ? "Verified" : "Pending") : "Absent")">
+                                            <i data-lucide="sun" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                        <!-- Dinner -->
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center @(a.IsDinnerPresent ? (a.DinnerVerified ? "bg-green-100 text-green-600" : "bg-purple-100 text-purple-600") : "bg-gray-100 text-gray-400")" title="Dinner: @(a.IsDinnerPresent ? (a.DinnerVerified ? "Verified" : "Pending") : "Absent")">
+                                            <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Status -->
+                                    <div class="px-2 pb-2 text-center">
+                                        @if (isVerified)
+                                        {
+                                            <span class="text-xs text-green-600 font-medium">
+                                                <i data-lucide="check" class="w-3 h-3 inline"></i> Verified
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="Verify" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@a.AttendanceId" />
+                                                <button type="submit" class="text-xs text-orange-600 font-medium hover:text-orange-700">
+                                                    <i data-lucide="clock" class="w-3 h-3 inline"></i> @a.PendingVerificationCount pending
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            
+            @* Show records without a matching period *@
+            @{
+                var orphanAttendances = Model
+                    .Where(a => !messPeriods.Any(p => a.Date >= p.StartDate && a.Date <= p.EndDate))
+                    .OrderByDescending(a => a.Date)
+                    .ToList();
+            }
+            
+            @if (orphanAttendances.Any())
+            {
+                <div class="border rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 bg-gray-100 flex items-center justify-between cursor-pointer period-toggle" data-period="other">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gray-400 text-white flex items-center justify-center">
+                                <i data-lucide="archive" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Other Records</h4>
+                                <p class="text-sm text-gray-500">Records not within any defined period</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="badge badge-secondary">@orphanAttendances.Count Records</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 period-chevron transition-transform"></i>
+                        </div>
+                    </div>
+                    <div class="period-content p-4 bg-gray-50" id="period-other">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
+                            @foreach (var a in orphanAttendances)
+                            {
+                                var isVerified = a.AllMealsVerified;
+                                var cardBorder = isVerified ? "border-green-200" : "border-orange-200";
+                                var headerBg = isVerified ? "bg-green-100" : "bg-orange-100";
+                                var dateBg = isVerified ? "bg-green-500" : "bg-orange-500";
+                                
+                                <div class="bg-white rounded-lg border @cardBorder shadow-sm overflow-hidden">
+                                    <div class="@headerBg px-3 py-2 text-center">
+                                        <div class="w-8 h-8 rounded-full @dateBg text-white flex items-center justify-center font-bold text-sm mx-auto">
+                                            @a.Date.Day
+                                        </div>
+                                        <p class="text-xs text-gray-600 mt-1">@a.Date.ToString("ddd")</p>
+                                    </div>
+                                    <div class="p-2 flex justify-center gap-1">
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center @(a.IsBreakfastPresent ? (a.BreakfastVerified ? "bg-green-100 text-green-600" : "bg-amber-100 text-amber-600") : "bg-gray-100 text-gray-400")">
+                                            <i data-lucide="sunrise" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center @(a.IsLunchPresent ? (a.LunchVerified ? "bg-green-100 text-green-600" : "bg-blue-100 text-blue-600") : "bg-gray-100 text-gray-400")">
+                                            <i data-lucide="sun" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center @(a.IsDinnerPresent ? (a.DinnerVerified ? "bg-green-100 text-green-600" : "bg-purple-100 text-purple-600") : "bg-gray-100 text-gray-400")">
+                                            <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                    </div>
+                                    <div class="px-2 pb-2 text-center">
+                                        @if (isVerified)
+                                        {
+                                            <span class="text-xs text-green-600 font-medium">
+                                                <i data-lucide="check" class="w-3 h-3 inline"></i> Verified
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="Verify" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@a.AttendanceId" />
+                                                <button type="submit" class="text-xs text-orange-600 font-medium">
+                                                    <i data-lucide="clock" class="w-3 h-3 inline"></i> @a.PendingVerificationCount pending
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i data-lucide="calendar-x" class="w-16 h-16 text-gray-300"></i>
+                </div>
+                <h3 class="empty-state-title">No Attendance Records</h3>
+                <p class="empty-state-description">You don't have any attendance records yet.</p>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Legend -->
+<div class="mt-4 p-4 bg-gray-50 rounded-xl">
+    <p class="text-sm font-medium text-gray-700 mb-2">Legend:</p>
+    <div class="flex flex-wrap gap-4 text-xs">
+        <div class="flex items-center gap-1">
+            <div class="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center text-green-600"><i data-lucide="check" class="w-3 h-3"></i></div>
+            <span>Verified</span>
+        </div>
+        <div class="flex items-center gap-1">
+            <div class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><i data-lucide="sunrise" class="w-3 h-3"></i></div>
+            <span>Breakfast Pending</span>
+        </div>
+        <div class="flex items-center gap-1">
+            <div class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><i data-lucide="sun" class="w-3 h-3"></i></div>
+            <span>Lunch Pending</span>
+        </div>
+        <div class="flex items-center gap-1">
+            <div class="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><i data-lucide="moon" class="w-3 h-3"></i></div>
+            <span>Dinner Pending</span>
+        </div>
+        <div class="flex items-center gap-1">
+            <div class="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"><i data-lucide="minus" class="w-3 h-3"></i></div>
+            <span>Absent</span>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+        
+        // Toggle period sections
+        document.querySelectorAll('.period-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const periodId = this.dataset.period;
+                const content = document.getElementById('period-' + periodId);
+                const chevron = this.querySelector('.period-chevron');
+                
+                if (content) {
+                    content.classList.toggle('hidden');
+                    chevron.classList.toggle('rotate-180');
+                }
+            });
+        });
+    </script>
+}

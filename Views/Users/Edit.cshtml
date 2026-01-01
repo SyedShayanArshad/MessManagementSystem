@@ -1,0 +1,143 @@
+@model MessManagement.Models.User
+@{
+    ViewData["Title"] = "Edit Member";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Users")" class="breadcrumb-link">Members</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Edit</span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon">
+            <i data-lucide="user-cog" class="w-6 h-6"></i>
+        </span>
+        Edit Member
+    </h1>
+    <p class="page-description">Update member information and account settings.</p>
+</div>
+
+<div class="flex justify-center">
+    <div class="w-full max-w-xl">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="file-edit" class="w-5 h-5 text-blue-600"></i>
+                    Member Information
+                </h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post" novalidate>
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-error mb-6" role="alert">
+                            <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                            <div asp-validation-summary="All" class="text-sm"></div>
+                        </div>
+                    }
+                    <input type="hidden" asp-for="UserId" />
+
+                    <!-- 2 Column Grid for Form Fields -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="form-group mb-0">
+                            <label asp-for="FullName" class="form-label">
+                                <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
+                                Full Name <span class="text-red-500">*</span>
+                            </label>
+                            <input asp-for="FullName" class="form-input" placeholder="Enter full name" />
+                            <span asp-validation-for="FullName" class="form-error"></span>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label asp-for="Username" class="form-label">
+                                <i data-lucide="at-sign" class="w-4 h-4 inline mr-1"></i>
+                                Username <span class="text-red-500">*</span>
+                            </label>
+                            <input asp-for="Username" class="form-input" placeholder="Enter username" />
+                            <span asp-validation-for="Username" class="form-error"></span>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="form-label">
+                                <i data-lucide="lock" class="w-4 h-4 inline mr-1"></i>
+                                New Password
+                            </label>
+                            <input type="password" name="newPassword" class="form-input" placeholder="Leave blank to keep" autocomplete="new-password" />
+                            <p class="form-hint text-xs">Leave empty to keep current</p>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label asp-for="Role" class="form-label">
+                                <i data-lucide="shield" class="w-4 h-4 inline mr-1"></i>
+                                Role <span class="text-red-500">*</span>
+                            </label>
+                            <select asp-for="Role" class="form-select">
+                                <option value="User">Regular Member</option>
+                                <option value="Admin">Administrator</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label asp-for="PhoneNumber" class="form-label">
+                                <i data-lucide="phone" class="w-4 h-4 inline mr-1"></i>
+                                Phone Number
+                            </label>
+                            <input asp-for="PhoneNumber" class="form-input" placeholder="Enter phone number" type="tel" />
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label asp-for="Email" class="form-label">
+                                <i data-lucide="mail" class="w-4 h-4 inline mr-1"></i>
+                                Email Address
+                            </label>
+                            <input asp-for="Email" class="form-input" placeholder="Enter email address" type="email" />
+                            <span asp-validation-for="Email" class="form-error"></span>
+                        </div>
+
+                        <div class="form-group mb-0 flex items-end">
+                            <label class="flex items-center gap-3 cursor-pointer p-3 bg-gray-50 rounded-lg w-full">
+                                <input asp-for="IsActive" type="checkbox" class="form-checkbox" />
+                                <span class="text-sm font-medium">
+                                    <i data-lucide="toggle-right" class="w-4 h-4 inline mr-1"></i>
+                                    Account Active
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-3 pt-5 border-t border-gray-100 mt-5">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

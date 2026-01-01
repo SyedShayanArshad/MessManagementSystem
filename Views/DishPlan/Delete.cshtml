@@ -1,0 +1,90 @@
+@model MessManagement.Models.DishPlan
+@{
+    ViewData["Title"] = "Delete Dish Plan";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "DishPlan")" class="breadcrumb-link">Dish Plans</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Delete</span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon bg-linear-to-br from-red-500 to-red-600" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+            <i data-lucide="utensils" class="w-6 h-6"></i>
+        </span>
+        Delete Dish Plan
+    </h1>
+</div>
+
+<div class="max-w-2xl">
+    <div class="card border-red-200">
+        <div class="card-body">
+            <!-- Warning Alert -->
+            <div class="alert alert-error mb-6">
+                <i data-lucide="alert-triangle" class="w-6 h-6 shrink-0"></i>
+                <div>
+                    <p class="font-semibold">Are you sure you want to delete this dish plan?</p>
+                    <p class="text-sm mt-1">This action cannot be undone and will remove the dish from the menu.</p>
+                </div>
+            </div>
+
+            <!-- Dish Info Card -->
+            <div class="bg-gray-50 rounded-xl p-6 mb-6">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-14 h-14 rounded-xl bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                        <i data-lucide="utensils" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">@Model.DishName</h3>
+                        <p class="text-gray-500">@Model.DayOfWeek • @Model.MealType</p>
+                    </div>
+                </div>
+                <dl class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <dt class="text-gray-500">Price</dt>
+                        <dd class="font-semibold text-gray-900 text-lg">$@Model.Price.ToString("N2")</dd>
+                    </div>
+                    <div>
+                        <dt class="text-gray-500">Meal Type</dt>
+                        <dd class="font-medium text-gray-900">@Model.MealType</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="DishPlanId" />
+                <div class="flex justify-end gap-3">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        Delete Dish Plan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

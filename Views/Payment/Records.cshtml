@@ -1,0 +1,308 @@
+@model IEnumerable<MessManagement.Models.Payment>
+@{
+    ViewData["Title"] = "Payment Records";
+    var periods = ViewBag.Periods as IEnumerable<MessManagement.Models.MessPeriod>;
+    var currentPeriod = ViewBag.CurrentPeriod as MessManagement.Models.MessPeriod;
+    var statusFilter = ViewBag.StatusFilter as string;
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Payment")" class="breadcrumb-link">Payments</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">All Records</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon">
+                    <i data-lucide="list" class="w-6 h-6"></i>
+                </span>
+                Payment Records
+            </h1>
+            <p class="page-description">View all payment transactions for @(currentPeriod?.PeriodName ?? "all periods").</p>
+        </div>
+        <div class="flex gap-2">
+            <a asp-action="PendingApprovals" class="btn btn-warning">
+                <i data-lucide="clock" class="w-4 h-4"></i>
+                Pending Approvals
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Back to Summary
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Period Filter -->
+<div class="card mb-6">
+    <div class="card-body py-3">
+        <form method="get" asp-action="Records" class="flex flex-col md:flex-row gap-4 items-center">
+            <label class="form-label mb-0 whitespace-nowrap">
+                <i data-lucide="filter" class="w-4 h-4 inline mr-1"></i>
+                Filter:
+            </label>
+            <select name="periodId" class="form-select flex-1" onchange="this.form.submit()">
+                <option value="">All Periods</option>
+                @if (periods != null)
+                {
+                    @foreach (var p in periods)
+                    {
+                        <option value="@p.PeriodId" selected="@(currentPeriod != null && currentPeriod.PeriodId == p.PeriodId)">
+                            @p.PeriodName @(p.IsActive ? "(Active)" : "")
+                        </option>
+                    }
+                }
+            </select>
+            <select name="status" class="form-select w-auto" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                <option value="Pending" selected="@(statusFilter == "Pending")">⏳ Pending</option>
+                <option value="Approved" selected="@(statusFilter == "Approved")">✓ Approved</option>
+                <option value="Completed" selected="@(statusFilter == "Completed")">✓ Completed</option>
+                <option value="Rejected" selected="@(statusFilter == "Rejected")">✗ Rejected</option>
+            </select>
+        </form>
+    </div>
+</div>
+
+<!-- Summary Stats -->
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+    @{
+        var totalPayments = Model.Count();
+        var totalAmount = Model.Where(p => p.Status == MessManagement.Models.PaymentStatus.Approved || p.Status == MessManagement.Models.PaymentStatus.Completed).Sum(p => p.Amount);
+        var pendingAmount = Model.Where(p => p.Status == MessManagement.Models.PaymentStatus.Pending).Sum(p => p.Amount);
+        var cashAmount = Model.Where(p => p.PaymentMethod == "Cash" && (p.Status == MessManagement.Models.PaymentStatus.Approved || p.Status == MessManagement.Models.PaymentStatus.Completed)).Sum(p => p.Amount);
+        var cardAmount = Model.Where(p => p.PaymentMethod == "Stripe" && (p.Status == MessManagement.Models.PaymentStatus.Approved || p.Status == MessManagement.Models.PaymentStatus.Completed)).Sum(p => p.Amount);
+    }
+    <div class="stat-card">
+        <div class="stat-icon bg-blue-100">
+            <i data-lucide="receipt" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@totalPayments</div>
+            <div class="stat-label">Total Records</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-emerald-100">
+            <i data-lucide="wallet" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value text-emerald-600">Rs. @totalAmount.ToString("N0")</div>
+            <div class="stat-label">Approved Amount</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-amber-100">
+            <i data-lucide="clock" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value text-amber-600">Rs. @pendingAmount.ToString("N0")</div>
+            <div class="stat-label">Pending Amount</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-green-100">
+            <i data-lucide="banknote" class="w-6 h-6 text-green-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value text-green-600">Rs. @cashAmount.ToString("N0")</div>
+            <div class="stat-label">Cash Payments</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-blue-100">
+            <i data-lucide="credit-card" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value text-blue-600">Rs. @cardAmount.ToString("N0")</div>
+            <div class="stat-label">Card Payments</div>
+        </div>
+    </div>
+</div>
+
+<!-- Payments Table -->
+<div class="card">
+    <div class="card-header">
+        <div class="flex items-center justify-between">
+            <h3 class="card-title">
+                <i data-lucide="list" class="w-5 h-5 text-blue-600"></i>
+                Payment Records
+            </h3>
+            <span class="badge badge-primary">@totalPayments Records</span>
+        </div>
+    </div>
+    @if (Model.Any())
+    {
+        <div class="table-container">
+            <table class="data-table" role="grid" aria-label="Payment records">
+                <thead>
+                    <tr>
+                        <th scope="col">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="hash" class="w-4 h-4"></i>
+                                ID
+                            </span>
+                        </th>
+                        <th scope="col">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                                Member
+                            </span>
+                        </th>
+                        <th scope="col">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                                Period
+                            </span>
+                        </th>
+                        <th scope="col" class="text-right">
+                            <span class="flex items-center justify-end gap-2">
+                                <i data-lucide="banknote" class="w-4 h-4"></i>
+                                Amount
+                            </span>
+                        </th>
+                        <th scope="col">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="wallet" class="w-4 h-4"></i>
+                                Method
+                            </span>
+                        </th>
+                        <th scope="col">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                                Date
+                            </span>
+                        </th>
+                        <th scope="col">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                Status
+                            </span>
+                        </th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="text-gray-500">#@p.PaymentId</span>
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold text-xs">
+                                        @(p.User?.FullName?.Substring(0, 1).ToUpper() ?? "?")
+                                    </div>
+                                    <span class="font-medium">@p.User?.FullName</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-gray-600">@p.MessPeriod?.PeriodName</span>
+                            </td>
+                            <td class="text-right">
+                                <span class="font-semibold text-emerald-600">Rs. @p.Amount.ToString("N0")</span>
+                                @if (!string.IsNullOrEmpty(p.ReferenceNumber))
+                                {
+                                    <p class="text-xs text-gray-500">Ref: @p.ReferenceNumber</p>
+                                }
+                            </td>
+                            <td>
+                                @if (p.PaymentMethod == "Cash")
+                                {
+                                    <span class="badge badge-success">
+                                        <i data-lucide="banknote" class="w-3 h-3 mr-1"></i>
+                                        Cash
+                                    </span>
+                                }
+                                else if (p.PaymentMethod == "Stripe")
+                                {
+                                    <span class="badge badge-info">
+                                        <i data-lucide="credit-card" class="w-3 h-3 mr-1"></i>
+                                        Card
+                                    </span>
+                                }
+                                else if (p.PaymentMethod == "Bank Transfer")
+                                {
+                                    <span class="badge badge-primary">
+                                        <i data-lucide="building-2" class="w-3 h-3 mr-1"></i>
+                                        Bank
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-gray">@p.PaymentMethod</span>
+                                }
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="text-gray-900">@p.PaymentDate.ToString("MMM dd, yyyy")</span>
+                                    <p class="text-xs text-gray-500">@p.PaymentDate.ToString("h:mm tt")</p>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge @p.StatusBadgeClass">
+                                    @p.StatusDisplayText
+                                </span>
+                                @if (p.ApprovedByUser != null && (p.Status == MessManagement.Models.PaymentStatus.Approved || p.Status == MessManagement.Models.PaymentStatus.Rejected))
+                                {
+                                    <p class="text-xs text-gray-500 mt-1">by @p.ApprovedByUser.FullName</p>
+                                }
+                            </td>
+                            <td>
+                                <div class="flex items-center justify-center gap-2">
+                                    <a asp-action="Details" asp-route-id="@p.PaymentId" 
+                                       class="table-action table-action-view" title="View Details">
+                                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@p.PaymentId" 
+                                       class="table-action table-action-edit" title="Edit">
+                                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@p.PaymentId" 
+                                       class="table-action table-action-delete" title="Delete">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i data-lucide="inbox" class="w-16 h-16 text-gray-300"></i>
+                </div>
+                <h3 class="empty-state-title">No Payment Records</h3>
+                <p class="empty-state-description">No payments found for the selected filters.</p>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

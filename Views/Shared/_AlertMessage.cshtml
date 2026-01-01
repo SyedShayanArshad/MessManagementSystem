@@ -1,0 +1,40 @@
+@* Partial View: _AlertMessage.cshtml
+   Reusable alert/notification component
+*@
+@model MessManagement.Models.ViewModels.AlertViewModel
+
+<div class="alert alert-@Model.Type @(Model.Dismissible ? "alert-dismissible" : "")" 
+     role="alert" 
+     id="@Model.Id">
+    <div class="flex items-start gap-3">
+        @switch (Model.Type)
+        {
+            case "success":
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-600 shrink-0"></i>
+                break;
+            case "error":
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-600 shrink-0"></i>
+                break;
+            case "warning":
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 shrink-0"></i>
+                break;
+            case "info":
+            default:
+                <i data-lucide="info" class="w-5 h-5 text-blue-600 shrink-0"></i>
+                break;
+        }
+        <div class="flex-1">
+            @if (!string.IsNullOrEmpty(Model.Title))
+            {
+                <p class="font-semibold">@Model.Title</p>
+            }
+            <p class="@(!string.IsNullOrEmpty(Model.Title) ? "mt-1" : "")">@Model.Message</p>
+        </div>
+        @if (Model.Dismissible)
+        {
+            <button type="button" class="alert-close" onclick="this.closest('.alert').remove()">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        }
+    </div>
+</div>

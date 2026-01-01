@@ -1,0 +1,322 @@
+@model MessManagement.Models.Payment
+@{
+    ViewData["Title"] = "Submit Payment";
+    var remainingBalance = ViewBag.RemainingBalance as decimal?;
+    var currentUser = ViewBag.CurrentUser as MessManagement.Models.User;
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("MyPayments", "Payment")" class="breadcrumb-link">My Payments</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Submit Payment</span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon">
+            <i data-lucide="plus-circle" class="w-6 h-6"></i>
+        </span>
+        Submit Payment
+    </h1>
+    <p class="page-description">Submit a new payment for admin approval. Card payments are processed instantly.</p>
+</div>
+
+<div class="max-w-2xl">
+    <!-- User Info Card -->
+    @if (currentUser != null)
+    {
+        <div class="card mb-6">
+            <div class="card-body">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
+                        @(currentUser.FullName?.Substring(0, 1).ToUpper() ?? "?")
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900">@currentUser.FullName</h3>
+                        <p class="text-sm text-gray-500">Submitting payment as yourself</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Remaining Balance Card (if available) -->
+    @if (remainingBalance.HasValue)
+    {
+        <div class="card mb-6 @(remainingBalance.Value > 0 ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50")">
+            <div class="card-body">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center @(remainingBalance.Value > 0 ? "bg-amber-100" : "bg-emerald-100")">
+                        <i data-lucide="@(remainingBalance.Value > 0 ? "alert-circle" : "check-circle")" 
+                           class="w-6 h-6 @(remainingBalance.Value > 0 ? "text-amber-600" : "text-emerald-600")"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm @(remainingBalance.Value > 0 ? "text-amber-700" : "text-emerald-700")">
+                            Outstanding Balance
+                        </p>
+                        <p class="text-2xl font-bold @(remainingBalance.Value > 0 ? "text-amber-800" : "text-emerald-800")">
+                            Rs. @remainingBalance.Value.ToString("N0")
+                        </p>
+                    </div>
+                    @if (remainingBalance.Value > 0)
+                    {
+                        <button type="button" onclick="document.getElementById('Amount').value = '@remainingBalance.Value'" 
+                                class="btn btn-warning btn-sm">
+                            Pay Full Amount
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Verification Warning -->
+    @if (ViewBag.VerificationError == true)
+    {
+        var pendingMeals = (int)(ViewBag.PendingMeals ?? 0);
+        var pendingTea = (int)(ViewBag.PendingTea ?? 0);
+        <div class="alert alert-error mb-6" role="alert">
+            <i data-lucide="shield-alert" class="w-6 h-6 shrink-0"></i>
+            <div>
+                <p class="font-semibold">Verification Required Before Payment</p>
+                <p class="text-sm mt-1">
+                    @if (pendingMeals > 0)
+                    {
+                        <span>• @pendingMeals meal(s) pending verification</span><br />
+                    }
+                    @if (pendingTea > 0)
+                    {
+                        <span>• @pendingTea tea entry(s) pending verification</span><br />
+                    }
+                </p>
+                <div class="flex gap-2 mt-3">
+                    <a asp-controller="Attendance" asp-action="MyAttendance" class="btn btn-sm btn-secondary">
+                        <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                        Verify Meals
+                    </a>
+                    <a asp-controller="Tea" asp-action="MyTea" class="btn btn-sm btn-secondary">
+                        <i data-lucide="coffee" class="w-4 h-4"></i>
+                        Verify Tea
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="credit-card" class="w-5 h-5 text-blue-600"></i>
+                Payment Details
+            </h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" method="post" novalidate>
+                <!-- Validation Summary -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-error mb-6" role="alert">
+                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                        <div>
+                            <p class="font-medium">Please correct the following errors:</p>
+                            <div asp-validation-summary="All" class="text-sm mt-1"></div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Period Selection -->
+                <div class="form-group">
+                    <label asp-for="PeriodId" class="form-label">
+                        <i data-lucide="calendar-range" class="w-4 h-4 inline mr-1"></i>
+                        Period <span class="text-red-500">*</span>
+                    </label>
+                    <select asp-for="PeriodId" class="form-select" id="periodSelect"
+                            asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(ViewBag.Periods, "PeriodId", "PeriodName"))">
+                        <option value="">-- Select Period --</option>
+                    </select>
+                    <p class="form-hint">Select the billing period for this payment</p>
+                </div>
+
+                <!-- Remaining Balance Display -->
+                <div id="balanceInfo" class="hidden mb-4">
+                    <div class="p-4 rounded-xl border border-gray-200 bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-600">Outstanding Balance:</span>
+                            <span id="balanceAmount" class="font-bold text-lg"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Amount -->
+                <div class="form-group">
+                    <label asp-for="Amount" class="form-label">
+                        <i data-lucide="banknote" class="w-4 h-4 inline mr-1"></i>
+                        Amount (PKR) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 font-medium">Rs.</span>
+                        </div>
+                        <input asp-for="Amount" class="form-input pl-12" type="number" step="1" min="1" placeholder="0" />
+                    </div>
+                    <span asp-validation-for="Amount" class="form-error"></span>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="form-group">
+                    <label asp-for="PaymentMethod" class="form-label">
+                        <i data-lucide="wallet" class="w-4 h-4 inline mr-1"></i>
+                        Payment Method <span class="text-red-500">*</span>
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label class="payment-method-option">
+                            <input type="radio" name="PaymentMethod" value="Cash" checked class="hidden peer" onchange="toggleReferenceField()" />
+                            <div class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-gray-200 cursor-pointer transition-all hover:border-gray-300 hover:bg-gray-50 peer-checked:border-green-500 peer-checked:bg-green-50">
+                                <i data-lucide="banknote" class="w-6 h-6 text-green-600 mb-2"></i>
+                                <span class="font-medium text-gray-700">Cash</span>
+                                <span class="text-xs text-gray-500">Needs approval</span>
+                            </div>
+                        </label>
+                        <label class="payment-method-option">
+                            <input type="radio" name="PaymentMethod" value="Bank Transfer" class="hidden peer" onchange="toggleReferenceField()" />
+                            <div class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-gray-200 cursor-pointer transition-all hover:border-gray-300 hover:bg-gray-50 peer-checked:border-purple-500 peer-checked:bg-purple-50">
+                                <i data-lucide="building-2" class="w-6 h-6 text-purple-600 mb-2"></i>
+                                <span class="font-medium text-gray-700">Bank Transfer</span>
+                                <span class="text-xs text-gray-500">Needs approval</span>
+                            </div>
+                        </label>
+                        <label class="payment-method-option">
+                            <input type="radio" name="PaymentMethod" value="Stripe" class="hidden peer" id="paymentMethodStripe" onchange="toggleReferenceField()" />
+                            <div class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-gray-200 cursor-pointer transition-all hover:border-gray-300 hover:bg-gray-50 peer-checked:border-blue-500 peer-checked:bg-blue-50">
+                                <i data-lucide="credit-card" class="w-6 h-6 text-blue-600 mb-2"></i>
+                                <span class="font-medium text-gray-700">Card</span>
+                                <span class="text-xs text-emerald-600 font-medium">Instant ✓</span>
+                            </div>
+                        </label>
+                        <label class="payment-method-option">
+                            <input type="radio" name="PaymentMethod" value="Other" class="hidden peer" onchange="toggleReferenceField()" />
+                            <div class="flex flex-col items-center justify-center p-4 rounded-xl border-2 border-gray-200 cursor-pointer transition-all hover:border-gray-300 hover:bg-gray-50 peer-checked:border-gray-500 peer-checked:bg-gray-100">
+                                <i data-lucide="more-horizontal" class="w-6 h-6 text-gray-600 mb-2"></i>
+                                <span class="font-medium text-gray-700">Other</span>
+                                <span class="text-xs text-gray-500">Needs approval</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Reference Number (for Bank Transfer, etc.) -->
+                <div class="form-group" id="referenceField">
+                    <label asp-for="ReferenceNumber" class="form-label">
+                        <i data-lucide="hash" class="w-4 h-4 inline mr-1"></i>
+                        Reference / Transaction Number
+                    </label>
+                    <input asp-for="ReferenceNumber" class="form-input" placeholder="e.g., Bank transaction ID, receipt number" />
+                    <p class="form-hint">Provide transaction ID for bank transfers to speed up verification</p>
+                </div>
+
+                <!-- Remarks -->
+                <div class="form-group">
+                    <label asp-for="Remarks" class="form-label">
+                        <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>
+                        Remarks
+                    </label>
+                    <textarea asp-for="Remarks" class="form-input" rows="2" placeholder="Optional notes about this payment"></textarea>
+                    <p class="form-hint">Add any additional notes (optional)</p>
+                </div>
+
+                <!-- Approval Notice -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-600 shrink-0 mt-0.5"></i>
+                        <div class="text-sm text-blue-800">
+                            <p class="font-semibold">Payment Approval Process</p>
+                            <ul class="mt-1 space-y-1">
+                                <li>• <strong>Cash/Bank Transfer:</strong> Will be verified by admin before being applied to your balance</li>
+                                <li>• <strong>Card (Stripe):</strong> Processed instantly, no approval needed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                    <a asp-action="MyPayments" class="btn btn-secondary">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        Submit Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+        
+        // Show/hide reference field based on payment method
+        function toggleReferenceField() {
+            const stripeSelected = document.getElementById('paymentMethodStripe').checked;
+            const referenceField = document.getElementById('referenceField');
+            
+            if (stripeSelected) {
+                referenceField.style.display = 'none';
+            } else {
+                referenceField.style.display = 'block';
+            }
+        }
+        
+        // Initial state
+        toggleReferenceField();
+        
+        // Fetch remaining balance when period changes
+        const periodSelect = document.getElementById('periodSelect');
+        const balanceInfo = document.getElementById('balanceInfo');
+        const balanceAmount = document.getElementById('balanceAmount');
+        
+        async function updateBalance() {
+            const periodId = periodSelect?.value;
+            const userId = '@currentUser?.UserId';
+            
+            if (userId && periodId) {
+                try {
+                    const response = await fetch(`/Payment/GetRemainingBalance?userId=${userId}&periodId=${periodId}`);
+                    const data = await response.json();
+                    
+                    if (balanceInfo && balanceAmount) {
+                        balanceInfo.classList.remove('hidden');
+                        const balance = data.remainingBalance;
+                        balanceAmount.textContent = 'Rs. ' + balance.toLocaleString();
+                        balanceAmount.className = balance > 0 ? 'font-bold text-lg text-red-600' : 'font-bold text-lg text-emerald-600';
+                    }
+                } catch (error) {
+                    console.error('Error fetching balance:', error);
+                }
+            }
+        }
+        
+        if (periodSelect) periodSelect.addEventListener('change', updateBalance);
+        
+        // Initial load if values are pre-selected
+        if (periodSelect?.value) {
+            updateBalance();
+        }
+    </script>
+}

@@ -1,0 +1,45 @@
+@{
+    var isPresent = ViewData["IsPresent"] is bool b1 && b1;
+    var isVerified = ViewData["IsVerified"] is bool b2 && b2;
+    var dishPlan = ViewData["DishPlan"] as MessManagement.Models.DishPlan;
+    var attendanceId = ViewData["AttendanceId"] is int id ? id : 0;
+    var mealType = ViewData["MealType"] as string ?? "";
+    var verifyAction = ViewData["VerifyAction"] as string ?? "";
+}
+
+@if (isPresent)
+{
+    <div class="flex flex-col items-center gap-1">
+        <span class="badge badge-success text-xs">
+            <i data-lucide="check" class="w-3 h-3"></i>
+        </span>
+        @if (dishPlan != null)
+        {
+            <p class="text-xs text-gray-600">@dishPlan.DishName</p>
+        }
+        @if (isVerified)
+        {
+            <span class="badge badge-info text-xs mt-1">
+                <i data-lucide="shield-check" class="w-3 h-3"></i>
+                Verified
+            </span>
+        }
+        else
+        {
+            <form asp-action="@verifyAction" method="post" class="mt-1">
+                <input type="hidden" name="id" value="@attendanceId" />
+                <button type="submit" class="btn btn-xs btn-outline-success">
+                    <i data-lucide="check" class="w-3 h-3"></i>
+                    Verify
+                </button>
+            </form>
+        }
+    </div>
+}
+else
+{
+    <span class="badge badge-gray text-xs">
+        <i data-lucide="minus" class="w-3 h-3"></i>
+        Absent
+    </span>
+}

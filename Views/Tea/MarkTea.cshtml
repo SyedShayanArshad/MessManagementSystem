@@ -1,0 +1,271 @@
+@model MessManagement.Models.ViewModels.TeaMarkViewModel
+@{
+    ViewData["Title"] = "Mark Tea";
+    var teaPrice = (decimal)(ViewBag.TeaPricePerCup ?? 0);
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Tea")" class="breadcrumb-link">Tea Management</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Mark Tea</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon">
+                    <i data-lucide="coffee" class="w-6 h-6"></i>
+                </span>
+                Mark Tea - @Model.Date.ToString("dddd, MMM dd, yyyy")
+            </h1>
+            <p class="page-description">Record tea consumption for each member. Price: Rs. @teaPrice.ToString("N0")/cup</p>
+        </div>
+    </div>
+</div>
+
+<!-- Date Selector -->
+<div class="card mb-6">
+    <div class="card-body py-4">
+        <form method="get" class="flex flex-wrap items-center gap-4">
+            <label class="font-medium text-gray-700">
+                <i data-lucide="calendar" class="w-4 h-4 inline mr-1"></i>
+                Date:
+            </label>
+            <input type="date" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" 
+                   class="form-input w-auto" onchange="this.form.submit()" />
+            @if (Model.PeriodName != null)
+            {
+                <span class="badge badge-primary">@Model.PeriodName</span>
+            }
+        </form>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mb-6" role="alert">
+        <i data-lucide="check-circle" class="w-5 h-5 shrink-0"></i>
+        <span>@TempData["SuccessMessage"]</span>
+    </div>
+}
+
+<!-- Quick Actions -->
+<div class="flex flex-wrap gap-3 mb-6">
+    <form asp-action="SetFromAttendance" method="post" class="inline">
+        <input type="hidden" name="date" value="@Model.Date.ToString("yyyy-MM-dd")" />
+        <input type="hidden" name="periodId" value="@Model.PeriodId" />
+        <button type="submit" class="btn btn-secondary">
+            <i data-lucide="wand-2" class="w-4 h-4"></i>
+            Set 1 Cup for Present Members
+        </button>
+    </form>
+    <button type="button" onclick="setAllCups(0)" class="btn btn-secondary">
+        <i data-lucide="eraser" class="w-4 h-4"></i>
+        Clear All
+    </button>
+    <button type="button" onclick="setAllCups(1)" class="btn btn-secondary">
+        <i data-lucide="coffee" class="w-4 h-4"></i>
+        Set All to 1
+    </button>
+</div>
+
+<!-- Tea Entry Form -->
+<form asp-action="MarkTea" method="post">
+    <input type="hidden" asp-for="Date" />
+    <input type="hidden" asp-for="PeriodId" />
+    
+    <div class="card">
+        <div class="card-header">
+            <div class="flex items-center justify-between">
+                <h3 class="card-title">
+                    <i data-lucide="users" class="w-5 h-5 text-amber-600"></i>
+                    Members
+                </h3>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-600">
+                        Total: <span id="totalCups" class="font-bold text-amber-600">0</span> cups
+                        = Rs. <span id="totalCost" class="font-bold text-green-600">0</span>
+                    </span>
+                    <span class="badge badge-warning">@Model.Items.Count Members</span>
+                </div>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th class="text-center">Attendance</th>
+                        <th class="text-center" style="width: 150px;">Cups</th>
+                        <th style="width: 200px;">Remarks</th>
+                        <th class="text-center">Verified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Items.Count; i++)
+                    {
+                        var item = Model.Items[i];
+                        <tr>
+                            <td>
+                                <input type="hidden" name="Items[@i].UserId" value="@item.UserId" />
+                                <input type="hidden" name="Items[@i].TeaEntryId" value="@item.TeaEntryId" />
+                                <input type="hidden" name="Items[@i].FullName" value="@item.FullName" />
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <span class="text-sm font-semibold text-blue-700">
+                                            @item.FullName.Substring(0, 1).ToUpper()
+                                        </span>
+                                    </div>
+                                    <span class="font-medium">@item.FullName</span>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                @if (item.HasMealAttendance)
+                                {
+                                    <span class="badge badge-success">
+                                        <i data-lucide="check" class="w-3 h-3"></i>
+                                        Present
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-gray">
+                                        <i data-lucide="minus" class="w-3 h-3"></i>
+                                        Absent
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button type="button" onclick="changeCups(@i, -1)" 
+                                            class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors decrement-btn">
+                                        <i data-lucide="minus" class="w-4 h-4 pointer-events-none"></i>
+                                    </button>
+                                    <input type="number" name="Items[@i].Cups" id="cups_@i" value="@item.Cups" 
+                                           class="form-input w-16 text-center cups-input" min="0" max="100"
+                                           onchange="updateTotals()" />
+                                    <button type="button" onclick="changeCups(@i, 1)" 
+                                            class="w-8 h-8 rounded-lg bg-amber-100 hover:bg-amber-200 flex items-center justify-center transition-colors increment-btn">
+                                        <i data-lucide="plus" class="w-4 h-4 pointer-events-none"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" name="Items[@i].Remarks" value="@item.Remarks" 
+                                       class="form-input text-sm" placeholder="Optional note..." />
+                            </td>
+                            <td class="text-center">
+                                @if (item.VerifiedByUser)
+                                {
+                                    <span class="badge badge-success">
+                                        <i data-lucide="shield-check" class="w-3 h-3"></i>
+                                        Verified
+                                    </span>
+                                }
+                                else if (item.TeaEntryId.HasValue)
+                                {
+                                    <span class="badge badge-warning">
+                                        <i data-lucide="clock" class="w-3 h-3"></i>
+                                        Pending
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card-body border-t border-gray-100">
+            <div class="flex justify-between items-center">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Back
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    Save Tea Entries
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        const teaPrice = @teaPrice;
+        
+        function changeCups(index, delta) {
+            const input = document.getElementById('cups_' + index);
+            if (!input) {
+                console.error('Input not found for index:', index);
+                return;
+            }
+            let value = parseInt(input.value) || 0;
+            value = Math.max(0, Math.min(100, value + delta));
+            input.value = value;
+            updateTotals();
+        }
+        
+        function setAllCups(value) {
+            document.querySelectorAll('.cups-input').forEach(input => {
+                input.value = value;
+            });
+            updateTotals();
+        }
+        
+        function updateTotals() {
+            let total = 0;
+            document.querySelectorAll('.cups-input').forEach(input => {
+                total += parseInt(input.value) || 0;
+            });
+            document.getElementById('totalCups').textContent = total;
+            document.getElementById('totalCost').textContent = (total * teaPrice).toLocaleString();
+        }
+        
+        // Attach event listeners after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle increment buttons
+            document.querySelectorAll('.increment-btn').forEach((btn, idx) => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    changeCups(idx, 1);
+                });
+            });
+            
+            // Handle decrement buttons
+            document.querySelectorAll('.decrement-btn').forEach((btn, idx) => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    changeCups(idx, -1);
+                });
+            });
+            
+            // Initial calculation
+            updateTotals();
+        });
+        
+        // Also run initial calculation immediately for fallback
+        updateTotals();
+    </script>
+}

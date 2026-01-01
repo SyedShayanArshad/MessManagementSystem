@@ -1,0 +1,192 @@
+@model IEnumerable<MessManagement.Models.TeaRecord>
+@{
+    ViewData["Title"] = "Tea Records";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Tea Records</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon">
+                    <i data-lucide="coffee" class="w-6 h-6"></i>
+                </span>
+                Tea Records
+            </h1>
+            <p class="page-description">Track daily tea consumption. Record cups served for each day.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            Add Tea Record
+        </a>
+    </div>
+</div>
+
+<!-- Summary Stats -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mb-6" role="alert">
+        <i data-lucide="check-circle" class="w-5 h-5 shrink-0"></i>
+        <span>@TempData["SuccessMessage"]</span>
+    </div>
+}
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    @{
+        var totalRecords = Model.Count();
+        var totalCups = Model.Sum(t => t.TotalCupsServed);
+    }
+    <div class="stat-card">
+        <div class="stat-icon bg-amber-100">
+            <i data-lucide="calendar" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@totalRecords</div>
+            <div class="stat-label">Total Records</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-amber-100">
+            <i data-lucide="coffee" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@totalCups</div>
+            <div class="stat-label">Total Cups Served</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tea Records Table -->
+<div class="card">
+    <div class="card-header">
+        <div class="flex items-center justify-between">
+            <h3 class="card-title">
+                <i data-lucide="list" class="w-5 h-5 text-amber-600"></i>
+                Tea Serving History
+            </h3>
+            <span class="badge badge-warning">@totalRecords Records</span>
+        </div>
+    </div>
+    @if (Model.Any())
+    {
+        <div class="table-container">
+            <table class="data-table" role="grid" aria-label="Tea records list">
+                <thead>
+                    <tr>
+                        <th scope="col">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-4 h-4"></i>
+                                Date
+                            </span>
+                        </th>
+                        <th scope="col">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="calendar-range" class="w-4 h-4"></i>
+                                Period
+                            </span>
+                        </th>
+                        <th scope="col" class="text-center">
+                            <span class="flex items-center justify-center gap-2">
+                                <i data-lucide="coffee" class="w-4 h-4"></i>
+                                Cups Served
+                            </span>
+                        </th>
+                        <th scope="col">
+                            <span class="flex items-center gap-2">
+                                <i data-lucide="file-text" class="w-4 h-4"></i>
+                                Remarks
+                            </span>
+                        </th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var t in Model.OrderByDescending(x => x.Date))
+                    {
+                        <tr>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                                        <span class="text-sm font-semibold text-amber-700">@t.Date.Day</span>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900">@t.Date.ToString("dddd")</p>
+                                        <p class="text-sm text-gray-500">@t.Date.ToString("MMM dd, yyyy")</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="text-gray-600">@t.MessPeriod?.PeriodName</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-amber-100 text-amber-700 font-bold text-lg">
+                                    @t.TotalCupsServed
+                                </span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(t.Remarks))
+                                {
+                                    <span class="text-gray-600 text-sm">@t.Remarks</span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400">—</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="flex items-center justify-center gap-2">
+                                    <a asp-action="Edit" asp-route-id="@t.TeaRecordId" 
+                                       class="table-action table-action-edit"
+                                       aria-label="Edit tea record for @t.Date.ToShortDateString()">
+                                        <i data-lucide="pencil" class="w-3.5 h-3.5 mr-1"></i>
+                                        Edit
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@t.TeaRecordId" 
+                                       class="table-action table-action-delete"
+                                       aria-label="Delete tea record for @t.Date.ToShortDateString()">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1"></i>
+                                        Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i data-lucide="coffee" class="w-16 h-16 text-gray-300"></i>
+                </div>
+                <h3 class="empty-state-title">No Tea Records Yet</h3>
+                <p class="empty-state-description">Start tracking tea consumption by adding records.</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    Add First Record
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

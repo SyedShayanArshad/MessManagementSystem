@@ -1,0 +1,38 @@
+@* Partial View: _ValidationScripts.cshtml
+   Include this partial for client-side jQuery validation
+*@
+
+<!-- jQuery and jQuery Validation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+
+<script>
+    // Configure jQuery Validation defaults
+    $.validator.setDefaults({
+        errorClass: 'form-error-message',
+        validClass: 'form-valid',
+        errorElement: 'span',
+        highlight: function(element, errorClass, validClass) {
+            $(element).addClass('form-input-error').removeClass('form-input-valid');
+        },
+        unhighlight: function(element, errorClass, validClass) {
+            $(element).removeClass('form-input-error').addClass('form-input-valid');
+        },
+        errorPlacement: function(error, element) {
+            error.insertAfter(element);
+        }
+    });
+
+    // Custom validation methods
+    $.validator.addMethod("phoneFormat", function(value, element) {
+        if (!value) return true; // Optional field
+        return /^[\d\s\-\+\(\)]+$/.test(value);
+    }, "Please enter a valid phone number");
+
+    $.validator.addMethod("strongPassword", function(value, element) {
+        if (!value) return false;
+        // At least 6 characters
+        return value.length >= 6;
+    }, "Password must be at least 6 characters");
+</script>

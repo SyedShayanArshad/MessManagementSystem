@@ -1,0 +1,124 @@
+@model MessManagement.Models.DishPlan
+@{
+    ViewData["Title"] = "Edit Dish Plan";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "DishPlan")" class="breadcrumb-link">Dish Plans</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Edit</span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon">
+            <i data-lucide="utensils" class="w-6 h-6"></i>
+        </span>
+        Edit Dish Plan
+    </h1>
+    <p class="page-description">Update dish information and pricing.</p>
+</div>
+
+<div class="max-w-2xl">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i data-lucide="file-edit" class="w-5 h-5 text-blue-600"></i>
+                Dish Information
+            </h3>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" method="post" novalidate>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-error mb-6" role="alert">
+                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                        <div asp-validation-summary="All" class="text-sm"></div>
+                    </div>
+                }
+                <input type="hidden" asp-for="DishPlanId" />
+
+                <div class="form-group">
+                    <label asp-for="DayOfWeek" class="form-label">
+                        <i data-lucide="calendar-days" class="w-4 h-4 inline mr-1"></i>
+                        Day of Week <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="DayOfWeek" class="form-input" placeholder="e.g., Monday" />
+                    <span asp-validation-for="DayOfWeek" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MealType" class="form-label">
+                        <i data-lucide="coffee" class="w-4 h-4 inline mr-1"></i>
+                        Meal Type <span class="text-red-500">*</span>
+                    </label>
+                    <select asp-for="MealType" class="form-select">
+                        <option value="Breakfast" selected="@(Model.MealType == "Breakfast")">Breakfast</option>
+                        <option value="Lunch" selected="@(Model.MealType == "Lunch")">Lunch</option>
+                        <option value="Dinner" selected="@(Model.MealType == "Dinner")">Dinner</option>
+                    </select>
+                    <span asp-validation-for="MealType" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="DishName" class="form-label">
+                        <i data-lucide="utensils-crossed" class="w-4 h-4 inline mr-1"></i>
+                        Dish Name <span class="text-red-500">*</span>
+                    </label>
+                    <input asp-for="DishName" class="form-input" placeholder="e.g., Chicken Biryani" />
+                    <span asp-validation-for="DishName" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Price" class="form-label">
+                        <i data-lucide="banknote" class="w-4 h-4 inline mr-1"></i>
+                        Price (PKR) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rs.</span>
+                        <input asp-for="Price" class="form-input pl-12" placeholder="0" step="1" />
+                    </div>
+                    <span asp-validation-for="Price" class="form-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Notes" class="form-label">
+                        <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>
+                        Notes
+                    </label>
+                    <input asp-for="Notes" class="form-input" placeholder="Optional notes or description..." />
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

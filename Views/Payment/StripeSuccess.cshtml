@@ -1,0 +1,47 @@
+@{
+    ViewData["Title"] = "Payment Successful";
+}
+
+<div class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center max-w-lg">
+        <!-- Success Animation -->
+        <div class="w-24 h-24 rounded-full bg-linear-to-br from-emerald-400 to-emerald-500 flex items-center justify-center mx-auto mb-6 animate-bounce">
+            <i data-lucide="check" class="w-12 h-12 text-white"></i>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-3xl font-bold text-gray-900 mb-3">Payment Successful!</h1>
+
+        <!-- Message -->
+        <p class="text-gray-600 mb-8">
+            Thank you! Your payment has been processed successfully. 
+            A confirmation email will be sent to your registered email address.
+        </p>
+
+        <!-- Success Card -->
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-6 mb-8 inline-block">
+            <div class="flex items-center gap-3 text-emerald-700">
+                <i data-lucide="receipt" class="w-6 h-6"></i>
+                <span class="font-medium">Your transaction is complete</span>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-center gap-4">
+            <a asp-controller="Payment" asp-action="Index" class="btn btn-secondary">
+                <i data-lucide="receipt" class="w-4 h-4"></i>
+                View Payments
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+                <i data-lucide="home" class="w-4 h-4"></i>
+                Go to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

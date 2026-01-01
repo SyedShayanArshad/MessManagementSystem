@@ -1,0 +1,124 @@
+@model MessManagement.Models.DishPlan
+@{
+    ViewData["Title"] = "Dish Plan Details";
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "DishPlan")" class="breadcrumb-link">Dish Plans</a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Details</span>
+    </nav>
+    <h1 class="page-title">
+        <span class="page-title-icon">
+            <i data-lucide="utensils" class="w-6 h-6"></i>
+        </span>
+        Dish Plan Details
+    </h1>
+</div>
+
+<div class="max-w-2xl">
+    <div class="card">
+        <div class="card-body">
+            <!-- Dish Header -->
+            <div class="flex items-center gap-6 mb-8 pb-6 border-b border-gray-100">
+                <div class="w-20 h-20 rounded-2xl bg-linear-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                    <i data-lucide="utensils" class="w-10 h-10 text-white"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">@Model.DishName</h2>
+                    <p class="text-gray-500">@Model.DayOfWeek • @Model.MealType</p>
+                    <span class="text-2xl font-bold text-emerald-600 mt-2 block">Rs. @Model.Price.ToString("N0")</span>
+                </div>
+            </div>
+
+            <!-- Dish Details -->
+            <div class="grid gap-4">
+                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                        <i data-lucide="calendar-days" class="w-5 h-5 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Day of Week</p>
+                        <p class="font-medium text-gray-900">@Model.DayOfWeek</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                        <i data-lucide="coffee" class="w-5 h-5 text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Meal Type</p>
+                        <p class="font-medium text-gray-900">@Model.MealType</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                        <i data-lucide="utensils-crossed" class="w-5 h-5 text-amber-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Dish Name</p>
+                        <p class="font-medium text-gray-900">@Model.DishName</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                        <i data-lucide="banknote" class="w-5 h-5 text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Price (PKR)</p>
+                        <p class="font-semibold text-lg text-gray-900">Rs. @Model.Price.ToString("N0")</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                        <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+                            <i data-lucide="file-text" class="w-5 h-5 text-gray-600"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Notes</p>
+                            <p class="font-medium text-gray-900">@Model.Notes</p>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-6">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Back to List
+                </a>
+                <a asp-action="Edit" asp-route-id="@Model.DishPlanId" class="btn btn-primary">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                    Edit Dish
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+    </script>
+}

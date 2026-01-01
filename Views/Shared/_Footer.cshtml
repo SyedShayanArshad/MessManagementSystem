@@ -1,0 +1,80 @@
+<footer class="app-footer" role="contentinfo">
+    <div class="footer-content">
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Brand Section -->
+            <div>
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-600">
+                        <i data-lucide="utensils" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <div class="footer-logo">MessHub</div>
+                </div>
+                <p class="footer-description">
+                    A comprehensive mess management solution for educational institutions. 
+                    Track attendance, manage payments, and plan meals efficiently.
+                </p>
+            </div>
+
+            <!-- Quick Links -->
+            <div>
+                <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                <div class="footer-links flex-col space-y-2">
+                    <a href="@Url.Action("Index", "Home")" class="footer-link block">
+                        <i data-lucide="home" class="w-4 h-4 inline mr-2"></i>
+                        Dashboard
+                    </a>
+                    @if (User?.IsInRole("Admin") == true)
+                    {
+                        <a href="@Url.Action("Index", "Report")" class="footer-link block">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 inline mr-2"></i>
+                            Reports
+                        </a>
+                        <a href="@Url.Action("Index", "Users")" class="footer-link block">
+                            <i data-lucide="users" class="w-4 h-4 inline mr-2"></i>
+                            Members
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Support -->
+            <div>
+                <h4 class="text-white font-semibold mb-4">Support</h4>
+                <div class="footer-links flex-col space-y-2">
+                    <a href="#" class="footer-link block">
+                        <i data-lucide="help-circle" class="w-4 h-4 inline mr-2"></i>
+                        Help Center
+                    </a>
+                    <a href="#" class="footer-link block">
+                        <i data-lucide="mail" class="w-4 h-4 inline mr-2"></i>
+                        Contact Support
+                    </a>
+                    <a href="#" class="footer-link block">
+                        <i data-lucide="file-text" class="w-4 h-4 inline mr-2"></i>
+                        Documentation
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p class="footer-copyright">
+                &copy; @DateTime.Now.Year MessHub - Mess Management System. All rights reserved.
+            </p>
+            <div class="flex items-center gap-4 text-gray-500 text-sm">
+                <span class="flex items-center gap-1">
+                    <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    Secure
+                </span>
+                <span class="flex items-center gap-1">
+                    <i data-lucide="accessibility" class="w-4 h-4"></i>
+                    Accessible
+                </span>
+                <span class="flex items-center gap-1">
+                    <i data-lucide="heart" class="w-4 h-4 text-red-500"></i>
+                    Built with care
+                </span>
+            </div>
+        </div>
+    </div>
+</footer>

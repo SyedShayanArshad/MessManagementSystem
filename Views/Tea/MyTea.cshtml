@@ -1,0 +1,455 @@
+@model IEnumerable<MessManagement.Models.TeaEntry>
+@{
+    ViewData["Title"] = "My Tea";
+    var user = ViewBag.User as MessManagement.Models.User;
+    var teaPrice = (decimal)(ViewBag.TeaPricePerCup ?? 0);
+    var messPeriods = ViewBag.MessPeriods as List<MessManagement.Models.MessPeriod> ?? new List<MessManagement.Models.MessPeriod>();
+    var pendingEntries = Model.Where(t => !t.VerifiedByUser && t.Cups > 0).OrderByDescending(t => t.Date).ToList();
+    var pendingCount = pendingEntries.Count;
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">My Tea</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon bg-amber-100">
+                    <i data-lucide="coffee" class="w-6 h-6 text-amber-600"></i>
+                </span>
+                My Tea Records
+            </h1>
+            <p class="page-description">View and verify your tea consumption records. Price: Rs. @teaPrice.ToString("N0")/cup</p>
+        </div>
+        <div class="flex gap-2">
+            @if (pendingCount > 0)
+            {
+                <form asp-action="VerifyAll" method="post" class="inline">
+                    <button type="submit" class="btn btn-success">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        Verify All (@pendingCount)
+                    </button>
+                </form>
+            }
+            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mb-6" role="alert">
+        <i data-lucide="check-circle" class="w-5 h-5 shrink-0"></i>
+        <span>@TempData["SuccessMessage"]</span>
+    </div>
+}
+
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    @{
+        var totalCups = Model.Sum(t => t.Cups);
+        var totalCharge = Model.Sum(t => t.TeaCharge);
+        var verifiedCount = Model.Count(t => t.VerifiedByUser);
+        var totalEntries = Model.Count(t => t.Cups > 0);
+    }
+    <div class="stat-card">
+        <div class="stat-icon bg-amber-100">
+            <i data-lucide="coffee" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@totalCups</div>
+            <div class="stat-label">Total Cups</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-green-100">
+            <i data-lucide="banknote" class="w-6 h-6 text-green-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">Rs. @totalCharge.ToString("N0")</div>
+            <div class="stat-label">Total Charges</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-emerald-100">
+            <i data-lucide="check-circle" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@verifiedCount</div>
+            <div class="stat-label">Verified</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon @(pendingCount > 0 ? "bg-orange-100" : "bg-green-100")">
+            <i data-lucide="@(pendingCount > 0 ? "clock" : "shield-check")" class="w-6 h-6 @(pendingCount > 0 ? "text-orange-600" : "text-green-600")"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@pendingCount</div>
+            <div class="stat-label">Pending</div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- SECTION 1: Pending Verification Section -->
+<!-- ========================================== -->
+@if (pendingEntries.Any())
+{
+    <div class="card mb-6">
+        <div class="card-header bg-orange-50 border-b border-orange-200">
+            <div class="flex items-center justify-between">
+                <h3 class="card-title text-orange-800">
+                    <i data-lucide="clock" class="w-5 h-5 text-orange-600"></i>
+                    Pending Verification
+                </h3>
+                <span class="badge badge-warning">
+                    @pendingCount Entries • @pendingEntries.Sum(e => e.Cups) Cups
+                </span>
+            </div>
+        </div>
+        <div class="p-4 bg-orange-50/30">
+            <div class="alert alert-warning mb-4">
+                <i data-lucide="alert-triangle" class="w-5 h-5 shrink-0"></i>
+                <div>
+                    <p class="font-medium">You have @pendingCount tea entry(s) pending verification</p>
+                    <p class="text-sm mt-1">Please verify your tea consumption to finalize your records.</p>
+                </div>
+            </div>
+            
+            <!-- Calendar Grid for Pending -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                @foreach (var entry in pendingEntries)
+                {
+                    <div class="bg-white rounded-xl border-2 border-orange-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                        <!-- Date Header -->
+                        <div class="bg-orange-100 px-4 py-3 border-b border-orange-200">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-10 h-10 rounded-lg bg-orange-500 text-white flex items-center justify-center font-bold text-lg">
+                                        @entry.Date.Day
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900">@entry.Date.ToString("dddd")</p>
+                                        <p class="text-xs text-gray-500">@entry.Date.ToString("MMM yyyy")</p>
+                                    </div>
+                                </div>
+                                <span class="badge badge-warning text-xs">Pending</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Tea Details -->
+                        <div class="p-4">
+                            <div class="flex items-center justify-center mb-3">
+                                <div class="w-16 h-16 rounded-xl bg-amber-100 flex items-center justify-center">
+                                    <span class="text-3xl font-bold text-amber-700">@entry.Cups</span>
+                                </div>
+                            </div>
+                            <p class="text-center text-sm text-gray-600 mb-1">
+                                @(entry.Cups == 1 ? "Cup" : "Cups") of Tea
+                            </p>
+                            <p class="text-center text-lg font-semibold text-gray-900">
+                                Rs. @entry.TeaCharge.ToString("N0")
+                            </p>
+                            @if (!string.IsNullOrEmpty(entry.Remarks))
+                            {
+                                <p class="text-center text-xs text-gray-500 mt-2 italic">@entry.Remarks</p>
+                            }
+                        </div>
+                        
+                        <!-- Verify Button -->
+                        <div class="px-4 pb-4">
+                            <form asp-action="Verify" asp-route-id="@entry.TeaEntryId" method="post">
+                                <button type="submit" class="btn btn-success btn-sm w-full">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                    Verify Entry
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-6">
+        <div class="card-body bg-green-50">
+            <div class="flex items-center gap-3 text-green-700">
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                    <i data-lucide="shield-check" class="w-6 h-6 text-green-600"></i>
+                </div>
+                <div>
+                    <p class="font-semibold text-green-800">All Caught Up!</p>
+                    <p class="text-sm text-green-600">You have no pending tea entries to verify.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ========================================== -->
+<!-- SECTION 2: Tea History (Period-wise Calendar) -->
+<!-- ========================================== -->
+<div class="card">
+    <div class="card-header">
+        <div class="flex items-center justify-between">
+            <h3 class="card-title">
+                <i data-lucide="calendar-range" class="w-5 h-5 text-amber-600"></i>
+                Tea History
+            </h3>
+            <span class="badge badge-warning">
+                @totalCups Total Cups
+            </span>
+        </div>
+    </div>
+    
+    @if (Model.Any(m => m.Cups > 0))
+    {
+        <div class="card-body space-y-6">
+            @foreach (var period in messPeriods)
+            {
+                var periodEntries = Model
+                    .Where(t => t.Date >= period.StartDate && t.Date <= period.EndDate && t.Cups > 0)
+                    .OrderByDescending(t => t.Date)
+                    .ToList();
+                
+                if (!periodEntries.Any()) continue;
+                
+                var periodCups = periodEntries.Sum(t => t.Cups);
+                var periodCharge = periodEntries.Sum(t => t.TeaCharge);
+                var periodVerified = periodEntries.Count(t => t.VerifiedByUser);
+                var periodPending = periodEntries.Count(t => !t.VerifiedByUser);
+                
+                <div class="border rounded-xl overflow-hidden">
+                    <!-- Period Header -->
+                    <div class="px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 flex flex-wrap items-center justify-between gap-2 cursor-pointer period-toggle" data-period="tea-@period.PeriodId">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-amber-500 text-white flex items-center justify-center">
+                                <i data-lucide="coffee" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">@period.PeriodName</h4>
+                                <p class="text-sm text-gray-500">
+                                    @period.StartDate.ToString("MMM dd") - @period.EndDate.ToString("MMM dd, yyyy")
+                                    @if (period.IsActive)
+                                    {
+                                        <span class="badge badge-success ml-2">Active</span>
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex gap-2 text-sm">
+                                <span class="px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+                                    <i data-lucide="coffee" class="w-3 h-3 inline"></i> @periodCups cups
+                                </span>
+                                <span class="px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+                                    Rs. @periodCharge.ToString("N0")
+                                </span>
+                            </div>
+                            @if (periodPending > 0)
+                            {
+                                <span class="badge badge-warning">@periodPending Pending</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-success">All Verified</span>
+                            }
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 period-chevron transition-transform"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar Grid -->
+                    <div class="period-content p-4 bg-gray-50" id="period-tea-@period.PeriodId">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
+                            @foreach (var entry in periodEntries)
+                            {
+                                var isVerified = entry.VerifiedByUser;
+                                var cardBorder = isVerified ? "border-green-200" : "border-orange-200";
+                                var headerBg = isVerified ? "bg-green-100" : "bg-orange-100";
+                                var dateBg = isVerified ? "bg-green-500" : "bg-orange-500";
+                                
+                                <div class="bg-white rounded-lg border @cardBorder shadow-sm overflow-hidden hover:shadow-md transition-all">
+                                    <!-- Date Header -->
+                                    <div class="@headerBg px-3 py-2 text-center">
+                                        <div class="w-8 h-8 rounded-full @dateBg text-white flex items-center justify-center font-bold text-sm mx-auto">
+                                            @entry.Date.Day
+                                        </div>
+                                        <p class="text-xs text-gray-600 mt-1">@entry.Date.ToString("ddd")</p>
+                                    </div>
+                                    
+                                    <!-- Tea Info -->
+                                    <div class="p-3 text-center">
+                                        <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center mx-auto mb-1">
+                                            <span class="text-lg font-bold text-amber-700">@entry.Cups</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">@(entry.Cups == 1 ? "cup" : "cups")</p>
+                                        <p class="text-sm font-medium text-gray-700 mt-1">Rs. @entry.TeaCharge.ToString("N0")</p>
+                                    </div>
+                                    
+                                    <!-- Status -->
+                                    <div class="px-2 pb-2 text-center">
+                                        @if (isVerified)
+                                        {
+                                            <span class="text-xs text-green-600 font-medium">
+                                                <i data-lucide="check" class="w-3 h-3 inline"></i> Verified
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="Verify" asp-route-id="@entry.TeaEntryId" method="post" class="inline">
+                                                <button type="submit" class="text-xs text-orange-600 font-medium hover:text-orange-700">
+                                                    <i data-lucide="check" class="w-3 h-3 inline"></i> Verify
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+            
+            @* Show records without a matching period *@
+            @{
+                var orphanEntries = Model
+                    .Where(t => t.Cups > 0 && !messPeriods.Any(p => t.Date >= p.StartDate && t.Date <= p.EndDate))
+                    .OrderByDescending(t => t.Date)
+                    .ToList();
+            }
+            
+            @if (orphanEntries.Any())
+            {
+                <div class="border rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 bg-gray-100 flex items-center justify-between cursor-pointer period-toggle" data-period="tea-other">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-gray-400 text-white flex items-center justify-center">
+                                <i data-lucide="archive" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Other Records</h4>
+                                <p class="text-sm text-gray-500">Records not within any defined period</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="badge badge-secondary">@orphanEntries.Sum(e => e.Cups) cups</span>
+                            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 period-chevron transition-transform"></i>
+                        </div>
+                    </div>
+                    <div class="period-content p-4 bg-gray-50" id="period-tea-other">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
+                            @foreach (var entry in orphanEntries)
+                            {
+                                var isVerified = entry.VerifiedByUser;
+                                var cardBorder = isVerified ? "border-green-200" : "border-orange-200";
+                                var headerBg = isVerified ? "bg-green-100" : "bg-orange-100";
+                                var dateBg = isVerified ? "bg-green-500" : "bg-orange-500";
+                                
+                                <div class="bg-white rounded-lg border @cardBorder shadow-sm overflow-hidden">
+                                    <div class="@headerBg px-3 py-2 text-center">
+                                        <div class="w-8 h-8 rounded-full @dateBg text-white flex items-center justify-center font-bold text-sm mx-auto">
+                                            @entry.Date.Day
+                                        </div>
+                                        <p class="text-xs text-gray-600 mt-1">@entry.Date.ToString("ddd")</p>
+                                    </div>
+                                    <div class="p-3 text-center">
+                                        <div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center mx-auto mb-1">
+                                            <span class="text-lg font-bold text-amber-700">@entry.Cups</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500">@(entry.Cups == 1 ? "cup" : "cups")</p>
+                                        <p class="text-sm font-medium text-gray-700 mt-1">Rs. @entry.TeaCharge.ToString("N0")</p>
+                                    </div>
+                                    <div class="px-2 pb-2 text-center">
+                                        @if (isVerified)
+                                        {
+                                            <span class="text-xs text-green-600 font-medium">
+                                                <i data-lucide="check" class="w-3 h-3 inline"></i> Verified
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <form asp-action="Verify" asp-route-id="@entry.TeaEntryId" method="post" class="inline">
+                                                <button type="submit" class="text-xs text-orange-600 font-medium">
+                                                    <i data-lucide="check" class="w-3 h-3 inline"></i> Verify
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i data-lucide="coffee" class="w-16 h-16 text-gray-300"></i>
+                </div>
+                <h3 class="empty-state-title">No Tea Records Yet</h3>
+                <p class="empty-state-description">Your tea consumption will appear here once recorded by the admin.</p>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Legend -->
+<div class="mt-4 p-4 bg-gray-50 rounded-xl">
+    <p class="text-sm font-medium text-gray-700 mb-2">Legend:</p>
+    <div class="flex flex-wrap gap-4 text-xs">
+        <div class="flex items-center gap-1">
+            <div class="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-bold">✓</div>
+            <span>Verified Entry</span>
+        </div>
+        <div class="flex items-center gap-1">
+            <div class="w-5 h-5 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold">!</div>
+            <span>Pending Verification</span>
+        </div>
+        <div class="flex items-center gap-1">
+            <div class="w-5 h-5 rounded-lg bg-amber-100 flex items-center justify-center">
+                <span class="text-xs font-bold text-amber-700">2</span>
+            </div>
+            <span>Number of Cups</span>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        lucide.createIcons();
+        
+        // Toggle period sections
+        document.querySelectorAll('.period-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const periodId = this.dataset.period;
+                const content = document.getElementById('period-' + periodId);
+                const chevron = this.querySelector('.period-chevron');
+                
+                if (content) {
+                    content.classList.toggle('hidden');
+                    chevron.classList.toggle('rotate-180');
+                }
+            });
+        });
+    </script>
+}
