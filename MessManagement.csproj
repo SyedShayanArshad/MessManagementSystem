@@ -16,12 +16,9 @@
     <!-- Authentication and Identity APIs come from Microsoft.AspNetCore.App metapackage on .NET 8 -->
       <PackageReference Include="Stripe.net" Version="41.12.0" />
     </ItemGroup>
-    <!-- <Target Name="Tailwind" BeforeTargets="Build">
+    <Target Name="Tailwind" BeforeTargets="Build">
       <Exec Command="npm run css:build" />
-    </Target> -->
-<Target Name="Tailwind" BeforeTargets="Build" Condition="'$(ASPNETCORE_ENVIRONMENT)' == 'Development'">
-  <Exec Command="npm run css:build" />
-</Target>
+    </Target>
 
     <ItemGroup>
       <UpToDateCheckBuilt Include="wwwroot/css/site.css" />
