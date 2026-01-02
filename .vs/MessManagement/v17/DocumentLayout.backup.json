@@ -3,19 +3,8 @@
   "WorkspaceRootPath": "E:\\Mess\\MessManagement\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Shayan\\AppData\\Local\\Temp\\smkqqtgf..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCB3E2AA-4F80-4BFF-9E84-5AD1C2E0A96B}|MessManagement.csproj|e:\\mess\\messmanagement\\views\\dishplan\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{CCB3E2AA-4F80-4BFF-9E84-5AD1C2E0A96B}|MessManagement.csproj|solutionrelative:views\\dishplan\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{CCB3E2AA-4F80-4BFF-9E84-5AD1C2E0A96B}|MessManagement.csproj|e:\\mess\\messmanagement\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{CCB3E2AA-4F80-4BFF-9E84-5AD1C2E0A96B}|MessManagement.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{CCB3E2AA-4F80-4BFF-9E84-5AD1C2E0A96B}|MessManagement.csproj|e:\\mess\\messmanagement\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{CCB3E2AA-4F80-4BFF-9E84-5AD1C2E0A96B}|MessManagement.csproj|solutionrelative:wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{CCB3E2AA-4F80-4BFF-9E84-5AD1C2E0A96B}|MessManagement.csproj|e:\\mess\\messmanagement\\wwwroot\\css\\styles.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
@@ -84,12 +73,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{CCB3E2AA-4F80-4BFF-9E84-5AD1C2E0A96B}|MessManagement.csproj|e:\\mess\\messmanagement\\models\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CCB3E2AA-4F80-4BFF-9E84-5AD1C2E0A96B}|MessManagement.csproj|solutionrelative:models\\payment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Shayan\\AppData\\Local\\Temp\\smkqqtgf..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|CodeFrame"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Shayan\\AppData\\Local\\Temp\\smkqqtgf..sql||{CC5D8DF0-88F4-4BB2-9DBB-B48CEE65C30A}|ResultFrame"
     }
   ],
   "DocumentGroupContainers": [
@@ -120,53 +103,19 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "SQLQuery1.sql ",
-              "DocumentMoniker": "C:\\Users\\Shayan\\AppData\\Local\\Temp\\smkqqtgf..sql",
-              "ToolTip": "SQLQuery1.sql *",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2025-12-18T17:18:51.163Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Index.cshtml",
-              "DocumentMoniker": "E:\\Mess\\MessManagement\\Views\\DishPlan\\Index.cshtml",
-              "RelativeDocumentMoniker": "Views\\DishPlan\\Index.cshtml",
-              "ToolTip": "E:\\Mess\\MessManagement\\Views\\DishPlan\\Index.cshtml",
-              "RelativeToolTip": "Views\\DishPlan\\Index.cshtml",
-              "ViewState": "AgIAABMAAAAAAAAAAAAAwCwAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-03T13:24:09.073Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "site.css",
-              "DocumentMoniker": "E:\\Mess\\MessManagement\\wwwroot\\css\\site.css",
-              "RelativeDocumentMoniker": "wwwroot\\css\\site.css",
-              "ToolTip": "E:\\Mess\\MessManagement\\wwwroot\\css\\site.css",
-              "RelativeToolTip": "wwwroot\\css\\site.css",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2025-12-03T13:22:00.18Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
               "Title": "_Layout.cshtml",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
               "ToolTip": "E:\\Mess\\MessManagement\\Views\\Shared\\_Layout.cshtml",
               "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAA+AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-12-03T13:16:06.545Z"
+              "WhenOpened": "2025-12-03T13:16:06.545Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "styles.css",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\wwwroot\\css\\styles.css",
               "RelativeDocumentMoniker": "wwwroot\\css\\styles.css",
@@ -178,7 +127,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 3,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "Data\\ApplicationDbContext.cs",
@@ -190,19 +139,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 5,
               "Title": "Index.cshtml",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Views\\Users\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Users\\Index.cshtml",
               "ToolTip": "E:\\Mess\\MessManagement\\Views\\Users\\Index.cshtml",
               "RelativeToolTip": "Views\\Users\\Index.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-11-25T15:25:37.773Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 6,
               "Title": "Login.cshtml",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Views\\Account\\Login.cshtml",
               "RelativeDocumentMoniker": "Views\\Account\\Login.cshtml",
@@ -214,7 +163,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Program.cs",
               "RelativeDocumentMoniker": "Program.cs",
@@ -226,7 +175,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 11,
               "Title": "MessManagement.csproj",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\MessManagement.csproj",
               "RelativeDocumentMoniker": "MessManagement.csproj",
@@ -238,7 +187,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 4,
               "Title": "appsettings.json",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
@@ -250,19 +199,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 9,
               "Title": "UsersController.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Controllers\\UsersController.cs",
               "RelativeDocumentMoniker": "Controllers\\UsersController.cs",
               "ToolTip": "E:\\Mess\\MessManagement\\Controllers\\UsersController.cs",
               "RelativeToolTip": "Controllers\\UsersController.cs",
-              "ViewState": "AgIAAJAAAAAAAAAAAAAAAAgAAAAkAAAAAAAAAA==",
+              "ViewState": "AgIAAI0AAAAAAAAAAIBJwAgAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-25T15:29:23.012Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 10,
               "Title": "DbInitializer.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Data\\DbInitializer.cs",
               "RelativeDocumentMoniker": "Data\\DbInitializer.cs",
@@ -274,7 +223,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 7,
               "Title": "User.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Models\\User.cs",
               "RelativeDocumentMoniker": "Models\\User.cs",
@@ -286,7 +235,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 8,
               "Title": "Create.cshtml",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Views\\Users\\Create.cshtml",
               "RelativeDocumentMoniker": "Views\\Users\\Create.cshtml",
@@ -298,43 +247,43 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 13,
               "Title": "HomeController.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "Controllers\\HomeController.cs",
               "ToolTip": "E:\\Mess\\MessManagement\\Controllers\\HomeController.cs",
               "RelativeToolTip": "Controllers\\HomeController.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-24T16:07:40.967Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 15,
               "Title": "AttendanceController.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Controllers\\AttendanceController.cs",
               "RelativeDocumentMoniker": "Controllers\\AttendanceController.cs",
               "ToolTip": "E:\\Mess\\MessManagement\\Controllers\\AttendanceController.cs",
               "RelativeToolTip": "Controllers\\AttendanceController.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAzwAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAxwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-24T15:49:18.401Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 14,
               "Title": "AccountController.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
               "ToolTip": "E:\\Mess\\MessManagement\\Controllers\\AccountController.cs",
               "RelativeToolTip": "Controllers\\AccountController.cs",
-              "ViewState": "AgIAADUAAAAAAAAAAAArwBkAAAASAAAAAAAAAA==",
+              "ViewState": "AgIAADUAAAAAAAAAAAArwBkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-11-24T15:46:11.773Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 12,
               "Title": "ReportController.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Controllers\\ReportController.cs",
               "RelativeDocumentMoniker": "Controllers\\ReportController.cs",
@@ -346,7 +295,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 16,
               "Title": "Index.cshtml",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Views\\Report\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Report\\Index.cshtml",
@@ -358,7 +307,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 17,
               "Title": "Payment.cs",
               "DocumentMoniker": "E:\\Mess\\MessManagement\\Models\\Payment.cs",
               "RelativeDocumentMoniker": "Models\\Payment.cs",

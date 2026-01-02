@@ -72,11 +72,11 @@ StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"] ?? string
 var app = builder.Build();
 
 // Initialize DB with seed data BEFORE app.Run()
-// using (var scope = app.Services.CreateScope())
-// {
-//     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//     DbInitializer.Initialize(db);
-// }
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    DbInitializer.Initialize(db);
+}
 
 if (!app.Environment.IsDevelopment())
 {
