@@ -306,6 +306,33 @@ namespace MessManagement.Controllers
         }
 
         /// <summary>
+        /// Member: Decline a tea entry (they didn't have this tea)
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Decline(int id)
+        {
+            var username = User.Identity?.Name;
+            if (string.IsNullOrEmpty(username)) return Unauthorized();
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null) return NotFound();
+
+            var entry = await _context.TeaEntries.FirstOrDefaultAsync(t => t.TeaEntryId == id && t.UserId == user.UserId);
+            if (entry == null) return NotFound();
+
+            // Member declines - set cups to 0 to indicate they didn't have tea
+            entry.Cups = 0;
+            entry.VerifiedByUser = false;
+            entry.VerifiedOn = null;
+            entry.Remarks = (entry.Remarks ?? "") + " [Declined by member]";
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Tea entry for {entry.Date:MMM dd, yyyy} declined. Admin has been notified.";
+            return RedirectToAction(nameof(MyTea));
+        }
+
+        /// <summary>
         /// Admin: Delete a tea entry
         /// </summary>
         [Authorize(Roles = "Admin")]

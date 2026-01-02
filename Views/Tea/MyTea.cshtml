@@ -170,12 +170,18 @@
                             }
                         </div>
                         
-                        <!-- Verify Button -->
-                        <div class="px-4 pb-4">
-                            <form asp-action="Verify" asp-route-id="@entry.TeaEntryId" method="post">
-                                <button type="submit" class="btn btn-success btn-sm w-full">
-                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
-                                    Verify Entry
+                        <!-- Verify / Decline Buttons -->
+                        <div class="px-4 pb-4 flex gap-2">
+                            <form asp-action="Verify" asp-route-id="@entry.TeaEntryId" method="post" class="flex-1">
+                                <button type="submit" class="btn btn-success btn-sm w-full" title="Accept - I had this tea">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                    Accept
+                                </button>
+                            </form>
+                            <form asp-action="Decline" asp-route-id="@entry.TeaEntryId" method="post" class="flex-1">
+                                <button type="submit" class="btn btn-outline-danger btn-sm w-full" title="Decline - I didn't have this tea">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                    Decline
                                 </button>
                             </form>
                         </div>
