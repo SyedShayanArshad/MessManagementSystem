@@ -171,17 +171,13 @@
 
                             <!-- Actions -->
                             <div class="flex items-center gap-2 lg:ml-4">
-                                <form asp-action="Approve" method="post" class="inline">
-                                    <input type="hidden" name="id" value="@payment.PaymentId" />
-                                    <button type="submit" class="btn btn-success" 
-                                            onclick="return confirm('Approve this payment of Rs. @payment.Amount.ToString("N0") from @payment.User?.FullName?')">
-                                        <i data-lucide="check" class="w-4 h-4"></i>
-                                        Approve
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-success" 
+                                        onclick="showApproveModal(@payment.PaymentId, '@payment.User?.FullName', @payment.Amount)">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                    Approve
+                                </button>
                                 <button type="button" class="btn btn-error" 
-                                        onclick="showRejectModal(@payment.PaymentId, '@payment.User?.FullName', @payment.Amount)">
-                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                        onclick="showRejectModal(@payment.PaymentId, '@payment.User?.FullName', @payment.Amount)">\n                                    <i data-lucide="x" class="w-4 h-4"></i>
                                     Reject
                                 </button>
                                 <a asp-action="Details" asp-route-id="@payment.PaymentId" class="btn btn-secondary">
@@ -238,6 +234,39 @@
     </div>
 </div>
 
+<!-- Approve Modal -->
+<div id="approveModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" onclick="hideApproveModal(event)">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6" onclick="event.stopPropagation()">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Approve Payment</h3>
+                <p class="text-sm text-gray-500" id="approveModalSubtitle">Payment from User</p>
+            </div>
+        </div>
+        <form asp-action="Approve" method="post" id="approveForm">
+            <input type="hidden" name="id" id="approvePaymentId" />
+            <div class="mb-4">
+                <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <p class="text-sm text-green-800">
+                        <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
+                        Are you sure you want to approve this payment? This will credit the amount to the member's balance.
+                    </p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button type="button" class="btn btn-secondary" onclick="hideApproveModal()">Cancel</button>
+                <button type="submit" class="btn btn-success">
+                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    Approve Payment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         lucide.createIcons();
@@ -255,9 +284,25 @@
             document.getElementById('rejectModal').classList.remove('flex');
         }
 
+        function showApproveModal(paymentId, userName, amount) {
+            document.getElementById('approvePaymentId').value = paymentId;
+            document.getElementById('approveModalSubtitle').textContent = `Rs. ${amount.toLocaleString()} from ${userName}`;
+            document.getElementById('approveModal').classList.remove('hidden');
+            document.getElementById('approveModal').classList.add('flex');
+        }
+
+        function hideApproveModal(event) {
+            if (event && event.target !== document.getElementById('approveModal')) return;
+            document.getElementById('approveModal').classList.add('hidden');
+            document.getElementById('approveModal').classList.remove('flex');
+        }
+
         // Close on Escape key
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') hideRejectModal();
+            if (e.key === 'Escape') {
+                hideRejectModal();
+                hideApproveModal();
+            }
         });
     </script>
 }

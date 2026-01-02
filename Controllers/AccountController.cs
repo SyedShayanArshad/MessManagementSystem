@@ -40,23 +40,32 @@ namespace MessManagement.Controllers
             var username = model.Username?.Trim() ?? string.Empty;
             var password = model.Password ?? string.Empty;
 
-            // Case-insensitive search for the username and ensure user is active
+            // Case-insensitive search for the username
             var loweredUsername = username.ToLower();
-            var user = await _db.Users.FirstOrDefaultAsync(u => u.IsActive && u.Username.ToLower() == loweredUsername);
-            if (user == null)
+            
+            // First check if user exists at all (regardless of active status)
+            var userExists = await _db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == loweredUsername);
+            if (userExists == null)
             {
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                return View();
+                ModelState.AddModelError(string.Empty, "Username not found. Please check your username and try again.");
+                return View(model);
+            }
+            
+            // Check if user is active
+            if (!userExists.IsActive)
+            {
+                ModelState.AddModelError(string.Empty, "This account has been deactivated. Please contact the administrator.");
+                return View(model);
             }
 
-            var verification = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+            var verification = _passwordHasher.VerifyHashedPassword(userExists, userExists.PasswordHash, password);
             if (verification == PasswordVerificationResult.Success)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Role, user.Role)
+                    new Claim(ClaimTypes.NameIdentifier, userExists.UserId.ToString()),
+                    new Claim(ClaimTypes.Name, userExists.Username),
+                    new Claim(ClaimTypes.Role, userExists.Role)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -66,7 +75,7 @@ namespace MessManagement.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            ModelState.AddModelError(string.Empty, "Incorrect password. Please try again.");
             return View(model);
         }
 

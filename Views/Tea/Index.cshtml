@@ -454,18 +454,18 @@
                             </td>
                             <td class="bg-amber-50/50">
                                 <div class="flex items-center justify-center gap-2">
-                                    <button type="button" onclick="adjustCups(@i, -1)" 
-                                            class="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 flex items-center justify-center transition-colors">
-                                        <i data-lucide="minus" class="w-3 h-3"></i>
+                                    <button type="button" data-action="decrease" data-index="@i"
+                                            class="tea-adjust-btn w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 flex items-center justify-center transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>
                                     </button>
                                     <input asp-for="Items[i].Cups" 
                                            type="number" 
                                            min="0" max="10"
                                            class="form-input w-16 text-center text-lg font-bold cups-input"
                                            data-index="@i" />
-                                    <button type="button" onclick="adjustCups(@i, 1)" 
-                                            class="w-7 h-7 rounded-full bg-amber-200 hover:bg-amber-300 text-amber-700 flex items-center justify-center transition-colors">
-                                        <i data-lucide="plus" class="w-3 h-3"></i>
+                                    <button type="button" data-action="increase" data-index="@i"
+                                            class="tea-adjust-btn w-7 h-7 rounded-full bg-amber-200 hover:bg-amber-300 text-amber-700 flex items-center justify-center transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
                                     </button>
                                 </div>
                             </td>
@@ -681,7 +681,7 @@ else
             window.location.href = url.toString();
         }
         
-        // Adjust cups for a member
+        // Adjust cups for a member - using event delegation for +/- buttons
         function adjustCups(index, delta) {
             const input = document.querySelector(`input[name="Items[${index}].Cups"]`);
             if (input) {
@@ -736,6 +736,17 @@ else
             document.querySelectorAll('.cups-input').forEach(input => {
                 input.addEventListener('change', updateTotals);
                 input.addEventListener('input', updateTotals);
+            });
+            
+            // Add event delegation for +/- buttons
+            document.querySelectorAll('.tea-adjust-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const index = parseInt(this.dataset.index);
+                    const action = this.dataset.action;
+                    const delta = action === 'increase' ? 1 : -1;
+                    adjustCups(index, delta);
+                });
             });
             
             // Handle date change to load tea for new date

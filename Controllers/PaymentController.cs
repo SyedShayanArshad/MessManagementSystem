@@ -545,10 +545,10 @@ namespace MessManagement.Controllers
             // Handle Stripe payment - auto complete on success
             if (payment.PaymentMethod == "Stripe")
             {
-                // Stripe has a minimum amount requirement of 100 PKR
-                if (payment.Amount < 100)
+                // Stripe has a minimum amount requirement of 150 PKR
+                if (payment.Amount < 150)
                 {
-                    ModelState.AddModelError("Amount", "Minimum amount for card payments is Rs. 100. For smaller amounts, please use Cash or Bank Transfer.");
+                    ModelState.AddModelError("Amount", "Minimum amount for card payments is Rs. 150. For smaller amounts, please use Cash or Bank Transfer.");
                     ViewBag.Periods = await _context.MessPeriods.OrderByDescending(p => p.StartDate).ToListAsync();
                     ViewBag.CurrentUser = currentUser;
                     return View(payment);

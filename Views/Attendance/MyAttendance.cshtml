@@ -173,14 +173,20 @@
                                 {
                                     @if (a.BreakfastVerified)
                                     {
-                                        <span class="badge badge-success text-xs"><i data-lucide="check" class="w-3 h-3"></i></span>
+                                        <span class="badge badge-success text-xs"><i data-lucide="check" class="w-3 h-3"></i> Verified</span>
                                     }
                                     else
                                     {
-                                        <form asp-action="VerifyBreakfast" method="post" class="inline">
-                                            <input type="hidden" name="id" value="@a.AttendanceId" />
-                                            <button type="submit" class="btn btn-xs btn-success">Verify</button>
-                                        </form>
+                                        <div class="flex gap-1">
+                                            <form asp-action="VerifyBreakfast" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@a.AttendanceId" />
+                                                <button type="submit" class="btn btn-xs btn-success" title="Accept this attendance">✓</button>
+                                            </form>
+                                            <form asp-action="DeclineBreakfast" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@a.AttendanceId" />
+                                                <button type="submit" class="btn btn-xs btn-error" title="I was not present for this meal">✕</button>
+                                            </form>
+                                        </div>
                                     }
                                 }
                                 else
@@ -199,14 +205,20 @@
                                 {
                                     @if (a.LunchVerified)
                                     {
-                                        <span class="badge badge-success text-xs"><i data-lucide="check" class="w-3 h-3"></i></span>
+                                        <span class="badge badge-success text-xs"><i data-lucide="check" class="w-3 h-3"></i> Verified</span>
                                     }
                                     else
                                     {
-                                        <form asp-action="VerifyLunch" method="post" class="inline">
-                                            <input type="hidden" name="id" value="@a.AttendanceId" />
-                                            <button type="submit" class="btn btn-xs btn-success">Verify</button>
-                                        </form>
+                                        <div class="flex gap-1">
+                                            <form asp-action="VerifyLunch" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@a.AttendanceId" />
+                                                <button type="submit" class="btn btn-xs btn-success" title="Accept this attendance">✓</button>
+                                            </form>
+                                            <form asp-action="DeclineLunch" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@a.AttendanceId" />
+                                                <button type="submit" class="btn btn-xs btn-error" title="I was not present for this meal">✕</button>
+                                            </form>
+                                        </div>
                                     }
                                 }
                                 else
@@ -225,14 +237,20 @@
                                 {
                                     @if (a.DinnerVerified)
                                     {
-                                        <span class="badge badge-success text-xs"><i data-lucide="check" class="w-3 h-3"></i></span>
+                                        <span class="badge badge-success text-xs"><i data-lucide="check" class="w-3 h-3"></i> Verified</span>
                                     }
                                     else
                                     {
-                                        <form asp-action="VerifyDinner" method="post" class="inline">
-                                            <input type="hidden" name="id" value="@a.AttendanceId" />
-                                            <button type="submit" class="btn btn-xs btn-success">Verify</button>
-                                        </form>
+                                        <div class="flex gap-1">
+                                            <form asp-action="VerifyDinner" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@a.AttendanceId" />
+                                                <button type="submit" class="btn btn-xs btn-success" title="Accept this attendance">✓</button>
+                                            </form>
+                                            <form asp-action="DeclineDinner" method="post" class="inline">
+                                                <input type="hidden" name="id" value="@a.AttendanceId" />
+                                                <button type="submit" class="btn btn-xs btn-error" title="I was not present for this meal">✕</button>
+                                            </form>
+                                        </div>
                                     }
                                 }
                                 else

@@ -307,18 +307,54 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex gap-1 mt-2 ml-10">
+                            <div class="flex flex-wrap gap-1 mt-2 ml-10">
                                 @if (pending.IsBreakfastPresent && !pending.BreakfastVerified)
                                 {
-                                    <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs">Breakfast</span>
+                                    <div class="flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs">Breakfast</span>
+                                        <form asp-action="AdminResendVerification" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@pending.AttendanceId" />
+                                            <input type="hidden" name="mealType" value="Breakfast" />
+                                            <button type="submit" class="text-xs text-blue-600 hover:underline" title="Resend verification request">↻</button>
+                                        </form>
+                                        <form asp-action="AdminCancelMeal" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@pending.AttendanceId" />
+                                            <input type="hidden" name="mealType" value="Breakfast" />
+                                            <button type="submit" class="text-xs text-red-600 hover:underline" title="Cancel this meal">✕</button>
+                                        </form>
+                                    </div>
                                 }
                                 @if (pending.IsLunchPresent && !pending.LunchVerified)
                                 {
-                                    <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">Lunch</span>
+                                    <div class="flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-xs">Lunch</span>
+                                        <form asp-action="AdminResendVerification" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@pending.AttendanceId" />
+                                            <input type="hidden" name="mealType" value="Lunch" />
+                                            <button type="submit" class="text-xs text-blue-600 hover:underline" title="Resend verification request">↻</button>
+                                        </form>
+                                        <form asp-action="AdminCancelMeal" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@pending.AttendanceId" />
+                                            <input type="hidden" name="mealType" value="Lunch" />
+                                            <button type="submit" class="text-xs text-red-600 hover:underline" title="Cancel this meal">✕</button>
+                                        </form>
+                                    </div>
                                 }
                                 @if (pending.IsDinnerPresent && !pending.DinnerVerified)
                                 {
-                                    <span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs">Dinner</span>
+                                    <div class="flex items-center gap-1">
+                                        <span class="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs">Dinner</span>
+                                        <form asp-action="AdminResendVerification" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@pending.AttendanceId" />
+                                            <input type="hidden" name="mealType" value="Dinner" />
+                                            <button type="submit" class="text-xs text-blue-600 hover:underline" title="Resend verification request">↻</button>
+                                        </form>
+                                        <form asp-action="AdminCancelMeal" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@pending.AttendanceId" />
+                                            <input type="hidden" name="mealType" value="Dinner" />
+                                            <button type="submit" class="text-xs text-red-600 hover:underline" title="Cancel this meal">✕</button>
+                                        </form>
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -497,12 +533,13 @@
                             <!-- Breakfast Column -->
                             <td class="bg-amber-50/50">
                                 <div class="flex flex-col gap-2">
-                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                    <label class="relative inline-flex items-center gap-2 cursor-pointer">
                                         <input asp-for="Items[i].IsBreakfastPresent" 
                                                type="checkbox" 
-                                               class="form-checkbox meal-checkbox"
+                                               class="sr-only peer meal-checkbox"
                                                data-meal="breakfast"
                                                data-index="@i" />
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
                                         <span class="text-xs text-gray-600">Present</span>
                                         @if (item.BreakfastVerified)
                                         {
@@ -521,12 +558,13 @@
                             <!-- Lunch Column -->
                             <td class="bg-blue-50/50">
                                 <div class="flex flex-col gap-2">
-                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                    <label class="relative inline-flex items-center gap-2 cursor-pointer">
                                         <input asp-for="Items[i].IsLunchPresent" 
                                                type="checkbox" 
-                                               class="form-checkbox meal-checkbox"
+                                               class="sr-only peer meal-checkbox"
                                                data-meal="lunch"
                                                data-index="@i" />
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                                         <span class="text-xs text-gray-600">Present</span>
                                         @if (item.LunchVerified)
                                         {
@@ -545,12 +583,13 @@
                             <!-- Dinner Column -->
                             <td class="bg-purple-50/50">
                                 <div class="flex flex-col gap-2">
-                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                    <label class="relative inline-flex items-center gap-2 cursor-pointer">
                                         <input asp-for="Items[i].IsDinnerPresent" 
                                                type="checkbox" 
-                                               class="form-checkbox meal-checkbox"
+                                               class="sr-only peer meal-checkbox"
                                                data-meal="dinner"
                                                data-index="@i" />
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
                                         <span class="text-xs text-gray-600">Present</span>
                                         @if (item.DinnerVerified)
                                         {

@@ -118,12 +118,22 @@ namespace MessManagement.Controllers
             
             var vm = new MessManagement.Models.ViewModels.AttendanceMarkViewModel { Date = modelDate };
             
+            // Get default dish plans for auto-selection (first available dish of each type for today)
+            var defaultBreakfastDish = dishPlans.FirstOrDefault(d => d.MealType == "Breakfast");
+            var defaultLunchDish = dishPlans.FirstOrDefault(d => d.MealType == "Lunch");
+            var defaultDinnerDish = dishPlans.FirstOrDefault(d => d.MealType == "Dinner");
+            
             foreach (var user in users)
             {
                 var att = existing.FirstOrDefault(e => e.UserId == user.UserId);
                 
                 // Calculate charges based on selected dishes
                 decimal breakfastCharge = 0, lunchCharge = 0, dinnerCharge = 0;
+                
+                // Determine dish plan IDs - use existing if available, otherwise use default for the day
+                int? breakfastDishId = att?.BreakfastDishPlanId ?? defaultBreakfastDish?.DishPlanId;
+                int? lunchDishId = att?.LunchDishPlanId ?? defaultLunchDish?.DishPlanId;
+                int? dinnerDishId = att?.DinnerDishPlanId ?? defaultDinnerDish?.DishPlanId;
                 
                 if (att != null)
                 {
@@ -151,9 +161,9 @@ namespace MessManagement.Controllers
                     IsBreakfastPresent = att?.IsBreakfastPresent ?? true,
                     IsLunchPresent = att?.IsLunchPresent ?? true,
                     IsDinnerPresent = att?.IsDinnerPresent ?? true,
-                    BreakfastDishPlanId = att?.BreakfastDishPlanId,
-                    LunchDishPlanId = att?.LunchDishPlanId,
-                    DinnerDishPlanId = att?.DinnerDishPlanId,
+                    BreakfastDishPlanId = breakfastDishId,
+                    LunchDishPlanId = lunchDishId,
+                    DinnerDishPlanId = dinnerDishId,
                     BreakfastCharge = breakfastCharge,
                     LunchCharge = lunchCharge,
                     DinnerCharge = dinnerCharge,
@@ -304,7 +314,11 @@ namespace MessManagement.Controllers
                         BreakfastDishPlanId = mealType == "Breakfast" && item.IsBreakfastPresent ? item.BreakfastDishPlanId : null,
                         LunchDishPlanId = mealType == "Lunch" && item.IsLunchPresent ? item.LunchDishPlanId : null,
                         DinnerDishPlanId = mealType == "Dinner" && item.IsDinnerPresent ? item.DinnerDishPlanId : null,
-                        IsPresent = true
+                        IsPresent = true,
+                        // Reset verification only for the specific meal type being saved
+                        BreakfastVerified = mealType != "Breakfast",
+                        LunchVerified = mealType != "Lunch",
+                        DinnerVerified = mealType != "Dinner"
                     };
                     _context.Attendances.Add(attendance);
                 }
@@ -315,18 +329,30 @@ namespace MessManagement.Controllers
                     {
                         attendance.IsBreakfastPresent = item.IsBreakfastPresent;
                         attendance.BreakfastDishPlanId = item.IsBreakfastPresent ? item.BreakfastDishPlanId : null;
+                        // Reset only breakfast verification (Issue 3 fix)
+                        attendance.BreakfastVerified = false;
+                        attendance.BreakfastVerifiedOn = null;
                     }
                     else if (mealType == "Lunch")
                     {
                         attendance.IsLunchPresent = item.IsLunchPresent;
                         attendance.LunchDishPlanId = item.IsLunchPresent ? item.LunchDishPlanId : null;
+                        // Reset only lunch verification (Issue 3 fix)
+                        attendance.LunchVerified = false;
+                        attendance.LunchVerifiedOn = null;
                     }
                     else if (mealType == "Dinner")
                     {
                         attendance.IsDinnerPresent = item.IsDinnerPresent;
                         attendance.DinnerDishPlanId = item.IsDinnerPresent ? item.DinnerDishPlanId : null;
+                        // Reset only dinner verification (Issue 3 fix)
+                        attendance.DinnerVerified = false;
+                        attendance.DinnerVerifiedOn = null;
                     }
                     attendance.IsPresent = attendance.IsBreakfastPresent || attendance.IsLunchPresent || attendance.IsDinnerPresent;
+                    // Reset legacy verification flag since at least one meal needs verification
+                    attendance.VerifiedByUser = false;
+                    attendance.VerifiedOn = null;
                     _context.Attendances.Update(attendance);
                 }
 
@@ -499,6 +525,81 @@ namespace MessManagement.Controllers
             return RedirectToAction(nameof(MyAttendance));
         }
 
+        // ============================================
+        // MEMBER DECLINE ACTIONS: Member can decline attendance they were not present for
+        // ============================================
+
+        // POST: Attendance/DeclineBreakfast - Member declines breakfast (they weren't there)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeclineBreakfast(int id)
+        {
+            var attendance = await _context.Attendances.FindAsync(id);
+            if (attendance == null) return NotFound();
+            
+            // Verify the attendance belongs to the current user
+            var username = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null || attendance.UserId != user.UserId) return Unauthorized();
+            
+            // Mark as declined (not present) - admin will be notified
+            attendance.IsBreakfastPresent = false;
+            attendance.BreakfastDishPlanId = null;
+            attendance.BreakfastVerified = false;
+            attendance.BreakfastVerifiedOn = null;
+            attendance.IsPresent = attendance.IsBreakfastPresent || attendance.IsLunchPresent || attendance.IsDinnerPresent;
+            
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"Breakfast for {attendance.Date:MMM dd} declined. Admin has been notified.";
+            return RedirectToAction(nameof(MyAttendance));
+        }
+
+        // POST: Attendance/DeclineLunch - Member declines lunch
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeclineLunch(int id)
+        {
+            var attendance = await _context.Attendances.FindAsync(id);
+            if (attendance == null) return NotFound();
+            
+            var username = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null || attendance.UserId != user.UserId) return Unauthorized();
+            
+            attendance.IsLunchPresent = false;
+            attendance.LunchDishPlanId = null;
+            attendance.LunchVerified = false;
+            attendance.LunchVerifiedOn = null;
+            attendance.IsPresent = attendance.IsBreakfastPresent || attendance.IsLunchPresent || attendance.IsDinnerPresent;
+            
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"Lunch for {attendance.Date:MMM dd} declined. Admin has been notified.";
+            return RedirectToAction(nameof(MyAttendance));
+        }
+
+        // POST: Attendance/DeclineDinner - Member declines dinner
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeclineDinner(int id)
+        {
+            var attendance = await _context.Attendances.FindAsync(id);
+            if (attendance == null) return NotFound();
+            
+            var username = User.Identity?.Name;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            if (user == null || attendance.UserId != user.UserId) return Unauthorized();
+            
+            attendance.IsDinnerPresent = false;
+            attendance.DinnerDishPlanId = null;
+            attendance.DinnerVerified = false;
+            attendance.DinnerVerifiedOn = null;
+            attendance.IsPresent = attendance.IsBreakfastPresent || attendance.IsLunchPresent || attendance.IsDinnerPresent;
+            
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"Dinner for {attendance.Date:MMM dd} declined. Admin has been notified.";
+            return RedirectToAction(nameof(MyAttendance));
+        }
+
         // POST: Attendance/VerifyAllMeals - Verify all pending meals for all days
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -550,6 +651,88 @@ namespace MessManagement.Controllers
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = $"{verifiedCount} meals verified successfully!";
             return RedirectToAction(nameof(MyAttendance));
+        }
+
+        // ============================================
+        // ADMIN ACTIONS: Resend verification or cancel attendance
+        // ============================================
+
+        // POST: Attendance/AdminResendVerification - Admin can resend verification request for a specific meal
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminResendVerification(int id, string mealType)
+        {
+            var attendance = await _context.Attendances.FindAsync(id);
+            if (attendance == null) return NotFound();
+            
+            // Reset the verification status for the specific meal type so member can verify again
+            switch (mealType.ToLower())
+            {
+                case "breakfast":
+                    attendance.BreakfastVerified = false;
+                    attendance.BreakfastVerifiedOn = null;
+                    break;
+                case "lunch":
+                    attendance.LunchVerified = false;
+                    attendance.LunchVerifiedOn = null;
+                    break;
+                case "dinner":
+                    attendance.DinnerVerified = false;
+                    attendance.DinnerVerifiedOn = null;
+                    break;
+                default:
+                    return BadRequest("Invalid meal type");
+            }
+            
+            attendance.VerifiedByUser = false;
+            attendance.VerifiedOn = null;
+            
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"{mealType} verification request re-sent for {attendance.Date:MMM dd}!";
+            return RedirectToAction(nameof(Index), new { date = attendance.Date.ToString("yyyy-MM-dd") });
+        }
+
+        // POST: Attendance/AdminCancelMeal - Admin can cancel a specific meal attendance that member declined
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminCancelMeal(int id, string mealType)
+        {
+            var attendance = await _context.Attendances.FindAsync(id);
+            if (attendance == null) return NotFound();
+            
+            // Remove the meal attendance entirely
+            switch (mealType.ToLower())
+            {
+                case "breakfast":
+                    attendance.IsBreakfastPresent = false;
+                    attendance.BreakfastDishPlanId = null;
+                    attendance.BreakfastVerified = false;
+                    attendance.BreakfastVerifiedOn = null;
+                    break;
+                case "lunch":
+                    attendance.IsLunchPresent = false;
+                    attendance.LunchDishPlanId = null;
+                    attendance.LunchVerified = false;
+                    attendance.LunchVerifiedOn = null;
+                    break;
+                case "dinner":
+                    attendance.IsDinnerPresent = false;
+                    attendance.DinnerDishPlanId = null;
+                    attendance.DinnerVerified = false;
+                    attendance.DinnerVerifiedOn = null;
+                    break;
+                default:
+                    return BadRequest("Invalid meal type");
+            }
+            
+            // Update legacy IsPresent field
+            attendance.IsPresent = attendance.IsBreakfastPresent || attendance.IsLunchPresent || attendance.IsDinnerPresent;
+            
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"{mealType} cancelled for {attendance.Date:MMM dd}!";
+            return RedirectToAction(nameof(Index), new { date = attendance.Date.ToString("yyyy-MM-dd") });
         }
 
         // Legacy methods for backward compatibility

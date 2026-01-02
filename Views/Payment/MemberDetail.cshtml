@@ -319,6 +319,10 @@
             </div>
 
             <!-- Payment History -->
+            @{
+                // Issue 6: Filter out Auto payments (auto-generated attendance charges) from payment history
+                var actualPayments = Model.PaymentHistory.Where(p => p.PaymentMethod != "Auto").ToList();
+            }
             <div class="card">
                 <div class="card-header bg-gradient-to-r from-emerald-50 to-green-50 border-b border-emerald-200">
                     <div class="flex items-center justify-between">
@@ -326,14 +330,14 @@
                             <i data-lucide="history" class="w-5 h-5 text-emerald-600"></i>
                             Payment History
                         </h3>
-                        <span class="badge bg-emerald-100 text-emerald-700">@Model.PaymentHistory.Count</span>
+                        <span class="badge bg-emerald-100 text-emerald-700">@actualPayments.Count</span>
                     </div>
                 </div>
                 <div class="card-body p-0">
-                    @if (Model.PaymentHistory.Any())
+                    @if (actualPayments.Any())
                     {
                         <div class="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
-                            @foreach (var payment in Model.PaymentHistory)
+                            @foreach (var payment in actualPayments)
                             {
                                 var methodIcon = payment.PaymentMethod switch
                                 {
