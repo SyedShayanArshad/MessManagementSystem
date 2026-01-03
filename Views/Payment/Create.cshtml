@@ -34,56 +34,10 @@
     <p class="page-description">Submit a new payment for admin approval. Card payments are processed instantly.</p>
 </div>
 
-<div class="max-w-2xl">
-    <!-- User Info Card -->
-    @if (currentUser != null)
-    {
-        <div class="card mb-6">
-            <div class="card-body">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-full bg-linear-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xl">
-                        @(currentUser.FullName?.Substring(0, 1).ToUpper() ?? "?")
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-900">@currentUser.FullName</h3>
-                        <p class="text-sm text-gray-500">Submitting payment as yourself</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
+<!-- Centered Main Content -->
+<div class="max-w-4xl mx-auto"> <!-- Increased width for better side-by-side layout -->
 
-    <!-- Remaining Balance Card (if available) -->
-    @if (remainingBalance.HasValue)
-    {
-        <div class="card mb-6 @(remainingBalance.Value > 0 ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50")">
-            <div class="card-body">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl flex items-center justify-center @(remainingBalance.Value > 0 ? "bg-amber-100" : "bg-emerald-100")">
-                        <i data-lucide="@(remainingBalance.Value > 0 ? "alert-circle" : "check-circle")" 
-                           class="w-6 h-6 @(remainingBalance.Value > 0 ? "text-amber-600" : "text-emerald-600")"></i>
-                    </div>
-                    <div class="flex-1">
-                        <p class="text-sm @(remainingBalance.Value > 0 ? "text-amber-700" : "text-emerald-700")">
-                            Outstanding Balance
-                        </p>
-                        <p class="text-2xl font-bold @(remainingBalance.Value > 0 ? "text-amber-800" : "text-emerald-800")">
-                            Rs. @remainingBalance.Value.ToString("N0")
-                        </p>
-                    </div>
-                    @if (remainingBalance.Value > 0)
-                    {
-                        <button type="button" onclick="document.getElementById('Amount').value = '@remainingBalance.Value'" 
-                                class="btn btn-warning btn-sm">
-                            Pay Full Amount
-                        </button>
-                    }
-                </div>
-            </div>
-        </div>
-    }
-
-    <!-- Verification Warning -->
+    <!-- Verification Warning (if any) -->
     @if (ViewBag.VerificationError == true)
     {
         var pendingMeals = (int)(ViewBag.PendingMeals ?? 0);
@@ -116,6 +70,60 @@
         </div>
     }
 
+    <!-- First Row: User Info + Remaining Balance -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- User Info Card -->
+        @if (currentUser != null)
+        {
+            <div class="card">
+                <div class="card-body">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white font-bold text-xl">
+                            @(currentUser.FullName?.Substring(0, 1).ToUpper() ?? "?")
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">@currentUser.FullName</h3>
+                            <p class="text-sm text-gray-500">Submitting payment as yourself</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Remaining Balance Card -->
+        @if (remainingBalance.HasValue)
+        {
+            <div class="card @(remainingBalance.Value > 0 ? "border-amber-200 bg-amber-50" : "border-emerald-200 bg-emerald-50")">
+                <div class="card-body">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center @(remainingBalance.Value > 0 ? "bg-amber-100" : "bg-emerald-100")">
+                                <i data-lucide="@(remainingBalance.Value > 0 ? "alert-circle" : "check-circle")"
+                                   class="w-6 h-6 @(remainingBalance.Value > 0 ? "text-amber-600" : "text-emerald-600")"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm @(remainingBalance.Value > 0 ? "text-amber-700" : "text-emerald-700")">
+                                    Outstanding Balance
+                                </p>
+                                <p class="text-2xl font-bold @(remainingBalance.Value > 0 ? "text-amber-800" : "text-emerald-800")">
+                                    Rs. @remainingBalance.Value.ToString("N0")
+                                </p>
+                            </div>
+                        </div>
+                        @if (remainingBalance.Value > 0)
+                        {
+                            <button type="button" onclick="document.getElementById('Amount').value = '@remainingBalance.Value'"
+                                    class="btn btn-warning btn-sm">
+                                Pay Full Amount
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Payment Details Card -->
     <div class="card">
         <div class="card-header">
             <h3 class="card-title">
@@ -137,46 +145,49 @@
                     </div>
                 }
 
-                <!-- Period Selection -->
-                <div class="form-group">
-                    <label asp-for="PeriodId" class="form-label">
-                        <i data-lucide="calendar-range" class="w-4 h-4 inline mr-1"></i>
-                        Period <span class="text-red-500">*</span>
-                    </label>
-                    <select asp-for="PeriodId" class="form-select" id="periodSelect"
-                            asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(ViewBag.Periods, "PeriodId", "PeriodName"))">
-                        <option value="">-- Select Period --</option>
-                    </select>
-                    <p class="form-hint">Select the billing period for this payment</p>
+                <!-- Row 1: Period + Amount -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Period Selection -->
+                    <div class="form-group">
+                        <label asp-for="PeriodId" class="form-label">
+                            <i data-lucide="calendar-range" class="w-4 h-4 inline mr-1"></i>
+                            Period <span class="text-red-500">*</span>
+                        </label>
+                        <select asp-for="PeriodId" class="form-select" id="periodSelect"
+                                asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(ViewBag.Periods, "PeriodId", "PeriodName"))">
+                            <option value="">-- Select Period --</option>
+                        </select>
+                        <p class="form-hint">Select the billing period for this payment</p>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="form-group">
+                        <label asp-for="Amount" class="form-label">
+                            <i data-lucide="banknote" class="w-4 h-4 inline mr-1"></i>
+                            Amount (PKR) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 font-medium">Rs.</span>
+                            </div>
+                            <input asp-for="Amount" class="form-input pl-12" type="number" step="1" min="1" placeholder="0" id="Amount" />
+                        </div>
+                        <span asp-validation-for="Amount" class="form-error"></span>
+                    </div>
                 </div>
 
-                <!-- Remaining Balance Display -->
-                <div id="balanceInfo" class="hidden mb-4">
+                <!-- Remaining Balance Display (after period select) -->
+                <div id="balanceInfo" class="hidden mb-6">
                     <div class="p-4 rounded-xl border border-gray-200 bg-gray-50">
                         <div class="flex items-center justify-between">
-                            <span class="text-gray-600">Outstanding Balance:</span>
+                            <span class="text-gray-600">Outstanding Balance for Selected Period:</span>
                             <span id="balanceAmount" class="font-bold text-lg"></span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Amount -->
-                <div class="form-group">
-                    <label asp-for="Amount" class="form-label">
-                        <i data-lucide="banknote" class="w-4 h-4 inline mr-1"></i>
-                        Amount (PKR) <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span class="text-gray-500 font-medium">Rs.</span>
-                        </div>
-                        <input asp-for="Amount" class="form-input pl-12" type="number" step="1" min="1" placeholder="0" />
-                    </div>
-                    <span asp-validation-for="Amount" class="form-error"></span>
-                </div>
-
-                <!-- Payment Method -->
-                <div class="form-group">
+                <!-- Row 2: Payment Method -->
+                <div class="form-group mb-6">
                     <label asp-for="PaymentMethod" class="form-label">
                         <i data-lucide="wallet" class="w-4 h-4 inline mr-1"></i>
                         Payment Method <span class="text-red-500">*</span>
@@ -217,24 +228,27 @@
                     </div>
                 </div>
 
-                <!-- Reference Number (for Bank Transfer, etc.) -->
-                <div class="form-group" id="referenceField">
-                    <label asp-for="ReferenceNumber" class="form-label">
-                        <i data-lucide="hash" class="w-4 h-4 inline mr-1"></i>
-                        Reference / Transaction Number
-                    </label>
-                    <input asp-for="ReferenceNumber" class="form-input" placeholder="e.g., Bank transaction ID, receipt number" />
-                    <p class="form-hint">Provide transaction ID for bank transfers to speed up verification</p>
-                </div>
+                <!-- Row 3: Reference + Remarks -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Reference Number -->
+                    <div class="form-group" id="referenceField">
+                        <label asp-for="ReferenceNumber" class="form-label">
+                            <i data-lucide="hash" class="w-4 h-4 inline mr-1"></i>
+                            Reference / Transaction Number
+                        </label>
+                        <input asp-for="ReferenceNumber" class="form-input" placeholder="e.g., Bank transaction ID, receipt number" />
+                        <p class="form-hint">Provide transaction ID for faster verification</p>
+                    </div>
 
-                <!-- Remarks -->
-                <div class="form-group">
-                    <label asp-for="Remarks" class="form-label">
-                        <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>
-                        Remarks
-                    </label>
-                    <textarea asp-for="Remarks" class="form-input" rows="2" placeholder="Optional notes about this payment"></textarea>
-                    <p class="form-hint">Add any additional notes (optional)</p>
+                    <!-- Remarks -->
+                    <div class="form-group">
+                        <label asp-for="Remarks" class="form-label">
+                            <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>
+                            Remarks
+                        </label>
+                        <textarea asp-for="Remarks" class="form-input" rows="3" placeholder="Optional notes about this payment"></textarea>
+                        <p class="form-hint">Add any additional notes (optional)</p>
+                    </div>
                 </div>
 
                 <!-- Approval Notice -->
@@ -244,7 +258,7 @@
                         <div class="text-sm text-cyan-800">
                             <p class="font-semibold">Payment Approval Process</p>
                             <ul class="mt-1 space-y-1">
-                                <li>• <strong>Cash/Bank Transfer:</strong> Will be verified by admin before being applied to your balance</li>
+                                <li>• <strong>Cash/Bank Transfer:</strong> Will be verified by admin before being applied</li>
                                 <li>• <strong>Card (Stripe):</strong> Processed instantly, no approval needed</li>
                             </ul>
                         </div>
@@ -252,7 +266,7 @@
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                     <a asp-action="MyPayments" class="btn btn-secondary">
                         <i data-lucide="x" class="w-4 h-4"></i>
                         Cancel
@@ -270,36 +284,31 @@
 @section Scripts {
     <script>
         lucide.createIcons();
-        
-        // Show/hide reference field based on payment method
+
+        // Toggle reference field visibility
         function toggleReferenceField() {
             const stripeSelected = document.getElementById('paymentMethodStripe').checked;
             const referenceField = document.getElementById('referenceField');
-            
-            if (stripeSelected) {
-                referenceField.style.display = 'none';
-            } else {
-                referenceField.style.display = 'block';
-            }
+            referenceField.style.display = stripeSelected ? 'none' : 'block';
         }
-        
-        // Initial state
+
+        // Initial call
         toggleReferenceField();
-        
+
         // Fetch remaining balance when period changes
         const periodSelect = document.getElementById('periodSelect');
         const balanceInfo = document.getElementById('balanceInfo');
         const balanceAmount = document.getElementById('balanceAmount');
-        
+
         async function updateBalance() {
             const periodId = periodSelect?.value;
             const userId = '@currentUser?.UserId';
-            
+
             if (userId && periodId) {
                 try {
                     const response = await fetch(`/Payment/GetRemainingBalance?userId=${userId}&periodId=${periodId}`);
                     const data = await response.json();
-                    
+
                     if (balanceInfo && balanceAmount) {
                         balanceInfo.classList.remove('hidden');
                         const balance = data.remainingBalance;
@@ -309,14 +318,14 @@
                 } catch (error) {
                     console.error('Error fetching balance:', error);
                 }
+            } else {
+                balanceInfo?.classList.add('hidden');
             }
         }
-        
-        if (periodSelect) periodSelect.addEventListener('change', updateBalance);
-        
-        // Initial load if values are pre-selected
-        if (periodSelect?.value) {
-            updateBalance();
+
+        if (periodSelect) {
+            periodSelect.addEventListener('change', updateBalance);
+            if (periodSelect.value) updateBalance();
         }
     </script>
 }

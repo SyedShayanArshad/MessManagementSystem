@@ -429,6 +429,21 @@ namespace MessManagement.Controllers
             }
         }
 
+        private async Task RemoveMealPayment(Attendance attendance, string mealType)
+        {
+            // Find and remove existing payment for this specific meal
+            var existingPayment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.AttendanceId == attendance.AttendanceId 
+                    && p.PaymentMethod == "Auto" 
+                    && p.Remarks != null 
+                    && p.Remarks.Contains(mealType));
+            
+            if (existingPayment != null)
+            {
+                _context.Payments.Remove(existingPayment);
+            }
+        }
+
         // POST: Attendance/Verify - Legacy verify all at once
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -716,18 +731,24 @@ namespace MessManagement.Controllers
                     attendance.BreakfastDishPlanId = null;
                     attendance.BreakfastVerified = false;
                     attendance.BreakfastVerifiedOn = null;
+                    // Remove associated payment
+                    await RemoveMealPayment(attendance, "Breakfast");
                     break;
                 case "lunch":
                     attendance.IsLunchPresent = false;
                     attendance.LunchDishPlanId = null;
                     attendance.LunchVerified = false;
                     attendance.LunchVerifiedOn = null;
+                    // Remove associated payment
+                    await RemoveMealPayment(attendance, "Lunch");
                     break;
                 case "dinner":
                     attendance.IsDinnerPresent = false;
                     attendance.DinnerDishPlanId = null;
                     attendance.DinnerVerified = false;
                     attendance.DinnerVerifiedOn = null;
+                    // Remove associated payment
+                    await RemoveMealPayment(attendance, "Dinner");
                     break;
                 default:
                     return BadRequest("Invalid meal type");
