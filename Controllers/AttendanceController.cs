@@ -169,6 +169,7 @@ namespace MessManagement.Controllers
                     BreakfastVerified = att?.BreakfastVerified ?? false,
                     LunchVerified = att?.LunchVerified ?? false,
                     DinnerVerified = att?.DinnerVerified ?? false,
+                    HasAttendanceRecord = att != null,
                     // Legacy compatibility
                     IsPresent = att?.IsPresent ?? true,
                     DishPlanId = att?.DishPlanId,
@@ -303,21 +304,27 @@ namespace MessManagement.Controllers
 
                 if (attendance == null)
                 {
+                    // When creating a new attendance record for a specific meal:
+                    // - Only mark the specific meal as present/absent based on the form
+                    // - Set other meals to false (not present) by default
+                    // - All verifications start as false (pending)
                     attendance = new Attendance
                     {
                         UserId = item.UserId,
                         Date = date,
-                        IsBreakfastPresent = mealType == "Breakfast" ? item.IsBreakfastPresent : true,
-                        IsLunchPresent = mealType == "Lunch" ? item.IsLunchPresent : true,
-                        IsDinnerPresent = mealType == "Dinner" ? item.IsDinnerPresent : true,
+                        IsBreakfastPresent = mealType == "Breakfast" ? item.IsBreakfastPresent : false,
+                        IsLunchPresent = mealType == "Lunch" ? item.IsLunchPresent : false,
+                        IsDinnerPresent = mealType == "Dinner" ? item.IsDinnerPresent : false,
                         BreakfastDishPlanId = mealType == "Breakfast" && item.IsBreakfastPresent ? item.BreakfastDishPlanId : null,
                         LunchDishPlanId = mealType == "Lunch" && item.IsLunchPresent ? item.LunchDishPlanId : null,
                         DinnerDishPlanId = mealType == "Dinner" && item.IsDinnerPresent ? item.DinnerDishPlanId : null,
-                        IsPresent = true,
-                        // Reset verification only for the specific meal type being saved
-                        BreakfastVerified = mealType != "Breakfast",
-                        LunchVerified = mealType != "Lunch",
-                        DinnerVerified = mealType != "Dinner"
+                        IsPresent = (mealType == "Breakfast" && item.IsBreakfastPresent) ||
+                                    (mealType == "Lunch" && item.IsLunchPresent) ||
+                                    (mealType == "Dinner" && item.IsDinnerPresent),
+                        // All verifications start as false (pending) - will require verification
+                        BreakfastVerified = false,
+                        LunchVerified = false,
+                        DinnerVerified = false
                     };
                     _context.Attendances.Add(attendance);
                 }

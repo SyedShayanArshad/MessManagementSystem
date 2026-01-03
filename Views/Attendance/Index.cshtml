@@ -548,6 +548,12 @@
                                                 <i data-lucide="lock" class="w-3 h-3 inline"></i> Verified
                                             </span>
                                         }
+                                        else if (item.HasAttendanceRecord && item.IsBreakfastPresent)
+                                        {
+                                            <span class="badge bg-orange-100 text-orange-700 text-xs">
+                                                <i data-lucide="clock" class="w-3 h-3 inline"></i> Pending
+                                            </span>
+                                        }
                                     </label>
                                     <select asp-for="Items[i].BreakfastDishPlanId" 
                                             asp-items="(IEnumerable<SelectListItem>)ViewBag.BreakfastDishes"
@@ -577,6 +583,12 @@
                                                 <i data-lucide="lock" class="w-3 h-3 inline"></i> Verified
                                             </span>
                                         }
+                                        else if (item.HasAttendanceRecord && item.IsLunchPresent)
+                                        {
+                                            <span class="badge bg-orange-100 text-orange-700 text-xs">
+                                                <i data-lucide="clock" class="w-3 h-3 inline"></i> Pending
+                                            </span>
+                                        }
                                     </label>
                                     <select asp-for="Items[i].LunchDishPlanId" 
                                             asp-items="(IEnumerable<SelectListItem>)ViewBag.LunchDishes"
@@ -604,6 +616,12 @@
                                         {
                                             <span class="badge bg-green-100 text-green-700 text-xs">
                                                 <i data-lucide="lock" class="w-3 h-3 inline"></i> Verified
+                                            </span>
+                                        }
+                                        else if (item.HasAttendanceRecord && item.IsDinnerPresent)
+                                        {
+                                            <span class="badge bg-orange-100 text-orange-700 text-xs">
+                                                <i data-lucide="clock" class="w-3 h-3 inline"></i> Pending
                                             </span>
                                         }
                                     </label>

@@ -21,117 +21,120 @@
         <span class="breadcrumb-separator">
             <i data-lucide="chevron-right" class="w-4 h-4"></i>
         </span>
-        <span class="breadcrumb-item text-gray-900 font-medium">Create New</span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Create</span>
     </nav>
+
     <h1 class="page-title">
         <span class="page-title-icon">
             <i data-lucide="user-plus" class="w-6 h-6"></i>
         </span>
         Add New Member
     </h1>
-    <p class="page-description">Fill in the details below to add a new member to the mess system.</p>
+    <p class="page-description">Fill in the details below to add a new member.</p>
 </div>
 
-<div class="max-w-2xl">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i data-lucide="file-text" class="w-5 h-5 text-cyan-600"></i>
-                Member Information
-            </h3>
-        </div>
-        <div class="card-body">
-            <form asp-action="Create" method="post" novalidate>
-                <!-- Validation Summary -->
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div class="alert alert-error mb-6" role="alert">
-                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
-                        <div>
-                            <p class="font-medium">Please correct the following errors:</p>
-                            <div asp-validation-summary="All" class="text-sm mt-1"></div>
+<!-- CENTERED CARD -->
+<div class="flex justify-center">
+    <div class="w-full max-w-xl">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="file-text" class="w-5 h-5 text-cyan-600"></i>
+                    Member Information
+                </h3>
+            </div>
+
+            <div class="card-body">
+                <form asp-action="Create" method="post" novalidate>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-error mb-6" role="alert">
+                            <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                            <div asp-validation-summary="All" class="text-sm"></div>
                         </div>
+                    }
+
+                    <!-- 2 COLUMN GRID -->
+                    <div class="grid grid-cols-2 gap-4">
+
+                        <!-- Full Name -->
+                        <div class="form-group mb-0">
+                            <label asp-for="FullName" class="form-label">
+                                <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
+                                Full Name <span class="text-red-500">*</span>
+                            </label>
+                            <input asp-for="FullName" class="form-input" />
+                            <span asp-validation-for="FullName" class="form-error"></span>
+                        </div>
+
+                        <!-- Username -->
+                        <div class="form-group mb-0">
+                            <label asp-for="Username" class="form-label">
+                                <i data-lucide="at-sign" class="w-4 h-4 inline mr-1"></i>
+                                Username <span class="text-red-500">*</span>
+                            </label>
+                            <input asp-for="Username" class="form-input" autocomplete="username" />
+                            <span asp-validation-for="Username" class="form-error"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="form-group mb-0">
+                            <label class="form-label">
+                                <i data-lucide="lock" class="w-4 h-4 inline mr-1"></i>
+                                Password <span class="text-red-500">*</span>
+                            </label>
+                            <input type="password" name="password" class="form-input" autocomplete="new-password" />
+                            @Html.ValidationMessage("password", "", new { @class = "form-error" })
+                        </div>
+
+                        <!-- Role -->
+                        <div class="form-group mb-0">
+                            <label asp-for="Role" class="form-label">
+                                <i data-lucide="shield" class="w-4 h-4 inline mr-1"></i>
+                                Role <span class="text-red-500">*</span>
+                            </label>
+                            <select asp-for="Role" class="form-select">
+                                <option value="User">Regular Member</option>
+                                <option value="Admin">Administrator</option>
+                            </select>
+                        </div>
+
+                        <!-- Phone -->
+                        <div class="form-group mb-0">
+                            <label asp-for="PhoneNumber" class="form-label">
+                                <i data-lucide="phone" class="w-4 h-4 inline mr-1"></i>
+                                Phone Number
+                            </label>
+                            <input asp-for="PhoneNumber" class="form-input" type="tel" />
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-group mb-0">
+                            <label asp-for="Email" class="form-label">
+                                <i data-lucide="mail" class="w-4 h-4 inline mr-1"></i>
+                                Email Address
+                            </label>
+                            <input asp-for="Email" class="form-input" type="email" />
+                            <span asp-validation-for="Email" class="form-error"></span>
+                        </div>
+
                     </div>
-                }
 
-                <!-- Full Name -->
-                <div class="form-group">
-                    <label asp-for="FullName" class="form-label">
-                        <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
-                        Full Name <span class="text-red-500">*</span>
-                    </label>
-                    <input asp-for="FullName" class="form-input" placeholder="Enter full name" />
-                    <span asp-validation-for="FullName" class="form-error"></span>
-                </div>
+                    <!-- ACTION BUTTONS -->
+                    <div class="flex justify-center gap-3 pt-5 border-t border-gray-100 mt-5">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i>
+                            Create Member
+                        </button>
+                    </div>
 
-                <!-- Username -->
-                <div class="form-group">
-                    <label asp-for="Username" class="form-label">
-                        <i data-lucide="at-sign" class="w-4 h-4 inline mr-1"></i>
-                        Username <span class="text-red-500">*</span>
-                    </label>
-                    <input asp-for="Username" class="form-input" placeholder="Enter username for login" autocomplete="username" />
-                    <span asp-validation-for="Username" class="form-error"></span>
-                    <p class="form-hint">This will be used for logging into the system</p>
-                </div>
-
-                <!-- Password -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i data-lucide="lock" class="w-4 h-4 inline mr-1"></i>
-                        Password <span class="text-red-500">*</span>
-                    </label>
-                    <input type="password" name="password" class="form-input" placeholder="Enter a secure password" autocomplete="new-password" />
-                    @Html.ValidationMessage("password", "", new { @class = "form-error" })
-                    <p class="form-hint">Choose a strong password for security</p>
-                </div>
-
-                <!-- Role -->
-                <div class="form-group">
-                    <label asp-for="Role" class="form-label">
-                        <i data-lucide="shield" class="w-4 h-4 inline mr-1"></i>
-                        Role <span class="text-red-500">*</span>
-                    </label>
-                    <select asp-for="Role" class="form-select">
-                        <option value="User">Regular Member</option>
-                        <option value="Admin">Administrator</option>
-                    </select>
-                    <p class="form-hint">Administrators have full access to all features</p>
-                </div>
-
-                <!-- Phone Number -->
-                <div class="form-group">
-                    <label asp-for="PhoneNumber" class="form-label">
-                        <i data-lucide="phone" class="w-4 h-4 inline mr-1"></i>
-                        Phone Number
-                    </label>
-                    <input asp-for="PhoneNumber" class="form-input" placeholder="Enter phone number (optional)" type="tel" />
-                    <p class="form-hint">Optional contact number</p>
-                </div>
-
-                <!-- Email -->
-                <div class="form-group">
-                    <label asp-for="Email" class="form-label">
-                        <i data-lucide="mail" class="w-4 h-4 inline mr-1"></i>
-                        Email Address
-                    </label>
-                    <input asp-for="Email" class="form-input" placeholder="Enter email address" type="email" />
-                    <span asp-validation-for="Email" class="form-error"></span>
-                    <p class="form-hint">Required for password reset functionality</p>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        <i data-lucide="user-plus" class="w-4 h-4"></i>
-                        Create Member
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 </div>

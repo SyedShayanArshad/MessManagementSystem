@@ -45,6 +45,9 @@ namespace MessManagement.Models.ViewModels
         public bool LunchVerified { get; set; }
         public bool DinnerVerified { get; set; }
         
+        // Track if attendance record exists in database (to differentiate between unsaved and pending)
+        public bool HasAttendanceRecord { get; set; }
+        
         // Legacy fields
         public bool AutoChargeExists { get; set; }
         public decimal? AutoChargeAmount { get; set; }
