@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using MessManagement.Data;
 using MessManagement.Models;
 using System.Text;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 
 namespace MessManagement.Controllers
 {
@@ -11,6 +14,13 @@ namespace MessManagement.Controllers
     public class ReportController : Controller
     {
         private readonly ApplicationDbContext _context;
+        
+        static ReportController()
+        {
+            // Set QuestPDF license (Community license is free for revenue < $1M)
+            QuestPDF.Settings.License = LicenseType.Community;
+        }
+        
         public ReportController(ApplicationDbContext context) => _context = context;
 
         // Helper method to generate report data
@@ -124,7 +134,7 @@ namespace MessManagement.Controllers
 
         // Export Overall Summary CSV
         [HttpGet]
-        public async Task<IActionResult> ExportSummary(int periodId)
+        public async Task<IActionResult> ExportSummaryCsv(int periodId)
         {
             var (report, period, teaTotalCups, totalPayments) = await GenerateReportData(periodId);
             if (period == null) return NotFound();
@@ -181,13 +191,156 @@ namespace MessManagement.Controllers
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToString());
             var fileName = $"MessReport_Summary_{period.PeriodName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.csv";
-            Response.Headers.Append("Content-Disposition", $"attachment; filename={fileName}");
+            
             return File(bytes, "text/csv", fileName);
+        }
+
+        // Export Summary to PDF using QuestPDF
+        [HttpGet]
+        public async Task<IActionResult> ExportSummaryPdf(int periodId)
+        {
+            var (report, period, teaTotalCups, totalPayments) = await GenerateReportData(periodId);
+            if (period == null) return NotFound();
+
+            var totalCharges = report.Sum(x => (decimal)x.TotalCharges);
+            var totalMealCharges = report.Sum(x => (decimal)x.MealCharges);
+            var totalWaterCharges = report.Sum(x => (decimal)x.WaterCharges);
+            var totalTeaCharges = report.Sum(x => (decimal)x.TeaCharges);
+            var totalBalance = report.Sum(x => (decimal)x.Balance);
+            var membersWithDues = report.Count(x => (decimal)x.Balance > 0);
+
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4.Landscape());
+                    page.Margin(30);
+                    page.DefaultTextStyle(x => x.FontSize(10));
+
+                    page.Header().Column(col =>
+                    {
+                        col.Item().Text("Mess Management - Period Summary Report")
+                            .FontSize(18).Bold().FontColor(Colors.Blue.Darken2);
+                        col.Item().Text($"Period: {period.PeriodName}").FontSize(12);
+                        col.Item().Text($"Date Range: {period.StartDate:MMM dd, yyyy} - {period.EndDate:MMM dd, yyyy}");
+                        col.Item().Text($"Generated: {DateTime.Now:MMM dd, yyyy HH:mm}");
+                        col.Item().PaddingVertical(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
+                    });
+
+                    page.Content().Column(col =>
+                    {
+                        // Summary Section
+                        col.Item().PaddingBottom(10).Row(row =>
+                        {
+                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Column(c =>
+                            {
+                                c.Item().Text("Summary Statistics").Bold().FontSize(12);
+                                c.Item().Text($"Total Members: {report.Count}");
+                                c.Item().Text($"Meal Charges: Rs. {totalMealCharges:N0}");
+                                c.Item().Text($"Water Charges: Rs. {totalWaterCharges:N0}");
+                                c.Item().Text($"Tea Charges: Rs. {totalTeaCharges:N0}");
+                            });
+                            row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Column(c =>
+                            {
+                                c.Item().Text("Financial Summary").Bold().FontSize(12);
+                                c.Item().Text($"Grand Total: Rs. {totalCharges:N0}");
+                                c.Item().Text($"Total Collected: Rs. {totalPayments:N0}");
+                                c.Item().Text($"Outstanding: Rs. {totalBalance:N0}");
+                                c.Item().Text($"Members with Dues: {membersWithDues}");
+                            });
+                        });
+
+                        // Member Table
+                        col.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(3); // Name
+                                columns.RelativeColumn(1); // Breakfast
+                                columns.RelativeColumn(1); // Lunch
+                                columns.RelativeColumn(1); // Dinner
+                                columns.RelativeColumn(1.5f); // Meal Charges
+                                columns.RelativeColumn(1); // Tea
+                                columns.RelativeColumn(1.5f); // Tea Charges
+                                columns.RelativeColumn(1.5f); // Water
+                                columns.RelativeColumn(1.5f); // Total
+                                columns.RelativeColumn(1.5f); // Paid
+                                columns.RelativeColumn(1.5f); // Balance
+                                columns.RelativeColumn(1); // Status
+                            });
+
+                            // Header
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).Text("Name").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignCenter().Text("B").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignCenter().Text("L").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignCenter().Text("D").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignRight().Text("Meals").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignCenter().Text("Tea").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignRight().Text("Tea Rs.").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignRight().Text("Water").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignRight().Text("Total").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignRight().Text("Paid").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignRight().Text("Balance").Bold();
+                                header.Cell().Background(Colors.Blue.Lighten3).Padding(5).AlignCenter().Text("Status").Bold();
+                            });
+
+                            // Data rows
+                            foreach (dynamic item in report)
+                            {
+                                var balance = (decimal)item.Balance;
+                                var bgColor = balance > 0 ? Colors.Red.Lighten5 : Colors.Green.Lighten5;
+
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).Text((string)item.User.FullName);
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignCenter().Text(((int)item.BreakfastCount).ToString());
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignCenter().Text(((int)item.LunchCount).ToString());
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignCenter().Text(((int)item.DinnerCount).ToString());
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"Rs. {(decimal)item.MealCharges:N0}");
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignCenter().Text(((int)item.TeaCups).ToString());
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"Rs. {(decimal)item.TeaCharges:N0}");
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"Rs. {(decimal)item.WaterCharges:N0}");
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"Rs. {(decimal)item.TotalCharges:N0}");
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"Rs. {(decimal)item.Payments:N0}").FontColor(Colors.Green.Darken2);
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Background(bgColor).Padding(4).AlignRight().Text($"Rs. {balance:N0}").FontColor(balance > 0 ? Colors.Red.Darken2 : Colors.Green.Darken2);
+                                table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Background(bgColor).Padding(4).AlignCenter().Text(balance > 0 ? "Due" : "Paid").FontColor(balance > 0 ? Colors.Red.Darken2 : Colors.Green.Darken2);
+                            }
+
+                            // Footer totals
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text("TOTALS").Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignCenter().Text(report.Sum(x => (int)x.BreakfastCount).ToString()).Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignCenter().Text(report.Sum(x => (int)x.LunchCount).ToString()).Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignCenter().Text(report.Sum(x => (int)x.DinnerCount).ToString()).Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignRight().Text($"Rs. {totalMealCharges:N0}").Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignCenter().Text(report.Sum(x => (int)x.TeaCups).ToString()).Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignRight().Text($"Rs. {totalTeaCharges:N0}").Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignRight().Text($"Rs. {totalWaterCharges:N0}").Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignRight().Text($"Rs. {totalCharges:N0}").Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignRight().Text($"Rs. {totalPayments:N0}").Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).AlignRight().Text($"Rs. {totalBalance:N0}").Bold();
+                            table.Cell().Background(Colors.Grey.Lighten3).Padding(4).Text("");
+                        });
+                    });
+
+                    page.Footer().AlignCenter().Text(x =>
+                    {
+                        x.Span("Page ");
+                        x.CurrentPageNumber();
+                        x.Span(" of ");
+                        x.TotalPages();
+                    });
+                });
+            });
+
+            var pdfBytes = document.GeneratePdf();
+            var fileName = $"MessReport_Summary_{period.PeriodName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.pdf";
+            
+            return File(pdfBytes, "application/pdf", fileName);
         }
 
         // Export User-wise Detailed CSV
         [HttpGet]
-        public async Task<IActionResult> ExportUserDetail(int periodId, int? userId = null)
+        public async Task<IActionResult> ExportUserDetailCsv(int periodId, int? userId = null)
         {
             var period = await _context.MessPeriods.FindAsync(periodId);
             if (period == null) return NotFound();
@@ -312,8 +465,200 @@ namespace MessManagement.Controllers
                 : $"MessReport_AllUsers_{period.PeriodName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.csv";
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToString());
-            Response.Headers.Append("Content-Disposition", $"attachment; filename={fileName}");
+            
             return File(bytes, "text/csv", fileName);
+        }
+
+        // Export User Detail to PDF using QuestPDF
+        [HttpGet]
+        public async Task<IActionResult> ExportUserDetailPdf(int periodId, int? userId = null)
+        {
+            var period = await _context.MessPeriods.FindAsync(periodId);
+            if (period == null) return NotFound();
+
+            var start = period.StartDate;
+            var end = period.EndDate;
+            
+            var usersQuery = _context.Users.Where(u => u.IsActive);
+            if (userId.HasValue)
+                usersQuery = usersQuery.Where(u => u.UserId == userId.Value);
+            
+            var users = await usersQuery.OrderBy(u => u.FullName).ToListAsync();
+            
+            var allTeaEntries = await _context.TeaEntries
+                .Where(t => t.PeriodId == periodId || (t.Date >= start && t.Date <= end))
+                .ToListAsync();
+
+            var document = Document.Create(container =>
+            {
+                foreach (var user in users)
+                {
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.Margin(30);
+                        page.DefaultTextStyle(x => x.FontSize(9));
+
+                        var attendances = _context.Attendances
+                            .Where(a => a.UserId == user.UserId && a.Date >= start && a.Date <= end)
+                            .Include(a => a.BreakfastDishPlan)
+                            .Include(a => a.LunchDishPlan)
+                            .Include(a => a.DinnerDishPlan)
+                            .OrderBy(a => a.Date)
+                            .ToList();
+
+                        var payments = _context.Payments
+                            .Where(p => p.UserId == user.UserId && p.PeriodId == periodId)
+                            .OrderBy(p => p.PaymentDate)
+                            .ToList();
+
+                        var userTeaEntries = allTeaEntries.Where(t => t.UserId == user.UserId).ToList();
+
+                        decimal totalMealCharges = 0;
+                        int bCount = 0, lCount = 0, dCount = 0;
+                        foreach (var att in attendances)
+                        {
+                            if (att.IsBreakfastPresent && att.BreakfastDishPlan != null) { totalMealCharges += att.BreakfastDishPlan.Price; bCount++; }
+                            if (att.IsLunchPresent && att.LunchDishPlan != null) { totalMealCharges += att.LunchDishPlan.Price; lCount++; }
+                            if (att.IsDinnerPresent && att.DinnerDishPlan != null) { totalMealCharges += att.DinnerDishPlan.Price; dCount++; }
+                        }
+                        decimal totalTeaCharges = userTeaEntries.Sum(t => t.Cups * period.TeaPricePerCup);
+                        decimal totalPaid = payments.Sum(p => p.Amount);
+                        decimal grandTotal = totalMealCharges + period.FixedWaterCharge + totalTeaCharges;
+                        decimal balance = grandTotal - totalPaid;
+
+                        page.Header().Column(col =>
+                        {
+                            col.Item().Row(row =>
+                            {
+                                row.RelativeItem().Column(c =>
+                                {
+                                    c.Item().Text("Mess Management").FontSize(14).Bold().FontColor(Colors.Blue.Darken2);
+                                    c.Item().Text("Member Detailed Report").FontSize(11);
+                                });
+                                row.RelativeItem().AlignRight().Column(c =>
+                                {
+                                    c.Item().Text(user.FullName).FontSize(12).Bold();
+                                    c.Item().Text($"@{user.Username}").FontSize(9).FontColor(Colors.Grey.Darken1);
+                                });
+                            });
+                            col.Item().PaddingTop(5).Text($"Period: {period.PeriodName} ({period.StartDate:MMM dd} - {period.EndDate:MMM dd, yyyy})").FontSize(9);
+                            col.Item().PaddingVertical(8).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
+                        });
+
+                        page.Content().Column(col =>
+                        {
+                            // Bill Summary Box at top
+                            col.Item().PaddingBottom(10).Border(1).BorderColor(Colors.Grey.Lighten1).Padding(10).Row(row =>
+                            {
+                                row.RelativeItem().Column(c =>
+                                {
+                                    c.Item().Text("Bill Summary").Bold().FontSize(11);
+                                    c.Item().PaddingTop(5).Text($"Meals: {bCount}B + {lCount}L + {dCount}D = Rs. {totalMealCharges:N0}");
+                                    c.Item().Text($"Water: Rs. {period.FixedWaterCharge:N0}");
+                                    c.Item().Text($"Tea ({userTeaEntries.Sum(t => t.Cups)} cups): Rs. {totalTeaCharges:N0}");
+                                });
+                                row.RelativeItem().AlignRight().Column(c =>
+                                {
+                                    c.Item().Text($"Grand Total: Rs. {grandTotal:N0}").Bold();
+                                    c.Item().Text($"Paid: Rs. {totalPaid:N0}").FontColor(Colors.Green.Darken2);
+                                    c.Item().Text($"Balance: Rs. {balance:N0}").Bold().FontColor(balance > 0 ? Colors.Red.Darken2 : Colors.Green.Darken2);
+                                });
+                            });
+
+                            // Attendance Table
+                            if (attendances.Any())
+                            {
+                                col.Item().PaddingBottom(5).Text("Daily Meal Attendance").Bold().FontSize(10);
+                                col.Item().PaddingBottom(10).Table(table =>
+                                {
+                                    table.ColumnsDefinition(columns =>
+                                    {
+                                        columns.RelativeColumn(2); // Date
+                                        columns.RelativeColumn(1); // Day
+                                        columns.RelativeColumn(1); // B
+                                        columns.RelativeColumn(1); // L
+                                        columns.RelativeColumn(1); // D
+                                        columns.RelativeColumn(2); // Total
+                                    });
+
+                                    table.Header(header =>
+                                    {
+                                        header.Cell().Background(Colors.Blue.Lighten4).Padding(3).Text("Date").Bold();
+                                        header.Cell().Background(Colors.Blue.Lighten4).Padding(3).Text("Day").Bold();
+                                        header.Cell().Background(Colors.Blue.Lighten4).Padding(3).AlignCenter().Text("B").Bold();
+                                        header.Cell().Background(Colors.Blue.Lighten4).Padding(3).AlignCenter().Text("L").Bold();
+                                        header.Cell().Background(Colors.Blue.Lighten4).Padding(3).AlignCenter().Text("D").Bold();
+                                        header.Cell().Background(Colors.Blue.Lighten4).Padding(3).AlignRight().Text("Total").Bold();
+                                    });
+
+                                    foreach (var att in attendances)
+                                    {
+                                        var bCharge = att.IsBreakfastPresent && att.BreakfastDishPlan != null ? att.BreakfastDishPlan.Price : 0;
+                                        var lCharge = att.IsLunchPresent && att.LunchDishPlan != null ? att.LunchDishPlan.Price : 0;
+                                        var dCharge = att.IsDinnerPresent && att.DinnerDishPlan != null ? att.DinnerDishPlan.Price : 0;
+                                        var dayTotal = bCharge + lCharge + dCharge;
+
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).Text(att.Date.ToString("MMM dd"));
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).Text(att.Date.ToString("ddd"));
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).AlignCenter().Text(att.IsBreakfastPresent ? "✓" : "-").FontColor(att.IsBreakfastPresent ? Colors.Green.Darken2 : Colors.Grey.Lighten1);
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).AlignCenter().Text(att.IsLunchPresent ? "✓" : "-").FontColor(att.IsLunchPresent ? Colors.Green.Darken2 : Colors.Grey.Lighten1);
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).AlignCenter().Text(att.IsDinnerPresent ? "✓" : "-").FontColor(att.IsDinnerPresent ? Colors.Green.Darken2 : Colors.Grey.Lighten1);
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).AlignRight().Text($"Rs. {dayTotal:N0}");
+                                    }
+                                });
+                            }
+
+                            // Payments Table
+                            if (payments.Any())
+                            {
+                                col.Item().PaddingBottom(5).Text("Payment History").Bold().FontSize(10);
+                                col.Item().Table(table =>
+                                {
+                                    table.ColumnsDefinition(columns =>
+                                    {
+                                        columns.RelativeColumn(2);
+                                        columns.RelativeColumn(2);
+                                        columns.RelativeColumn(2);
+                                        columns.RelativeColumn(2);
+                                    });
+
+                                    table.Header(header =>
+                                    {
+                                        header.Cell().Background(Colors.Green.Lighten4).Padding(3).Text("Date").Bold();
+                                        header.Cell().Background(Colors.Green.Lighten4).Padding(3).AlignRight().Text("Amount").Bold();
+                                        header.Cell().Background(Colors.Green.Lighten4).Padding(3).Text("Method").Bold();
+                                        header.Cell().Background(Colors.Green.Lighten4).Padding(3).Text("Reference").Bold();
+                                    });
+
+                                    foreach (var pay in payments)
+                                    {
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).Text(pay.PaymentDate.ToString("MMM dd, yyyy"));
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).AlignRight().Text($"Rs. {pay.Amount:N0}");
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).Text(pay.PaymentMethod);
+                                        table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(2).Text(pay.ReferenceNumber ?? "-");
+                                    }
+                                });
+                            }
+                        });
+
+                        page.Footer().AlignCenter().Text(x =>
+                        {
+                            x.Span($"Generated on {DateTime.Now:MMM dd, yyyy HH:mm} | Page ");
+                            x.CurrentPageNumber();
+                            x.Span(" of ");
+                            x.TotalPages();
+                        });
+                    });
+                }
+            });
+
+            var pdfBytes = document.GeneratePdf();
+            var fileName = userId.HasValue 
+                ? $"MessReport_User_{users.FirstOrDefault()?.FullName?.Replace(" ", "_")}_{period.PeriodName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.pdf"
+                : $"MessReport_AllUsers_{period.PeriodName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.pdf";
+            
+            return File(pdfBytes, "application/pdf", fileName);
         }
     }
 }
