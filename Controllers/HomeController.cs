@@ -63,6 +63,38 @@
                 HttpContext.Session.Clear();
                 return Json(new { success = true, message = "Session cleared" });
             }
+            
+            /// <summary>
+            /// Switch view mode for admin users between "admin" and "member" view
+            /// Stores preference in session and redirects back to the referring page
+            /// </summary>
+            [HttpGet]
+            public IActionResult SwitchViewMode(string mode)
+            {
+                // Validate user is admin
+                if (!User.IsInRole("Admin"))
+                {
+                    return RedirectToAction("Index");
+                }
+                
+                // Validate mode parameter
+                if (mode != "admin" && mode != "member")
+                {
+                    mode = "admin";
+                }
+                
+                // Store view mode preference in session
+                HttpContext.Session.SetString("ViewMode", mode);
+                
+                // Redirect back to the referring page or home
+                var returnUrl = Request.Headers["Referer"].ToString();
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+                
+                return RedirectToAction("Index");
+            }
         }
     }
 

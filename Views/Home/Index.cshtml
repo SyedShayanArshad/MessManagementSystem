@@ -2,6 +2,9 @@
     ViewData["Title"] = "Dashboard";
     var isAdmin = User?.IsInRole("Admin") == true;
     var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+    var viewMode = Context.Session.GetString("ViewMode") ?? "admin";
+    var showAdminDashboard = isAdmin && viewMode == "admin";
+    var showMemberDashboard = viewMode == "member" || !isAdmin;
 }
 
 <!-- Welcome Section -->
@@ -26,7 +29,7 @@
         }
     </h1>
     <p class="page-description">
-        @if (isAdmin)
+        @if (showAdminDashboard)
         {
             <text>Manage your mess operations efficiently. View attendance, track payments, and generate reports.</text>
         }
@@ -41,7 +44,7 @@
     </p>
 </div>
 
-@if (isAdmin)
+@if (showAdminDashboard)
 {
     <!-- Admin Dashboard -->
     <!-- Stats Overview Cards - Using Partial Views -->
