@@ -82,7 +82,7 @@ namespace MessManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("UserId,FullName,Username,Role,IsActive,PhoneNumber,Email")] User user, string? newPassword = null)
+        public async Task<IActionResult> Edit(int id, [Bind("UserId,FullName,Username,Role,PhoneNumber,Email")] User user, string? newPassword = null)
         {
             if (id != user.UserId) return NotFound();
             if (!ModelState.IsValid) return View(user);
@@ -102,7 +102,6 @@ namespace MessManagement.Controllers
                 }
                 existing.Username = newUsername;
                 existing.Role = user.Role;
-                existing.IsActive = user.IsActive;
                 existing.PhoneNumber = user.PhoneNumber;
                 existing.Email = user.Email?.Trim();
 
@@ -120,39 +119,36 @@ namespace MessManagement.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
-
-        // GET: Users/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null) return NotFound();
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.UserId == id);
-            if (user == null) return NotFound();
-            return View(user);
-        }
-
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id, string confirmUsername)
+        public async Task<IActionResult> ToggleStatus(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null) return NotFound();
-            
-            // Verify username confirmation
-            if (string.IsNullOrWhiteSpace(confirmUsername) || 
-                !confirmUsername.Equals(user.Username, StringComparison.OrdinalIgnoreCase))
+            var user = await _context.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.UserId == id);
+
+            if (user == null)
             {
-                TempData["ErrorMessage"] = "Username confirmation does not match. Please enter the correct username to delete.";
-                return RedirectToAction(nameof(Delete), new { id });
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction(nameof(Index));
             }
-            
-            var memberName = user.FullName;
-            _context.Users.Remove(user);
+
+            // Optional safety: admin khud ko deactivate na kare
+            if (User.Identity?.Name == user.Username && user.IsActive)
+            {
+                TempData["ErrorMessage"] = "You cannot deactivate your own account.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            user.IsActive = !user.IsActive;
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = $"Member '{memberName}' has been deleted successfully!";
+
+            TempData["SuccessMessage"] = user.IsActive
+                ? $"Member '{user.FullName}' activated successfully."
+                : $"Member '{user.FullName}' deactivated successfully.";
+
             return RedirectToAction(nameof(Index));
         }
-
         private bool UserExists(int id) => _context.Users.Any(e => e.UserId == id);
     }
 }
