@@ -134,66 +134,36 @@ namespace MessManagement.Controllers
 
         // Export Overall Summary CSV
         [HttpGet]
-        public async Task<IActionResult> ExportSummaryCsv(int periodId)
-        {
-            var (report, period, teaTotalCups, totalPayments) = await GenerateReportData(periodId);
-            if (period == null) return NotFound();
+public async Task ExportSummaryCsv(int periodId)
+{
+    var (report, period, teaTotalCups, totalPayments) = await GenerateReportData(periodId);
+    if (period == null) return;
 
-            var sb = new StringBuilder();
-            sb.AppendLine("Mess Management - Period Summary Report");
-            sb.AppendLine($"Period: {period.PeriodName}");
-            sb.AppendLine($"Date Range: {period.StartDate:MMM dd, yyyy} - {period.EndDate:MMM dd, yyyy}");
-            sb.AppendLine($"Generated: {DateTime.Now:MMM dd, yyyy HH:mm}");
-            sb.AppendLine();
-            
-            // Summary Stats
-            var totalCharges = report.Sum(x => (decimal)x.TotalCharges);
-            var totalMealCharges = report.Sum(x => (decimal)x.MealCharges);
-            var totalWaterCharges = report.Sum(x => (decimal)x.WaterCharges);
-            var totalTeaCharges = report.Sum(x => (decimal)x.TeaCharges);
-            var totalBalance = report.Sum(x => (decimal)x.Balance);
-            var membersWithDues = report.Count(x => (decimal)x.Balance > 0);
-            
-            sb.AppendLine("=== SUMMARY ===");
-            sb.AppendLine($"Total Members,{report.Count}");
-            sb.AppendLine($"Total Meal Charges,Rs. {totalMealCharges:N0}");
-            sb.AppendLine($"Total Water Charges,Rs. {totalWaterCharges:N0}");
-            sb.AppendLine($"Total Tea Charges,Rs. {totalTeaCharges:N0}");
-            sb.AppendLine($"Total Tea Cups,{teaTotalCups}");
-            sb.AppendLine($"Grand Total Charges,Rs. {totalCharges:N0}");
-            sb.AppendLine($"Total Collected,Rs. {totalPayments:N0}");
-            sb.AppendLine($"Outstanding Balance,Rs. {totalBalance:N0}");
-            sb.AppendLine($"Collection Rate,{(totalCharges > 0 ? (totalPayments / totalCharges * 100) : 0):N1}%");
-            sb.AppendLine($"Members with Dues,{membersWithDues}");
-            sb.AppendLine($"Fully Paid Members,{report.Count - membersWithDues}");
-            sb.AppendLine();
-            
-            // Member-wise summary
-            sb.AppendLine("=== MEMBER-WISE SUMMARY ===");
-            sb.AppendLine("Name,Breakfast,Lunch,Dinner,Total Meals,Meal Charges,Tea Cups,Tea Charges,Water Charges,Total Charges,Paid,Balance,Status");
-            
-            foreach (dynamic item in report)
-            {
-                var balance = (decimal)item.Balance;
-                var status = balance > 0 ? "Due" : "Paid";
-                sb.AppendLine($"\"{item.User.FullName}\",{item.BreakfastCount},{item.LunchCount},{item.DinnerCount},{item.AttendanceCount},Rs. {item.MealCharges:N0},{item.TeaCups},Rs. {item.TeaCharges:N0},Rs. {item.WaterCharges:N0},Rs. {item.TotalCharges:N0},Rs. {item.Payments:N0},Rs. {balance:N0},{status}");
-            }
-            
-            // Footer totals
-            sb.AppendLine();
-            var totalBreakfast = report.Sum(x => (int)x.BreakfastCount);
-            var totalLunch = report.Sum(x => (int)x.LunchCount);
-            var totalDinner = report.Sum(x => (int)x.DinnerCount);
-            var totalMeals = report.Sum(x => (int)x.AttendanceCount);
-            var totalTeaCups = report.Sum(x => (int)x.TeaCups);
-            
-            sb.AppendLine($"TOTALS,{totalBreakfast},{totalLunch},{totalDinner},{totalMeals},Rs. {totalMealCharges:N0},{totalTeaCups},Rs. {totalTeaCharges:N0},Rs. {totalWaterCharges:N0},Rs. {totalCharges:N0},Rs. {totalPayments:N0},Rs. {totalBalance:N0},");
+    Response.Clear();
+    Response.ContentType = "text/csv; charset=utf-8";
+    Response.Headers.Add(
+        "Content-Disposition",
+        $"attachment; filename=\"MessReport_Summary_{period.PeriodName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.csv\""
+    );
 
-            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
-            var fileName = $"MessReport_Summary_{period.PeriodName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.csv";
-            
-            return File(bytes, "text/csv", fileName);
-        }
+    await using var writer = new StreamWriter(Response.Body, Encoding.UTF8);
+
+    writer.WriteLine("Mess Management - Period Summary Report");
+    writer.WriteLine($"Period: {period.PeriodName}");
+    writer.WriteLine($"Generated: {DateTime.Now:MMM dd, yyyy HH:mm}");
+    writer.WriteLine();
+
+    writer.WriteLine("Name,Total Charges,Paid,Balance");
+
+    foreach (dynamic item in report)
+    {
+        writer.WriteLine(
+            $"\"{item.User.FullName}\",{item.TotalCharges},{item.Payments},{item.Balance}");
+    }
+
+    await writer.FlushAsync();
+}
+
 
         // Export Summary to PDF using QuestPDF
         [HttpGet]

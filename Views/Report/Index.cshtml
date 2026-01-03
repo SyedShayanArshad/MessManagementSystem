@@ -126,22 +126,22 @@
                 <!-- Export Buttons -->
                 <div class="flex flex-col gap-2">
                     <a href="@Url.Action("ExportSummaryCsv", new { periodId = selectedPeriod.PeriodId })" 
-                       class="btn btn-secondary text-sm">
+                       class="btn btn-secondary text-sm" target="_blank">
                         <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
                         Export Summary CSV
                     </a>
                     <a href="@Url.Action("ExportSummaryPdf", new { periodId = selectedPeriod.PeriodId })" 
-                       class="btn btn-secondary text-sm">
+                       class="btn btn-secondary text-sm" target="_blank">
                         <i data-lucide="file-text" class="w-4 h-4"></i>
                         Export Summary PDF
                     </a>
                     <a href="@Url.Action("ExportUserDetailCsv", new { periodId = selectedPeriod.PeriodId })" 
-                       class="btn btn-outline text-sm">
+                       class="btn btn-outline text-sm" target="_blank">
                         <i data-lucide="users" class="w-4 h-4"></i>
                         Export All Users CSV
                     </a>
                     <a href="@Url.Action("ExportUserDetailPdf", new { periodId = selectedPeriod.PeriodId })" 
-                       class="btn btn-outline text-sm">
+                       class="btn btn-outline text-sm" target="_blank">
                         <i data-lucide="users" class="w-4 h-4"></i>
                         Export All Users PDF
                     </a>
@@ -358,11 +358,11 @@
                                             <i data-lucide="eye" class="w-4 h-4"></i>
                                         </a>
                                         <a href="@Url.Action("ExportUserDetailCsv", new { periodId = selectedPeriod.PeriodId, userId = item.User.UserId })" 
-                                           class="p-2 rounded-lg hover:bg-green-100 text-green-600 transition-colors" title="Export User CSV">
+                                           class="p-2 rounded-lg hover:bg-green-100 text-green-600 transition-colors" title="Export User CSV" target="_blank">
                                             <i data-lucide="download" class="w-4 h-4"></i>
                                         </a>
                                         <a href="@Url.Action("ExportUserDetailPdf", new { periodId = selectedPeriod.PeriodId, userId = item.User.UserId })" 
-                                           class="p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors" title="Export User PDF">
+                                           class="p-2 rounded-lg hover:bg-red-100 text-red-600 transition-colors" title="Export User PDF" target="_blank">
                                             <i data-lucide="file-text" class="w-4 h-4"></i>
                                         </a>
                                     </div>
@@ -417,16 +417,6 @@
                 <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
                 Report generated on @DateTime.Now.ToString("MMMM dd, yyyy HH:mm")
             </p>
-            <div class="flex items-center gap-2">
-                <a href="@Url.Action("ExportSummaryCsv", new { periodId = selectedPeriod.PeriodId })" class="btn btn-secondary">
-                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                    Export CSV
-                </a>
-                <button onclick="window.print()" class="btn btn-primary">
-                    <i data-lucide="printer" class="w-4 h-4"></i>
-                    Print Report
-                </button>
-            </div>
         </div>
     </div>
 }
