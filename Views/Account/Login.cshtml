@@ -9,13 +9,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Login to Mess Management System" />
+    <meta name="description" content="Login to MessHub - Your Mess Management System" />
+    <meta name="theme-color" content="#0891b2" />
     <title>Login - MessHub</title>
     
     <!-- Google Fonts - Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -24,31 +25,32 @@
 </head>
 <body>
     <div class="login-container">
-        <!-- Background Decoration -->
+        <!-- Background Decoration (HCI: Visual appeal without distraction) -->
         <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-blue-400/20 blur-3xl"></div>
-            <div class="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-indigo-400/20 blur-3xl"></div>
+            <div class="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-cyan-300/20 blur-3xl"></div>
+            <div class="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-teal-300/20 blur-3xl"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-white/5 blur-2xl"></div>
         </div>
 
         <div class="login-card relative">
-            <!-- Login Header -->
+            <!-- Login Header (HCI: Clear branding, welcoming) -->
             <div class="login-header">
                 <div class="login-logo">
-                    <i data-lucide="utensils" class="w-10 h-10 text-white"></i>
+                    <i data-lucide="chef-hat" class="w-10 h-10 text-white"></i>
                 </div>
-                <h1 class="login-title">Welcome Back</h1>
-                <p class="login-subtitle">Sign in to your MessHub account</p>
+                <h1 class="login-title">Welcome Back!</h1>
+                <p class="login-subtitle">Sign in to continue to MessHub</p>
             </div>
 
             <!-- Login Body -->
             <div class="login-body">
-                <!-- Validation Summary -->
+                <!-- Validation Summary (HCI: Clear error feedback) -->
                 @if (!ViewData.ModelState.IsValid)
                 {
-                    <div class="alert alert-error mb-6" role="alert">
+                    <div class="alert alert-error mb-6" role="alert" aria-live="polite">
                         <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
                         <div>
-                            <p class="font-medium">Login Failed</p>
+                            <p class="font-bold">Unable to sign in</p>
                             <div asp-validation-summary="All" class="text-sm mt-1"></div>
                         </div>
                     </div>
@@ -57,7 +59,7 @@
                 <form asp-action="Login" method="post" novalidate>
                     @Html.AntiForgeryToken()
                     
-                    <!-- Username Field -->
+                    <!-- Username Field (HCI: Clear labels, helpful placeholders) -->
                     <div class="form-group">
                         <label asp-for="Username" class="form-label">
                             <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
@@ -68,15 +70,16 @@
                                    class="form-input pl-11" 
                                    placeholder="Enter your username"
                                    autocomplete="username"
-                                   autofocus />
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                   autofocus
+                                   aria-describedby="username-help" />
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
                                 <i data-lucide="at-sign" class="w-5 h-5 text-gray-400"></i>
                             </div>
                         </div>
                         <span asp-validation-for="Username" class="form-error"></span>
                     </div>
 
-                    <!-- Password Field -->
+                    <!-- Password Field (HCI: Toggle visibility, security indicator) -->
                     <div class="form-group">
                         <label asp-for="Password" class="form-label">
                             <i data-lucide="lock" class="w-4 h-4 inline mr-1"></i>
@@ -85,43 +88,44 @@
                         <div class="relative">
                             <input asp-for="Password" 
                                    type="password" 
-                                   class="form-input pl-11" 
+                                   class="form-input pl-11 pr-11" 
                                    placeholder="Enter your password"
                                    autocomplete="current-password"
                                    id="password-input" />
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <i data-lucide="key" class="w-5 h-5 text-gray-400"></i>
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <i data-lucide="key-round" class="w-5 h-5 text-gray-400"></i>
                             </div>
                             <button type="button" 
-                                    class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center hover:text-cyan-600 transition-colors"
                                     onclick="togglePassword()"
-                                    aria-label="Toggle password visibility">
-                                <i data-lucide="eye" class="w-5 h-5 text-gray-400 hover:text-gray-600" id="eye-icon"></i>
+                                    aria-label="Toggle password visibility"
+                                    title="Show/Hide Password">
+                                <i data-lucide="eye" class="w-5 h-5 text-gray-400 hover:text-cyan-600" id="eye-icon"></i>
                             </button>
                         </div>
                         <span asp-validation-for="Password" class="form-error"></span>
                     </div>
 
-                    <!-- Submit Button -->
-                    <button type="submit" class="btn btn-primary w-full btn-lg mt-6">
+                    <!-- Submit Button (HCI: Clear action, loading state) -->
+                    <button type="submit" class="btn btn-primary w-full btn-lg mt-6" id="login-btn">
                         <i data-lucide="log-in" class="w-5 h-5"></i>
-                        Sign In
+                        <span id="login-text">Sign In</span>
                     </button>
                 </form>
 
-                <!-- Forgot Password Link -->
-                <div class="mt-4 text-center">
-                    <a asp-action="ForgotPassword" class="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
-                        <i data-lucide="key" class="w-4 h-4 inline mr-1"></i>
+                <!-- Forgot Password Link (HCI: Recovery option visible) -->
+                <div class="mt-5 text-center">
+                    <a asp-action="ForgotPassword" class="text-sm text-cyan-600 hover:text-cyan-700 font-semibold transition-colors inline-flex items-center gap-1.5">
+                        <i data-lucide="help-circle" class="w-4 h-4"></i>
                         Forgot your password?
                     </a>
                 </div>
 
-                <!-- Footer Info -->
-                <div class="mt-8 text-center">
-                    <p class="text-sm text-gray-500">
-                        <i data-lucide="shield-check" class="w-4 h-4 inline mr-1"></i>
-                        Your connection is secure
+                <!-- Security Info (HCI: Trust indicators) -->
+                <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                    <p class="text-xs text-gray-500 flex items-center justify-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i>
+                        Your connection is encrypted and secure
                     </p>
                 </div>
             </div>
@@ -130,7 +134,7 @@
         <!-- Back to Home Link -->
         <div class="mt-6 text-center">
             <a href="@Url.Action("Index", "Home")" data-spa-ignore 
-               class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white text-sm font-medium transition-all backdrop-blur-sm">
+               class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-sm font-semibold transition-all backdrop-blur-sm border border-white/20">
                 <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 Back to Home
             </a>

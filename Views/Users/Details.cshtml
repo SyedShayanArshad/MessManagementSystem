@@ -8,7 +8,7 @@
     <nav class="page-breadcrumb" aria-label="Breadcrumb">
         <span class="breadcrumb-item">
             <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
-                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                <i data-lucide="layout-dashboard" class="w-4 h-4 inline"></i>
                 Dashboard
             </a>
         </span>
@@ -37,7 +37,7 @@
             <div class="card-body">
                 <!-- Member Profile Header -->
                 <div class="flex items-center gap-6 mb-6 pb-6 border-b border-gray-100">
-                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold @(Model.Role == "Admin" ? "bg-linear-to-br from-purple-500 to-purple-600" : "bg-linear-to-br from-blue-500 to-blue-600")">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold @(Model.Role == "Admin" ? "bg-linear-to-br from-purple-500 to-purple-600" : "bg-linear-to-br from-cyan-500 to-cyan-600")">
                         @Model.FullName?.Substring(0, 1).ToUpper()
                     </div>
                     <div>
@@ -63,8 +63,8 @@
                 <!-- Member Details - 2 Column Grid -->
                 <div class="grid grid-cols-2 gap-4">
                     <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                        <div class="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center">
-                            <i data-lucide="user" class="w-4 h-4 text-blue-600"></i>
+                        <div class="w-9 h-9 rounded-lg bg-cyan-100 flex items-center justify-center">
+                            <i data-lucide="user" class="w-4 h-4 text-cyan-600"></i>
                         </div>
                         <div>
                             <p class="text-xs text-gray-500">Full Name</p>

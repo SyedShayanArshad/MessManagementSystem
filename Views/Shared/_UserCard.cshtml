@@ -6,7 +6,7 @@
 <div class="card user-card" data-user-id="@Model.UserId">
     <div class="card-body">
         <div class="flex items-center gap-4">
-            <div class="user-avatar-lg @(Model.Role == "Admin" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700")">
+            <div class="user-avatar-lg @(Model.Role == "Admin" ? "bg-amber-100 text-amber-700" : "bg-cyan-100 text-cyan-700")">
                 @Model.FullName.Substring(0, 1).ToUpper()
             </div>
             <div class="flex-1">

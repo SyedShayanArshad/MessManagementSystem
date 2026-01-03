@@ -25,7 +25,7 @@
     <nav class="page-breadcrumb" aria-label="Breadcrumb">
         <span class="breadcrumb-item">
             <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
-                <i data-lucide="home" class="w-4 h-4 inline"></i>
+                <i data-lucide="layout-dashboard" class="w-4 h-4 inline"></i>
                 Dashboard
             </a>
         </span>
@@ -78,11 +78,11 @@
     </div>
     <!-- Today's Members -->
     <div class="stat-card">
-        <div class="stat-icon bg-blue-100">
-            <i data-lucide="users" class="w-6 h-6 text-blue-600"></i>
+        <div class="stat-icon bg-cyan-100">
+            <i data-lucide="users" class="w-6 h-6 text-cyan-600"></i>
         </div>
         <div class="stat-content">
-            <div class="stat-value text-blue-600">@todayMembersWithTea / @totalMembers</div>
+            <div class="stat-value text-cyan-600">@todayMembersWithTea / @totalMembers</div>
             <div class="stat-label">Members Today</div>
         </div>
     </div>
@@ -212,8 +212,8 @@
                         
                         <a href="@Url.Action("Index", new { date = dateStr, periodId = selectedPeriod.PeriodId })"
                            class="aspect-square rounded-lg p-1 flex flex-col items-center justify-center cursor-pointer transition-all
-                                  @bgClass @(isSelected ? "ring-2 ring-amber-500 ring-offset-1" : "") @(isToday ? "font-bold ring-2 ring-blue-400" : "") @(isPast && !isSelected ? "opacity-75" : "")">
-                            <span class="text-sm @(isToday ? "text-blue-700" : "text-gray-700")">@d.Day</span>
+                                  @bgClass @(isSelected ? "ring-2 ring-amber-500 ring-offset-1" : "") @(isToday ? "font-bold ring-2 ring-cyan-400" : "") @(isPast && !isSelected ? "opacity-75" : "")">
+                            <span class="text-sm @(isToday ? "text-cyan-700" : "text-gray-700")">@d.Day</span>
                             <span class="text-[10px] text-gray-500">@d.ToString("MMM")</span>
                             @if (hasData)
                             {
@@ -262,7 +262,7 @@
 
     <!-- Pending Verifications Panel -->
     <div class="card">
-        <div class="card-header bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200">
+        <div class="card-header bg-linear-to-r from-orange-50 to-amber-50 border-b border-orange-200">
             <h3 class="card-title text-orange-800">
                 <i data-lucide="clock" class="w-5 h-5 text-orange-600"></i>
                 Pending Verifications
@@ -277,7 +277,7 @@
                         <div class="p-3 hover:bg-orange-50/50 transition-colors">
                             <div class="flex items-start justify-between gap-2">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
+                                    <div class="w-8 h-8 rounded-full bg-linear-to-br from-amber-400 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
                                         @(pending.User?.FullName?.Substring(0, 1).ToUpper() ?? "?")
                                     </div>
                                     <div>
@@ -320,7 +320,7 @@
 <form asp-action="SaveTea" method="post" id="tea-form">
     <input type="hidden" asp-for="PeriodId" />
     <div class="card">
-        <div class="card-header bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-200">
+        <div class="card-header bg-linear-to-r from-amber-50 to-yellow-50 border-b border-amber-200">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <h3 class="card-title text-amber-800">
                     <i data-lucide="coffee" class="w-5 h-5 text-amber-600"></i>
@@ -348,9 +348,9 @@
                     <span class="font-semibold text-amber-600" id="total-cups">@Model.Items.Sum(i => i.Cups)</span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
+                    <i data-lucide="users" class="w-4 h-4 text-cyan-600"></i>
                     <span class="text-sm text-gray-600">Members with Tea:</span>
-                    <span class="font-semibold text-blue-600" id="members-with-tea">@Model.Items.Count(i => i.Cups > 0)</span>
+                    <span class="font-semibold text-cyan-600" id="members-with-tea">@Model.Items.Count(i => i.Cups > 0)</span>
                 </div>
                 <div class="flex items-center gap-2 ml-auto">
                     <span class="text-sm text-gray-600">Total Cost:</span>
@@ -424,7 +424,7 @@
                                 <input type="hidden" asp-for="Items[i].UserId" />
                                 <input type="hidden" asp-for="Items[i].TeaEntryId" />
                                 <div class="flex items-center gap-3">
-                                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center text-white font-semibold text-sm">
+                                    <div class="w-9 h-9 rounded-full bg-linear-to-br from-amber-500 to-yellow-600 flex items-center justify-center text-white font-semibold text-sm">
                                         @item.FullName?.Substring(0, 1).ToUpper()
                                     </div>
                                     <div>
@@ -516,7 +516,7 @@ else
 {
 <!-- READ-ONLY HISTORY VIEW -->
 <div class="card">
-    <div class="card-header bg-gradient-to-r from-gray-100 to-slate-100 border-b border-gray-300">
+    <div class="card-header bg-linear-to-r from-gray-100 to-slate-100 border-b border-gray-300">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h3 class="card-title text-gray-700">
                 <i data-lucide="history" class="w-5 h-5 text-gray-500"></i>
@@ -536,9 +536,9 @@ else
                 <span class="font-semibold text-amber-600">@Model.Items.Sum(i => i.Cups)</span>
             </div>
             <div class="flex items-center gap-2">
-                <i data-lucide="users" class="w-4 h-4 text-blue-600"></i>
+                <i data-lucide="users" class="w-4 h-4 text-cyan-600"></i>
                 <span class="text-sm text-gray-600">Members with Tea:</span>
-                <span class="font-semibold text-blue-600">@Model.Items.Count(i => i.Cups > 0)</span>
+                <span class="font-semibold text-cyan-600">@Model.Items.Count(i => i.Cups > 0)</span>
             </div>
             <div class="flex items-center gap-2 ml-auto">
                 <span class="text-sm text-gray-600">Total Cost:</span>
@@ -591,7 +591,7 @@ else
                     <tr class="@(i % 2 == 0 ? "bg-white" : "bg-gray-50/50")">
                         <td>
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white font-semibold text-sm">
+                                <div class="w-9 h-9 rounded-full bg-linear-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white font-semibold text-sm">
                                     @item.FullName?.Substring(0, 1).ToUpper()
                                 </div>
                                 <div>
