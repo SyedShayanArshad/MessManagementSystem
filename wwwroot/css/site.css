@@ -746,15 +746,6 @@
   .footer-link {
     @apply text-gray-400 hover:text-white transition-colors duration-200;
   }
-
-  .footer-bottom {
-    @apply border-t border-gray-800 mt-6 pt-6 flex flex-col md:flex-row justify-between items-center gap-4;
-  }
-
-  .footer-copyright {
-    @apply text-gray-500 text-sm;
-  }
-
   /* Login Page Specific */
   .login-container {
     @apply min-h-screen flex items-center justify-center p-4;

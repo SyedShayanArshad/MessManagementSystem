@@ -88,9 +88,8 @@ namespace MessManagement.Controllers
             var currentPeriod = allPeriods.FirstOrDefault(p => p.StartDate <= DateTime.Today && p.EndDate >= DateTime.Today);
             ViewBag.CurrentPeriod = currentPeriod;
             
-            // Check if selected date is editable (today or no data yet, or within current period)
-            var isEditable = modelDate >= DateTime.Today || 
-                            (currentPeriod != null && modelDate >= currentPeriod.StartDate && modelDate <= currentPeriod.EndDate);
+            // Allow editing any date within current period
+            var isEditable = currentPeriod != null && modelDate >= currentPeriod.StartDate && modelDate <= currentPeriod.EndDate;
             ViewBag.IsEditable = isEditable;
             
             // Pending verifications
@@ -327,32 +326,32 @@ namespace MessManagement.Controllers
                     // Update only the specific meal type
                     if (mealType == "Breakfast")
                     {
-                        attendance.IsBreakfastPresent = item.IsBreakfastPresent;
-                        attendance.BreakfastDishPlanId = item.IsBreakfastPresent ? item.BreakfastDishPlanId : null;
-                        // Reset only breakfast verification (Issue 3 fix)
-                        attendance.BreakfastVerified = false;
-                        attendance.BreakfastVerifiedOn = null;
+                        // Skip if already verified
+                        if (!attendance.BreakfastVerified)
+                        {
+                            attendance.IsBreakfastPresent = item.IsBreakfastPresent;
+                            attendance.BreakfastDishPlanId = item.IsBreakfastPresent ? item.BreakfastDishPlanId : null;
+                        }
                     }
                     else if (mealType == "Lunch")
                     {
-                        attendance.IsLunchPresent = item.IsLunchPresent;
-                        attendance.LunchDishPlanId = item.IsLunchPresent ? item.LunchDishPlanId : null;
-                        // Reset only lunch verification (Issue 3 fix)
-                        attendance.LunchVerified = false;
-                        attendance.LunchVerifiedOn = null;
+                        // Skip if already verified
+                        if (!attendance.LunchVerified)
+                        {
+                            attendance.IsLunchPresent = item.IsLunchPresent;
+                            attendance.LunchDishPlanId = item.IsLunchPresent ? item.LunchDishPlanId : null;
+                        }
                     }
                     else if (mealType == "Dinner")
                     {
-                        attendance.IsDinnerPresent = item.IsDinnerPresent;
-                        attendance.DinnerDishPlanId = item.IsDinnerPresent ? item.DinnerDishPlanId : null;
-                        // Reset only dinner verification (Issue 3 fix)
-                        attendance.DinnerVerified = false;
-                        attendance.DinnerVerifiedOn = null;
+                        // Skip if already verified
+                        if (!attendance.DinnerVerified)
+                        {
+                            attendance.IsDinnerPresent = item.IsDinnerPresent;
+                            attendance.DinnerDishPlanId = item.IsDinnerPresent ? item.DinnerDishPlanId : null;
+                        }
                     }
                     attendance.IsPresent = attendance.IsBreakfastPresent || attendance.IsLunchPresent || attendance.IsDinnerPresent;
-                    // Reset legacy verification flag since at least one meal needs verification
-                    attendance.VerifiedByUser = false;
-                    attendance.VerifiedOn = null;
                     _context.Attendances.Update(attendance);
                 }
 

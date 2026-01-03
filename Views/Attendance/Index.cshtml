@@ -533,24 +533,28 @@
                             <!-- Breakfast Column -->
                             <td class="bg-amber-50/50">
                                 <div class="flex flex-col gap-2">
-                                    <label class="relative inline-flex items-center gap-2 cursor-pointer">
+                                    <label class="relative inline-flex items-center gap-2 @(item.BreakfastVerified ? "cursor-not-allowed opacity-60" : "cursor-pointer")">
                                         <input asp-for="Items[i].IsBreakfastPresent" 
                                                type="checkbox" 
                                                class="sr-only peer meal-checkbox"
                                                data-meal="breakfast"
-                                               data-index="@i" />
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                                               data-index="@i"
+                                               disabled="@item.BreakfastVerified" />
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 @(item.BreakfastVerified ? "peer-disabled:bg-gray-300 peer-disabled:opacity-60" : "")"></div>
                                         <span class="text-xs text-gray-600">Present</span>
                                         @if (item.BreakfastVerified)
                                         {
-                                            <span class="badge bg-green-100 text-green-700 text-xs">Verified</span>
+                                            <span class="badge bg-green-100 text-green-700 text-xs">
+                                                <i data-lucide="lock" class="w-3 h-3 inline"></i> Verified
+                                            </span>
                                         }
                                     </label>
                                     <select asp-for="Items[i].BreakfastDishPlanId" 
                                             asp-items="(IEnumerable<SelectListItem>)ViewBag.BreakfastDishes"
                                             class="form-select text-xs meal-select"
                                             data-meal="breakfast"
-                                            data-index="@i">
+                                            data-index="@i"
+                                            disabled="@item.BreakfastVerified">
                                         <option value="">-- Select Dish --</option>
                                     </select>
                                 </div>
@@ -558,24 +562,28 @@
                             <!-- Lunch Column -->
                             <td class="bg-blue-50/50">
                                 <div class="flex flex-col gap-2">
-                                    <label class="relative inline-flex items-center gap-2 cursor-pointer">
+                                    <label class="relative inline-flex items-center gap-2 @(item.LunchVerified ? "cursor-not-allowed opacity-60" : "cursor-pointer")">
                                         <input asp-for="Items[i].IsLunchPresent" 
                                                type="checkbox" 
                                                class="sr-only peer meal-checkbox"
                                                data-meal="lunch"
-                                               data-index="@i" />
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                                               data-index="@i"
+                                               disabled="@item.LunchVerified" />
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500 @(item.LunchVerified ? "peer-disabled:bg-gray-300 peer-disabled:opacity-60" : "")"></div>
                                         <span class="text-xs text-gray-600">Present</span>
                                         @if (item.LunchVerified)
                                         {
-                                            <span class="badge bg-green-100 text-green-700 text-xs">Verified</span>
+                                            <span class="badge bg-green-100 text-green-700 text-xs">
+                                                <i data-lucide="lock" class="w-3 h-3 inline"></i> Verified
+                                            </span>
                                         }
                                     </label>
                                     <select asp-for="Items[i].LunchDishPlanId" 
                                             asp-items="(IEnumerable<SelectListItem>)ViewBag.LunchDishes"
                                             class="form-select text-xs meal-select"
                                             data-meal="lunch"
-                                            data-index="@i">
+                                            data-index="@i"
+                                            disabled="@item.LunchVerified">
                                         <option value="">-- Select Dish --</option>
                                     </select>
                                 </div>
@@ -583,24 +591,28 @@
                             <!-- Dinner Column -->
                             <td class="bg-purple-50/50">
                                 <div class="flex flex-col gap-2">
-                                    <label class="relative inline-flex items-center gap-2 cursor-pointer">
+                                    <label class="relative inline-flex items-center gap-2 @(item.DinnerVerified ? "cursor-not-allowed opacity-60" : "cursor-pointer")">
                                         <input asp-for="Items[i].IsDinnerPresent" 
                                                type="checkbox" 
                                                class="sr-only peer meal-checkbox"
                                                data-meal="dinner"
-                                               data-index="@i" />
-                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                                               data-index="@i"
+                                               disabled="@item.DinnerVerified" />
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500 @(item.DinnerVerified ? "peer-disabled:bg-gray-300 peer-disabled:opacity-60" : "")"></div>
                                         <span class="text-xs text-gray-600">Present</span>
                                         @if (item.DinnerVerified)
                                         {
-                                            <span class="badge bg-green-100 text-green-700 text-xs">Verified</span>
+                                            <span class="badge bg-green-100 text-green-700 text-xs">
+                                                <i data-lucide="lock" class="w-3 h-3 inline"></i> Verified
+                                            </span>
                                         }
                                     </label>
                                     <select asp-for="Items[i].DinnerDishPlanId" 
                                             asp-items="(IEnumerable<SelectListItem>)ViewBag.DinnerDishes"
                                             class="form-select text-xs meal-select"
                                             data-meal="dinner"
-                                            data-index="@i">
+                                            data-index="@i"
+                                            disabled="@item.DinnerVerified">
                                         <option value="">-- Select Dish --</option>
                                     </select>
                                 </div>
@@ -620,7 +632,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="text-sm text-gray-600">
                     <i data-lucide="info" class="w-4 h-4 inline mr-1"></i>
-                    Mark presence and select dishes for each meal. Save each meal type separately.
+                    Mark presence and select dishes. <strong>Verified meals are locked and cannot be changed.</strong>
                 </p>
                 <div class="flex flex-wrap gap-2">
                     <button type="submit" formaction="@Url.Action("SaveBreakfast")" class="btn bg-amber-500 hover:bg-amber-600 text-white">
@@ -887,7 +899,10 @@ else
         // Set all checkboxes for a meal
         function setAllMeal(meal, checked) {
             document.querySelectorAll(`input[data-meal="${meal}"]`).forEach(cb => {
-                cb.checked = checked;
+                // Skip disabled checkboxes (verified meals)
+                if (!cb.disabled) {
+                    cb.checked = checked;
+                }
             });
             calculateTotals();
             updateCounts();

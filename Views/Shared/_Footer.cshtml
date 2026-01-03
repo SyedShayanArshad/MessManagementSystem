@@ -1,6 +1,6 @@
 <footer class="app-footer" role="contentinfo">
     <div class="footer-content">
-        <div class="grid md:grid-cols-3 gap-8">
+        <div class="flex flex-col md:flex-row justify-around gap-8 items-center">
             <!-- Brand Section -->
             <div>
                 <div class="flex items-center space-x-3 mb-4">
@@ -10,7 +10,7 @@
                     <div class="footer-logo">MessHub</div>
                 </div>
                 <p class="footer-description">
-                    A comprehensive mess management solution for educational institutions. 
+                    A comprehensive mess management solution for educational institutions.
                     Track attendance, manage payments, and plan meals efficiently.
                 </p>
             </div>
@@ -18,7 +18,7 @@
             <!-- Quick Links -->
             <div>
                 <h4 class="text-white font-semibold mb-4">Quick Links</h4>
-                <div class="footer-links flex-col space-y-2">
+                <div class="footer-links flex justify-between">
                     <a href="@Url.Action("Index", "Home")" class="footer-link block">
                         <i data-lucide="home" class="w-4 h-4 inline mr-2"></i>
                         Dashboard
@@ -36,10 +36,8 @@
                     }
                 </div>
             </div>
-    </div>
-        <div class="footer-bottom">
-            <p class="footer-copyright text-center">
-                &copy; @DateTime.Now.Year MessHub - Mess Management System. All rights reserved.
-            </p>
         </div>
+        <p class="text-gray-500 text-sm mt-4 text-center border-t-2 border-gray-700 pt-4">
+            &copy; @DateTime.Now.Year MessHub - Mess Management System. All rights reserved.
+        </p>
 </footer>
