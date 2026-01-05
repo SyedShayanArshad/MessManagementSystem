@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using MessManagement.Data;
 using MessManagement.Models;
 using MessManagement.ViewModels;
+using MessManagement.Services;
 using Stripe;
 using Stripe.Checkout;
 
@@ -13,8 +14,15 @@ namespace MessManagement.Controllers
     public class PaymentController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(ApplicationDbContext context) => _context = context;
+        public PaymentController(ApplicationDbContext context, IEmailService emailService, ILogger<PaymentController> logger)
+        {
+            _context = context;
+            _emailService = emailService;
+            _logger = logger;
+        }
 
         // Admin dashboard showing payment summaries
         [Authorize(Roles = "Admin")]
@@ -184,7 +192,10 @@ namespace MessManagement.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Approve(int id)
         {
-            var payment = await _context.Payments.FindAsync(id);
+            var payment = await _context.Payments
+                .Include(p => p.User)
+                .Include(p => p.MessPeriod)
+                .FirstOrDefaultAsync(p => p.PaymentId == id);
             if (payment == null) return NotFound();
 
             // Get admin user id
@@ -198,6 +209,28 @@ namespace MessManagement.Controllers
 
             _context.Update(payment);
             await _context.SaveChangesAsync();
+
+            // Send payment approval email if user has email
+            if (payment.User != null && !string.IsNullOrWhiteSpace(payment.User.Email))
+            {
+                try
+                {
+                    var periodName = payment.MessPeriod?.PeriodName ?? "N/A";
+                    await _emailService.SendPaymentApprovalEmailAsync(
+                        payment.User.Email,
+                        payment.User.FullName,
+                        payment.Amount,
+                        payment.PaymentMethod,
+                        periodName,
+                        payment.ApprovedAt ?? DateTime.Now
+                    );
+                    _logger.LogInformation("Payment approval email sent to {Email} for payment {PaymentId}", payment.User.Email, payment.PaymentId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send payment approval email to {Email}", payment.User.Email);
+                }
+            }
 
             TempData["SuccessMessage"] = "Payment approved successfully!";
             return RedirectToAction(nameof(PendingApprovals));

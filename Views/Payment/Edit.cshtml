@@ -23,6 +23,7 @@
         </span>
         <span class="breadcrumb-item text-gray-900 font-medium">Edit</span>
     </nav>
+
     <h1 class="page-title">
         <span class="page-title-icon">
             <i data-lucide="receipt" class="w-6 h-6"></i>
@@ -32,102 +33,132 @@
     <p class="page-description">Update payment details and information.</p>
 </div>
 
-<div class="max-w-2xl">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i data-lucide="file-edit" class="w-5 h-5 text-cyan-600"></i>
-                Payment Information
-            </h3>
-        </div>
-        <div class="card-body">
-            <form asp-action="Edit" method="post" novalidate>
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div class="alert alert-error mb-6" role="alert">
-                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
-                        <div asp-validation-summary="All" class="text-sm"></div>
-                    </div>
-                }
-                <input type="hidden" asp-for="PaymentId" />
-                <input type="hidden" asp-for="AttendanceId" />
+<!-- CENTERED CONTAINER -->
+<div class="flex justify-center">
+    <div class="w-full max-w-2xl">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="file-edit" class="w-5 h-5 text-cyan-600"></i>
+                    Payment Information
+                </h3>
+            </div>
 
-                <div class="form-group">
-                    <label asp-for="UserId" class="form-label">
-                        <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
-                        Member <span class="text-red-500">*</span>
-                    </label>
-                    <select asp-for="UserId" class="form-select" asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(ViewBag.Users, "UserId", "FullName"))">
-                    </select>
-                </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post" novalidate>
 
-                <div class="form-group">
-                    <label asp-for="PeriodId" class="form-label">
-                        <i data-lucide="calendar-range" class="w-4 h-4 inline mr-1"></i>
-                        Mess Period <span class="text-red-500">*</span>
-                    </label>
-                    <select asp-for="PeriodId" class="form-select" asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(ViewBag.Periods, "PeriodId", "PeriodName"))">
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Amount" class="form-label">
-                        <i data-lucide="banknote" class="w-4 h-4 inline mr-1"></i>
-                        Amount (PKR) <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rs.</span>
-                        <input asp-for="Amount" class="form-input pl-12" placeholder="0" step="1" />
-                    </div>
-                    <span asp-validation-for="Amount" class="form-error"></span>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="PaymentMethod" class="form-label">
-                        <i data-lucide="wallet" class="w-4 h-4 inline mr-1"></i>
-                        Payment Method <span class="text-red-500">*</span>
-                    </label>
-                    <select asp-for="PaymentMethod" class="form-select">
-                        <option value="Cash">💵 Cash</option>
-                        <option value="Bank Transfer">🏦 Bank Transfer</option>
-                        <option value="Stripe">💳 Card (Stripe)</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label asp-for="Remarks" class="form-label">
-                        <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>
-                        Remarks
-                    </label>
-                    <input asp-for="Remarks" class="form-input" placeholder="Optional notes..." />
-                </div>
-
-                @if (Model.Attendance != null)
-                {
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i data-lucide="link" class="w-4 h-4 inline mr-1"></i>
-                            Linked Attendance
-                        </label>
-                        <div class="p-3 bg-cyan-50 rounded-lg border border-cyan-200 text-cyan-800">
-                            <i data-lucide="calendar-check" class="w-4 h-4 inline mr-1"></i>
-                            @Model.Attendance.Date.ToShortDateString()
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-error mb-6" role="alert">
+                            <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
+                            <div asp-validation-summary="All" class="text-sm"></div>
                         </div>
-                    </div>
-                }
+                    }
 
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
-                    <a asp-action="Index" class="btn btn-secondary">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-success">
-                        <i data-lucide="save" class="w-4 h-4"></i>
-                        Save Changes
-                    </button>
-                </div>
-            </form>
+                    <input type="hidden" asp-for="PaymentId" />
+                    <input type="hidden" asp-for="AttendanceId" />
+
+                    <!-- TWO COLUMN GRID -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <!-- Member -->
+                        <div class="form-group">
+                            <label asp-for="UserId" class="form-label">
+                                <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
+                                Member <span class="text-red-500">*</span>
+                            </label>
+                            <select asp-for="UserId"
+                                    class="form-select"
+                                    asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(ViewBag.Users, "UserId", "FullName"))">
+                            </select>
+                        </div>
+
+                        <!-- Mess Period -->
+                        <div class="form-group">
+                            <label asp-for="PeriodId" class="form-label">
+                                <i data-lucide="calendar-range" class="w-4 h-4 inline mr-1"></i>
+                                Mess Period <span class="text-red-500">*</span>
+                            </label>
+                            <select asp-for="PeriodId"
+                                    class="form-select"
+                                    asp-items="@(new Microsoft.AspNetCore.Mvc.Rendering.SelectList(ViewBag.Periods, "PeriodId", "PeriodName"))">
+                            </select>
+                        </div>
+
+                        <!-- Amount -->
+                        <div class="form-group">
+                            <label asp-for="Amount" class="form-label">
+                                <i data-lucide="banknote" class="w-4 h-4 inline mr-1"></i>
+                                Amount (PKR) <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">
+                                    Rs.
+                                </span>
+                                <input asp-for="Amount"
+                                       class="form-input pl-12"
+                                       placeholder="0"
+                                       step="1" />
+                            </div>
+                            <span asp-validation-for="Amount" class="form-error"></span>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="form-group">
+                            <label asp-for="PaymentMethod" class="form-label">
+                                <i data-lucide="wallet" class="w-4 h-4 inline mr-1"></i>
+                                Payment Method <span class="text-red-500">*</span>
+                            </label>
+                            <select asp-for="PaymentMethod" class="form-select">
+                                <option value="Cash">💵 Cash</option>
+                                <option value="Bank Transfer">🏦 Bank Transfer</option>
+                                <option value="Stripe">💳 Card (Stripe)</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Remarks (FULL WIDTH) -->
+                        <div class="form-group md:col-span-2">
+                            <label asp-for="Remarks" class="form-label">
+                                <i data-lucide="file-text" class="w-4 h-4 inline mr-1"></i>
+                                Remarks
+                            </label>
+                            <input asp-for="Remarks"
+                                   class="form-input"
+                                   placeholder="Optional notes..." />
+                        </div>
+
+                        <!-- Attendance (FULL WIDTH) -->
+                        @if (Model.Attendance != null)
+                        {
+                            <div class="form-group md:col-span-2">
+                                <label class="form-label">
+                                    <i data-lucide="link" class="w-4 h-4 inline mr-1"></i>
+                                    Linked Attendance
+                                </label>
+                                <div class="p-3 bg-cyan-50 rounded-lg border border-cyan-200 text-cyan-800">
+                                    <i data-lucide="calendar-check" class="w-4 h-4 inline mr-1"></i>
+                                    @Model.Attendance.Date.ToShortDateString()
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="flex justify-end gap-3 pt-6 border-t border-gray-100 mt-6">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Save Changes
+                        </button>
+                    </div>
+
+                </form>
+            </div>
         </div>
     </div>
 </div>

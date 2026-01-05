@@ -5,6 +5,7 @@ using MessManagement.Data;
 using MessManagement.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using MessManagement.Services;
 
 namespace MessManagement.Controllers
 {
@@ -13,11 +14,15 @@ namespace MessManagement.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly PasswordHasher<User> _passwordHasher;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(ApplicationDbContext context)
+        public UsersController(ApplicationDbContext context, IEmailService emailService, ILogger<UsersController> logger)
         {
             _context = context;
             _passwordHasher = new PasswordHasher<User>();
+            _emailService = emailService;
+            _logger = logger;
         }
 
         // GET: Users
@@ -67,7 +72,27 @@ namespace MessManagement.Controllers
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
             _context.Add(user);
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = $"Member '{user.FullName}' has been created successfully!";
+
+            // Send welcome email if email is provided
+            if (!string.IsNullOrWhiteSpace(user.Email))
+            {
+                try
+                {
+                    await _emailService.SendWelcomeEmailAsync(user.Email, user.Username, user.FullName, password);
+                    TempData["SuccessMessage"] = $"Member '{user.FullName}' has been created successfully! A welcome email has been sent.";
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send welcome email to {Email}", user.Email);
+                    TempData["SuccessMessage"] = $"Member '{user.FullName}' has been created successfully!";
+                    TempData["WarningMessage"] = "Welcome email could not be sent. Please ensure SMTP is configured.";
+                }
+            }
+            else
+            {
+                TempData["SuccessMessage"] = $"Member '{user.FullName}' has been created successfully!";
+            }
+            
             return RedirectToAction(nameof(Index));
         }
 
@@ -142,6 +167,20 @@ namespace MessManagement.Controllers
 
             user.IsActive = !user.IsActive;
             await _context.SaveChangesAsync();
+
+            // Send account status email if email is provided
+            if (!string.IsNullOrWhiteSpace(user.Email))
+            {
+                try
+                {
+                    await _emailService.SendAccountStatusEmailAsync(user.Email, user.FullName, user.IsActive);
+                    _logger.LogInformation("Account status email sent to {Email}, Status: {Status}", user.Email, user.IsActive ? "Activated" : "Deactivated");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to send account status email to {Email}", user.Email);
+                }
+            }
 
             TempData["SuccessMessage"] = user.IsActive
                 ? $"Member '{user.FullName}' activated successfully."

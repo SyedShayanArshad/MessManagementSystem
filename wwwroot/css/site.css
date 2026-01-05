@@ -1081,40 +1081,70 @@
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
+ /* =========================
+   LOGIN PAGE (POLISHED)
+========================= */
 
-  /* Login Page */
-  .login-container {
-    @apply min-h-screen flex items-center justify-center p-4;
-    background: linear-gradient(135deg, #0e7490 0%, #0891b2 40%, #06b6d4 70%, #22d3ee 100%);
-  }
+.login-container {
+  @apply min-h-screen flex flex-col items-center justify-center p-4 relative;
+  background: linear-gradient(
+    135deg,
+    #0e7490 0%,
+    #0891b2 40%,
+    #06b6d4 70%,
+    #22d3ee 100%
+  );
+}
 
-  .login-card {
-    @apply bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-md;
-    animation: fadeInUp 0.5s ease-out;
-  }
+.login-card {
+  @apply bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden relative;
+  animation: fadeInUp 0.5s ease-out;
+}
 
-  .login-header {
-    @apply p-8 text-center;
-    background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
-  }
+.login-header {
+  @apply p-6 md:p-8 text-center;
+  background: linear-gradient(180deg, #fafafa 0%, #f5f5f5 100%);
+}
 
-  .login-logo {
-    @apply w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center;
-    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-    box-shadow: var(--shadow-primary);
-  }
+.login-logo {
+  @apply w-20 h-20 mx-auto mb-5 rounded-2xl flex items-center justify-center;
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  box-shadow: 0 12px 30px rgba(6,182,212,.35);
+}
 
-  .login-title {
-    @apply text-2xl font-bold text-gray-900;
-  }
+.login-title {
+  @apply text-2xl font-bold text-gray-900;
+}
 
-  .login-subtitle {
-    @apply text-gray-500 mt-1;
-  }
+.login-subtitle {
+  @apply text-gray-500 mt-1;
+}
 
-  .login-body {
-    @apply p-8;
-  }
+.login-body {
+  @apply p-6 md:p-8;
+}
+
+/* Inputs polish */
+.form-input {
+  @apply w-full rounded-xl border border-gray-300 px-4 py-3 text-sm
+         focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500
+         transition;
+}
+
+/* Button polish */
+.btn-primary {
+  @apply bg-cyan-600 text-white rounded-xl py-3 font-semibold
+         hover:bg-cyan-700 transition;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+}
+
+/* Error */
+.alert-error {
+  @apply bg-red-50 text-red-700 border border-red-200 rounded-xl p-4 text-sm;
+}
 
   /* Footer */
   .app-footer {

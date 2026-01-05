@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MessManagement.Data;
 using MessManagement.Models;
+using MessManagement.Services;
 using System.Text;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -14,6 +15,8 @@ namespace MessManagement.Controllers
     public class ReportController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<ReportController> _logger;
         
         static ReportController()
         {
@@ -21,7 +24,12 @@ namespace MessManagement.Controllers
             QuestPDF.Settings.License = LicenseType.Community;
         }
         
-        public ReportController(ApplicationDbContext context) => _context = context;
+        public ReportController(ApplicationDbContext context, IEmailService emailService, ILogger<ReportController> logger)
+        {
+            _context = context;
+            _emailService = emailService;
+            _logger = logger;
+        }
 
         // Helper method to generate report data
         private async Task<(List<dynamic> Report, MessPeriod Period, int TeaTotalCups, decimal TotalPayments)> GenerateReportData(int periodId)
@@ -629,6 +637,243 @@ public async Task ExportSummaryCsv(int periodId)
                 : $"MessReport_AllUsers_{period.PeriodName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd}.pdf";
             
             return File(pdfBytes, "application/pdf", fileName);
+        }
+
+        // Send bill statement emails to all users for a period
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendBillStatementEmails(int periodId)
+        {
+            var period = await _context.MessPeriods.FindAsync(periodId);
+            if (period == null)
+            {
+                TempData["ErrorMessage"] = "Period not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var start = period.StartDate;
+            var end = period.EndDate;
+
+            // Get all active users with email
+            var users = await _context.Users
+                .Where(u => u.IsActive && !string.IsNullOrEmpty(u.Email))
+                .OrderBy(u => u.FullName)
+                .ToListAsync();
+
+            if (!users.Any())
+            {
+                TempData["ErrorMessage"] = "No users with email addresses found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Get all tea entries for this period
+            var allTeaEntries = await _context.TeaEntries
+                .Where(t => t.PeriodId == periodId || (t.Date >= start && t.Date <= end))
+                .ToListAsync();
+
+            int successCount = 0;
+            int failCount = 0;
+            var failedUsers = new List<string>();
+
+            foreach (var user in users)
+            {
+                try
+                {
+                    // Get user's attendance records
+                    var attendances = await _context.Attendances
+                        .Where(a => a.UserId == user.UserId && a.Date >= start && a.Date <= end)
+                        .Include(a => a.BreakfastDishPlan)
+                        .Include(a => a.LunchDishPlan)
+                        .Include(a => a.DinnerDishPlan)
+                        .ToListAsync();
+
+                    // Calculate meal charges
+                    decimal mealCharges = 0;
+                    int breakfastCount = 0, lunchCount = 0, dinnerCount = 0;
+
+                    foreach (var att in attendances)
+                    {
+                        if (att.IsBreakfastPresent && att.BreakfastDishPlan != null)
+                        {
+                            mealCharges += att.BreakfastDishPlan.Price;
+                            breakfastCount++;
+                        }
+                        if (att.IsLunchPresent && att.LunchDishPlan != null)
+                        {
+                            mealCharges += att.LunchDishPlan.Price;
+                            lunchCount++;
+                        }
+                        if (att.IsDinnerPresent && att.DinnerDishPlan != null)
+                        {
+                            mealCharges += att.DinnerDishPlan.Price;
+                            dinnerCount++;
+                        }
+                    }
+
+                    // Calculate other charges
+                    decimal waterCharges = period.FixedWaterCharge;
+                    var userTeaEntries = allTeaEntries.Where(t => t.UserId == user.UserId).ToList();
+                    int teaCups = userTeaEntries.Sum(t => t.Cups);
+                    decimal teaCharges = teaCups * period.TeaPricePerCup;
+                    decimal totalCharges = mealCharges + waterCharges + teaCharges;
+
+                    // Calculate payments (only approved/completed)
+                    var totalPaid = await _context.Payments
+                        .Where(p => p.UserId == user.UserId && p.PeriodId == periodId &&
+                               (p.Status == PaymentStatus.Approved || p.Status == PaymentStatus.Completed))
+                        .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
+                    decimal balance = totalCharges - totalPaid;
+
+                    // Send email
+                    await _emailService.SendPeriodBillStatementEmailAsync(
+                        user.Email!,
+                        user.FullName,
+                        period,
+                        breakfastCount,
+                        lunchCount,
+                        dinnerCount,
+                        mealCharges,
+                        waterCharges,
+                        teaCups,
+                        teaCharges,
+                        totalCharges,
+                        totalPaid,
+                        balance
+                    );
+
+                    successCount++;
+                    _logger.LogInformation("Bill statement email sent to {Email} for period {Period}", user.Email, period.PeriodName);
+                }
+                catch (Exception ex)
+                {
+                    failCount++;
+                    failedUsers.Add(user.FullName);
+                    _logger.LogError(ex, "Failed to send bill statement email to {Email}", user.Email);
+                }
+            }
+
+            if (failCount == 0)
+            {
+                TempData["SuccessMessage"] = $"Bill statement emails sent successfully to {successCount} member(s)!";
+            }
+            else if (successCount > 0)
+            {
+                TempData["WarningMessage"] = $"Sent {successCount} email(s), but {failCount} failed: {string.Join(", ", failedUsers)}";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = $"Failed to send all {failCount} email(s). Please check SMTP configuration.";
+            }
+
+            return RedirectToAction(nameof(Index), new { periodId });
+        }
+
+        // Send bill statement email to a single user
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendBillStatementEmail(int periodId, int userId)
+        {
+            var period = await _context.MessPeriods.FindAsync(periodId);
+            if (period == null)
+            {
+                TempData["ErrorMessage"] = "Period not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (string.IsNullOrEmpty(user.Email))
+            {
+                TempData["ErrorMessage"] = $"No email address configured for {user.FullName}.";
+                return RedirectToAction(nameof(Index), new { periodId });
+            }
+
+            var start = period.StartDate;
+            var end = period.EndDate;
+
+            try
+            {
+                // Get user's attendance records
+                var attendances = await _context.Attendances
+                    .Where(a => a.UserId == user.UserId && a.Date >= start && a.Date <= end)
+                    .Include(a => a.BreakfastDishPlan)
+                    .Include(a => a.LunchDishPlan)
+                    .Include(a => a.DinnerDishPlan)
+                    .ToListAsync();
+
+                // Calculate meal charges
+                decimal mealCharges = 0;
+                int breakfastCount = 0, lunchCount = 0, dinnerCount = 0;
+
+                foreach (var att in attendances)
+                {
+                    if (att.IsBreakfastPresent && att.BreakfastDishPlan != null)
+                    {
+                        mealCharges += att.BreakfastDishPlan.Price;
+                        breakfastCount++;
+                    }
+                    if (att.IsLunchPresent && att.LunchDishPlan != null)
+                    {
+                        mealCharges += att.LunchDishPlan.Price;
+                        lunchCount++;
+                    }
+                    if (att.IsDinnerPresent && att.DinnerDishPlan != null)
+                    {
+                        mealCharges += att.DinnerDishPlan.Price;
+                        dinnerCount++;
+                    }
+                }
+
+                // Calculate other charges
+                decimal waterCharges = period.FixedWaterCharge;
+                var teaEntries = await _context.TeaEntries
+                    .Where(t => t.UserId == user.UserId && (t.PeriodId == periodId || (t.Date >= start && t.Date <= end)))
+                    .ToListAsync();
+                int teaCups = teaEntries.Sum(t => t.Cups);
+                decimal teaCharges = teaCups * period.TeaPricePerCup;
+                decimal totalCharges = mealCharges + waterCharges + teaCharges;
+
+                // Calculate payments (only approved/completed)
+                var totalPaid = await _context.Payments
+                    .Where(p => p.UserId == user.UserId && p.PeriodId == periodId &&
+                           (p.Status == PaymentStatus.Approved || p.Status == PaymentStatus.Completed))
+                    .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
+                decimal balance = totalCharges - totalPaid;
+
+                // Send email
+                await _emailService.SendPeriodBillStatementEmailAsync(
+                    user.Email,
+                    user.FullName,
+                    period,
+                    breakfastCount,
+                    lunchCount,
+                    dinnerCount,
+                    mealCharges,
+                    waterCharges,
+                    teaCups,
+                    teaCharges,
+                    totalCharges,
+                    totalPaid,
+                    balance
+                );
+
+                TempData["SuccessMessage"] = $"Bill statement email sent successfully to {user.FullName}!";
+                _logger.LogInformation("Bill statement email sent to {Email} for period {Period}", user.Email, period.PeriodName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send bill statement email to {Email}", user.Email);
+                TempData["ErrorMessage"] = $"Failed to send email to {user.FullName}. Please check SMTP configuration.";
+            }
+
+            return RedirectToAction(nameof(Index), new { periodId });
         }
     }
 }

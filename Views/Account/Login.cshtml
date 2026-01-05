@@ -8,200 +8,121 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Login to MessHub - Your Mess Management System" />
-    <meta name="theme-color" content="#0891b2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login - MessHub</title>
-    
-    <!-- Google Fonts - Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons -->
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    
+
     <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
 </head>
-<body>
-    <div class="login-container">
-        <!-- Background Decoration (HCI: Visual appeal without distraction) -->
-        <div class="absolute inset-0 overflow-hidden pointer-events-none">
-            <div class="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-cyan-300/20 blur-3xl"></div>
-            <div class="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-teal-300/20 blur-3xl"></div>
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-white/5 blur-2xl"></div>
-        </div>
 
-        <div class="login-card relative">
-            <!-- Login Header (HCI: Clear branding, welcoming) -->
-            <div class="login-header">
-                <div class="login-logo">
-                    <i data-lucide="chef-hat" class="w-10 h-10 text-white"></i>
-                </div>
-                <h1 class="login-title">Welcome Back!</h1>
-                <p class="login-subtitle">Sign in to continue to MessHub</p>
-            </div>
+<body class="font-[Inter]">
 
-            <!-- Login Body -->
-            <div class="login-body">
-                <!-- Validation Summary (HCI: Clear error feedback) -->
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div class="alert alert-error mb-6" role="alert" aria-live="polite">
-                        <i data-lucide="alert-circle" class="w-5 h-5 shrink-0"></i>
-                        <div>
-                            <p class="font-bold">Unable to sign in</p>
-                            <div asp-validation-summary="All" class="text-sm mt-1"></div>
-                        </div>
-                    </div>
-                }
+<div class="login-container">
 
-                <form asp-action="Login" method="post" novalidate>
-                    @Html.AntiForgeryToken()
-                    
-                    <!-- Username Field (HCI: Clear labels, helpful placeholders) -->
-                    <div class="form-group">
-                        <label asp-for="Username" class="form-label">
-                            <i data-lucide="user" class="w-4 h-4 inline mr-1"></i>
-                            Username
-                        </label>
-                        <div class="relative">
-                            <input asp-for="Username" 
-                                   class="form-input pl-11" 
-                                   placeholder="Enter your username"
-                                   autocomplete="username"
-                                   autofocus
-                                   aria-describedby="username-help" />
-                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                <i data-lucide="at-sign" class="w-5 h-5 text-gray-400"></i>
-                            </div>
-                        </div>
-                        <span asp-validation-for="Username" class="form-error"></span>
-                    </div>
-
-                    <!-- Password Field (HCI: Toggle visibility, security indicator) -->
-                    <div class="form-group">
-                        <label asp-for="Password" class="form-label">
-                            <i data-lucide="lock" class="w-4 h-4 inline mr-1"></i>
-                            Password
-                        </label>
-                        <div class="relative">
-                            <input asp-for="Password" 
-                                   type="password" 
-                                   class="form-input pl-11 pr-11" 
-                                   placeholder="Enter your password"
-                                   autocomplete="current-password"
-                                   id="password-input" />
-                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                                <i data-lucide="key-round" class="w-5 h-5 text-gray-400"></i>
-                            </div>
-                            <button type="button" 
-                                    class="absolute inset-y-0 right-0 pr-3.5 flex items-center hover:text-cyan-600 transition-colors"
-                                    onclick="togglePassword()"
-                                    aria-label="Toggle password visibility"
-                                    title="Show/Hide Password">
-                                <i data-lucide="eye" class="w-5 h-5 text-gray-400 hover:text-cyan-600" id="eye-icon"></i>
-                            </button>
-                        </div>
-                        <span asp-validation-for="Password" class="form-error"></span>
-                    </div>
-
-                    <!-- Submit Button (HCI: Clear action, loading state) -->
-                    <button type="submit" class="btn btn-primary w-full btn-lg mt-6" id="login-btn">
-                        <i data-lucide="log-in" class="w-5 h-5"></i>
-                        <span id="login-text">Sign In</span>
-                    </button>
-                </form>
-
-                <!-- Forgot Password Link (HCI: Recovery option visible) -->
-                <div class="mt-5 text-center">
-                    <a asp-action="ForgotPassword" class="text-sm text-cyan-600 hover:text-cyan-700 font-semibold transition-colors inline-flex items-center gap-1.5">
-                        <i data-lucide="help-circle" class="w-4 h-4"></i>
-                        Forgot your password?
-                    </a>
-                </div>
-
-                <!-- Security Info (HCI: Trust indicators) -->
-                <div class="mt-8 pt-6 border-t border-gray-100 text-center">
-                    <p class="text-xs text-gray-500 flex items-center justify-center gap-2">
-                        <i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i>
-                        Your connection is encrypted and secure
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Back to Home Link -->
-        <div class="mt-6 text-center">
-            <a href="@Url.Action("Index", "Home")" data-spa-ignore 
-               class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-sm font-semibold transition-all backdrop-blur-sm border border-white/20">
-                <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                Back to Home
-            </a>
-        </div>
+    <!-- Background blobs -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-teal-300/20 rounded-full blur-3xl"></div>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
-    
-    <script>
-        lucide.createIcons();
-        
-        function togglePassword() {
-            const input = document.getElementById('password-input');
-            const icon = document.getElementById('eye-icon');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.setAttribute('data-lucide', 'eye-off');
-            } else {
-                input.type = 'password';
-                icon.setAttribute('data-lucide', 'eye');
-            }
-            lucide.createIcons();
-        }
+    <!-- Card -->
+    <div class="login-card relative">
 
-        // Handle login form submission via fetch (no page refresh)
-        document.querySelector('form')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const form = this;
-            const formData = new FormData(form);
-            
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    redirect: 'follow'
-                });
+        <!-- Back -->
+        <a href="@Url.Action("Index","Home")"
+           class="absolute top-4 left-4 text-sm font-medium text-cyan-600 hover:text-cyan-800 transition flex items-center gap-1">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Back
+        </a>
 
-                if (response.redirected) {
-                    // Successful login - redirect to new page
-                    window.location.href = response.url;
-                } else {
-                    // Failed login - show the response (error message)
-                    const html = await response.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const errorDiv = doc.querySelector('.alert-error');
-                    
-                    if (errorDiv) {
-                        const existingError = document.querySelector('.alert-error');
-                        if (existingError) {
-                            existingError.innerHTML = errorDiv.innerHTML;
-                        } else {
-                            const loginBody = document.querySelector('.login-body');
-                            loginBody.insertBefore(errorDiv, loginBody.firstChild);
-                        }
-                        lucide.createIcons();
-                    }
-                }
-            } catch (error) {
-                console.error('Login error:', error);
+        <!-- Header -->
+        <div class="login-header pt-14">
+            <div class="login-logo">
+                <i data-lucide="chef-hat" class="w-10 h-10 text-white"></i>
+            </div>
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-subtitle">Sign in to continue to MessHub</p>
+        </div>
+
+        <!-- Body -->
+        <div class="login-body">
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-error mb-6 flex gap-3 items-start">
+                    <i data-lucide="alert-circle" class="w-5 h-5 mt-0.5"></i>
+                    <div asp-validation-summary="All"></div>
+                </div>
             }
-        });
-    </script>
+
+            <form asp-action="Login" method="post" id="login-form">
+                @Html.AntiForgeryToken()
+
+                <!-- Username -->
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input asp-for="Username"
+                           class="form-input"
+                           placeholder="Enter your username"
+                           autocomplete="username" />
+                    <span asp-validation-for="Username" class="form-error"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group mt-4">
+                    <label class="form-label">Password</label>
+                    <input asp-for="Password"
+                           type="password"
+                           class="form-input"
+                           placeholder="Enter your password"
+                           autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="form-error"></span>
+                </div>
+
+                <!-- Button -->
+                <button type="submit"
+                        id="login-btn"
+                        class="btn btn-primary w-full mt-6 flex items-center justify-center gap-2">
+                    <span id="login-text">Sign In</span>
+                </button>
+            </form>
+
+            <!-- Forgot -->
+            <div class="mt-5 text-center">
+                <a asp-action="ForgotPassword"
+                   class="text-sm text-cyan-600 hover:text-cyan-800 font-medium">
+                    Forgot your password?
+                </a>
+            </div>
+
+            <!-- Trust -->
+            <div class="mt-8 pt-6 border-t border-gray-100 text-center">
+                <p class="text-xs text-gray-500 flex items-center justify-center gap-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i>
+                    Secure & encrypted connection
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+
+    // Loading state
+    document.getElementById('login-form')?.addEventListener('submit', () => {
+        const btn = document.getElementById('login-btn');
+        btn.disabled = true;
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+        document.getElementById('login-text').innerText = 'Signing in...';
+    });
+</script>
+
 </body>
 </html>
