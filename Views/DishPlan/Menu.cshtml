@@ -1,0 +1,246 @@
+@model IEnumerable<MessManagement.Models.DishPlan>
+@{
+    ViewData["Title"] = "Weekly Menu";
+    var daysOfWeek = ViewBag.DaysOfWeek as string[] ?? new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+    var mealTypes = ViewBag.MealTypes as string[] ?? new[] { "Breakfast", "Lunch", "Dinner" };
+    var menuByDay = ViewBag.MenuByDay as Dictionary<string, Dictionary<string, List<MessManagement.Models.DishPlan>>> 
+                    ?? new Dictionary<string, Dictionary<string, List<MessManagement.Models.DishPlan>>>();
+    var today = DateTime.Now.DayOfWeek.ToString();
+}
+
+<!-- Page Header -->
+<div class="page-header">
+    <nav class="page-breadcrumb" aria-label="Breadcrumb">
+        <span class="breadcrumb-item">
+            <a href="@Url.Action("Index", "Home")" class="breadcrumb-link">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 inline"></i>
+                Dashboard
+            </a>
+        </span>
+        <span class="breadcrumb-separator">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        <span class="breadcrumb-item text-gray-900 font-medium">Weekly Menu</span>
+    </nav>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <h1 class="page-title">
+                <span class="page-title-icon">
+                    <i data-lucide="utensils" class="w-6 h-6"></i>
+                </span>
+                Weekly Menu
+            </h1>
+            <p class="page-description">View the complete meal schedule for the week.</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Menu Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    @{
+        var breakfastCount = Model.Count(d => d.MealType == "Breakfast");
+        var lunchCount = Model.Count(d => d.MealType == "Lunch");
+        var dinnerCount = Model.Count(d => d.MealType == "Dinner");
+    }
+    <div class="stat-card">
+        <div class="stat-icon bg-amber-100">
+            <i data-lucide="sunrise" class="w-6 h-6 text-amber-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@breakfastCount</div>
+            <div class="stat-label">Breakfast Options</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-emerald-100">
+            <i data-lucide="sun" class="w-6 h-6 text-emerald-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@lunchCount</div>
+            <div class="stat-label">Lunch Options</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon bg-purple-100">
+            <i data-lucide="moon" class="w-6 h-6 text-purple-600"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">@dinnerCount</div>
+            <div class="stat-label">Dinner Options</div>
+        </div>
+    </div>
+</div>
+
+<!-- Today's Special Highlight -->
+@if (menuByDay.ContainsKey(today))
+{
+    <div class="card mb-6 border-2 border-cyan-200 bg-gradient-to-r from-cyan-50 to-white">
+        <div class="card-header bg-gradient-to-r from-cyan-600 to-cyan-500 text-white">
+            <h2 class="card-title text-white">
+                <i data-lucide="sparkles" class="w-5 h-5 inline mr-2"></i>
+                Today's Menu (@today)
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                @foreach (var mealType in mealTypes)
+                {
+                    var dishes = menuByDay[today][mealType];
+                    var iconName = mealType == "Breakfast" ? "sunrise" : mealType == "Lunch" ? "sun" : "moon";
+                    var bgColor = mealType == "Breakfast" ? "bg-amber-100" : mealType == "Lunch" ? "bg-emerald-100" : "bg-purple-100";
+                    var textColor = mealType == "Breakfast" ? "text-amber-600" : mealType == "Lunch" ? "text-emerald-600" : "text-purple-600";
+                    var borderColor = mealType == "Breakfast" ? "border-amber-200" : mealType == "Lunch" ? "border-emerald-200" : "border-purple-200";
+                    
+                    <div class="bg-white rounded-lg border @borderColor p-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-10 h-10 rounded-full @bgColor flex items-center justify-center">
+                                <i data-lucide="@iconName" class="w-5 h-5 @textColor"></i>
+                            </div>
+                            <h3 class="font-semibold text-gray-900">@mealType</h3>
+                        </div>
+                        @if (dishes.Any())
+                        {
+                            <ul class="space-y-2">
+                                @foreach (var dish in dishes)
+                                {
+                                    <li class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                                        <span class="font-medium text-gray-800">@dish.DishName</span>
+                                        <span class="text-sm font-semibold @textColor">Rs. @dish.Price.ToString("N0")</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-gray-400 text-sm italic">No dishes planned</p>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Weekly Menu Table -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">
+            <i data-lucide="calendar" class="w-5 h-5 inline mr-2"></i>
+            Complete Weekly Schedule
+        </h2>
+    </div>
+    <div class="card-body p-0">
+        <div class="overflow-x-auto">
+            <table class="data-table" role="grid" aria-label="Weekly menu schedule">
+                <thead>
+                    <tr>
+                        <th class="w-32">Day</th>
+                        @foreach (var mealType in mealTypes)
+                        {
+                            var iconName = mealType == "Breakfast" ? "sunrise" : mealType == "Lunch" ? "sun" : "moon";
+                            var textColor = mealType == "Breakfast" ? "text-amber-600" : mealType == "Lunch" ? "text-emerald-600" : "text-purple-600";
+                            <th>
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="@iconName" class="w-4 h-4 @textColor"></i>
+                                    @mealType
+                                </div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var day in daysOfWeek)
+                    {
+                        var isToday = day == today;
+                        var rowClass = isToday ? "bg-cyan-50 border-l-4 border-l-cyan-500" : "";
+                        
+                        <tr class="@rowClass">
+                            <td class="font-semibold">
+                                <div class="flex items-center gap-2">
+                                    @if (isToday)
+                                    {
+                                        <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
+                                    }
+                                    @day
+                                    @if (isToday)
+                                    {
+                                        <span class="text-xs bg-cyan-500 text-white px-2 py-0.5 rounded-full">Today</span>
+                                    }
+                                </div>
+                            </td>
+                            @foreach (var mealType in mealTypes)
+                            {
+                                var dishes = menuByDay.ContainsKey(day) && menuByDay[day].ContainsKey(mealType) 
+                                            ? menuByDay[day][mealType] 
+                                            : new List<MessManagement.Models.DishPlan>();
+                                var bgColor = mealType == "Breakfast" ? "bg-amber-50" : mealType == "Lunch" ? "bg-emerald-50" : "bg-purple-50";
+                                var textColor = mealType == "Breakfast" ? "text-amber-700" : mealType == "Lunch" ? "text-emerald-700" : "text-purple-700";
+                                
+                                <td>
+                                    @if (dishes.Any())
+                                    {
+                                        <div class="space-y-2">
+                                            @foreach (var dish in dishes)
+                                            {
+                                                <div class="@bgColor rounded-lg p-2">
+                                                    <div class="font-medium text-gray-900">@dish.DishName</div>
+                                                    <div class="text-sm @textColor font-semibold">Rs. @dish.Price.ToString("N0")</div>
+                                                    @if (!string.IsNullOrEmpty(dish.Notes))
+                                                    {
+                                                        <div class="text-xs text-gray-500 mt-1">@dish.Notes</div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-gray-400 text-sm italic">—</span>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Legend / Info Section -->
+<div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+    <div class="flex flex-wrap items-center gap-6 text-sm text-gray-600">
+        <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-amber-100"></div>
+            <span>Breakfast Items</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-emerald-100"></div>
+            <span>Lunch Items</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-purple-100"></div>
+            <span>Dinner Items</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-500"></span>
+            <span>Today's Menu</span>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+}

@@ -6,7 +6,7 @@ using MessManagement.Models;
 
 namespace MessManagement.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class DishPlanController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,10 +16,37 @@ namespace MessManagement.Controllers
             _context = context;
         }
 
-        // GET: DishPlan
+        // GET: DishPlan - Admin only
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Index() => View(await _context.DishPlans.ToListAsync());
 
+        // GET: DishPlan/Menu - Available to all authenticated users
+        public async Task<IActionResult> Menu()
+        {
+            var dishPlans = await _context.DishPlans.ToListAsync();
+            
+            // Group by day of week in proper order
+            var daysOfWeek = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+            var mealTypes = new[] { "Breakfast", "Lunch", "Dinner" };
+            
+            ViewBag.DaysOfWeek = daysOfWeek;
+            ViewBag.MealTypes = mealTypes;
+            
+            // Create a dictionary for easy lookup
+            var menuByDay = daysOfWeek.ToDictionary(
+                day => day,
+                day => mealTypes.ToDictionary(
+                    meal => meal,
+                    meal => dishPlans.Where(d => d.DayOfWeek == day && d.MealType == meal).ToList()
+                )
+            );
+            ViewBag.MenuByDay = menuByDay;
+            
+            return View(dishPlans);
+        }
+
         // GET: DishPlan/Details/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -29,10 +56,12 @@ namespace MessManagement.Controllers
         }
 
         // GET: DishPlan/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([Bind("DayOfWeek,MealType,DishName,Price,Notes")] DishPlan dishPlan)
         {
             if (!ModelState.IsValid) return View(dishPlan);
@@ -43,6 +72,7 @@ namespace MessManagement.Controllers
         }
 
         // GET: DishPlan/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -53,6 +83,7 @@ namespace MessManagement.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("DishPlanId,DayOfWeek,MealType,DishName,Price,Notes")] DishPlan dishPlan)
         {
             if (id != dishPlan.DishPlanId) return NotFound();
@@ -72,6 +103,7 @@ namespace MessManagement.Controllers
         }
 
         // GET: DishPlan/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -82,6 +114,7 @@ namespace MessManagement.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var item = await _context.DishPlans.FindAsync(id);

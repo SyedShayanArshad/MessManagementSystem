@@ -98,6 +98,10 @@
                                     <i data-lucide="receipt" class="w-4 h-4 inline mr-1.5"></i>
                                     My Payments
                                 </a>
+                                <a href="@Url.Action("Menu", "DishPlan")" data-spa-ignore class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Menu" ? "active" : "")">
+                                    <i data-lucide="utensils" class="w-4 h-4 inline mr-1.5"></i>
+                                    Menu
+                                </a>
                             </div>
                         </template>
                         
@@ -141,6 +145,10 @@
                         <a href="@Url.Action("MyPayments", "Payment")" data-spa-ignore class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Payment" ? "active" : "")">
                             <i data-lucide="receipt" class="w-4 h-4 inline mr-1.5"></i>
                             My Payments
+                        </a>
+                        <a href="@Url.Action("Menu", "DishPlan")" data-spa-ignore class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Menu" ? "active" : "")">
+                            <i data-lucide="utensils" class="w-4 h-4 inline mr-1.5"></i>
+                            Menu
                         </a>
                     </nav>
                 }
@@ -242,6 +250,10 @@
                             <i data-lucide="wallet" class="w-4 h-4 inline mr-2"></i>
                             My Payments
                         </a>
+                        <a href="@Url.Action("Menu", "DishPlan")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="utensils" class="w-4 h-4 inline mr-2"></i>
+                            Menu
+                        </a>
                         <a href="@Url.Action("Create", "Payment")" data-spa-ignore class="mobile-nav-link">
                             <i data-lucide="plus-circle" class="w-4 h-4 inline mr-2"></i>
                             Add Payment
@@ -299,6 +311,10 @@
                 <a href="@Url.Action("MyPayments", "Payment")" data-spa-ignore class="mobile-nav-link">
                     <i data-lucide="wallet" class="w-4 h-4 inline mr-2"></i>
                     My Payments
+                </a>
+                <a href="@Url.Action("Menu", "DishPlan")" data-spa-ignore class="mobile-nav-link">
+                    <i data-lucide="utensils" class="w-4 h-4 inline mr-2"></i>
+                    Menu
                 </a>
                 <a href="@Url.Action("Create", "Payment")" data-spa-ignore class="mobile-nav-link">
                     <i data-lucide="plus-circle" class="w-4 h-4 inline mr-2"></i>
