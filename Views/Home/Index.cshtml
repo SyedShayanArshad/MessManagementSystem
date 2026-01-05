@@ -210,7 +210,7 @@
 else if (isAuthenticated)
 {
     <!-- Regular User Dashboard -->
-    <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
@@ -227,6 +227,26 @@ else if (isAuthenticated)
                 <a href="@Url.Action("MyAttendance", "Attendance")" class="btn btn-success btn-lg">
                     <i data-lucide="eye" class="w-5 h-5"></i>
                     View Attendance
+                </a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i data-lucide="utensils" class="w-5 h-5 text-orange-600"></i>
+                    Weekly Menu
+                </h3>
+            </div>
+            <div class="card-body text-center py-8">
+                <div class="w-20 h-20 mx-auto rounded-2xl bg-linear-to-br from-orange-500 to-orange-600 flex items-center justify-center mb-4">
+                    <i data-lucide="chef-hat" class="w-10 h-10 text-white"></i>
+                </div>
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">View Menu</h4>
+                <p class="text-gray-600 mb-6">Check this week's meal schedule and dishes.</p>
+                <a href="@Url.Action("Menu", "DishPlan")" class="btn btn-warning btn-lg">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    View Menu
                 </a>
             </div>
         </div>

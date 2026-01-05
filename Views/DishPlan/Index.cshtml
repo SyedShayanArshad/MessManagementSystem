@@ -129,16 +129,21 @@
                                         @foreach (var dish in dayDishes)
                                         {
                                             <div class="flex items-center justify-between p-2 bg-amber-50 rounded-lg group">
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="font-medium text-gray-900 truncate">@dish.DishName</p>
-                                                    <p class="text-sm text-amber-600 font-semibold">Rs. @dish.Price.ToString("N0")</p>
+                                                <div class="flex-1 min-w-0 flex items-center gap-2">
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="font-medium text-gray-900 truncate">@dish.DishName</p>
+                                                        <p class="text-sm text-amber-600 font-semibold">Rs. @dish.Price.ToString("N0")</p>
+                                                    </div>
+                                                    <button type="button" 
+                                                            onclick="showDeleteModal(@dish.DishPlanId, '@dish.DishName.Replace("'", "\'")')" 
+                                                            class="p-1 rounded-full hover:bg-red-100 text-red-400 hover:text-red-600 transition-colors" 
+                                                            title="Delete @dish.DishName">
+                                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                                    </button>
                                                 </div>
-                                                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
                                                     <a asp-action="Edit" asp-route-id="@dish.DishPlanId" class="p-1.5 rounded-lg hover:bg-amber-200 text-amber-700" title="Edit">
                                                         <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                                                    </a>
-                                                    <a asp-action="Delete" asp-route-id="@dish.DishPlanId" class="p-1.5 rounded-lg hover:bg-red-100 text-red-600" title="Delete">
-                                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                     </a>
                                                 </div>
                                             </div>
@@ -210,16 +215,21 @@
                                         @foreach (var dish in dayDishes)
                                         {
                                             <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg group">
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="font-medium text-gray-900 truncate">@dish.DishName</p>
-                                                    <p class="text-sm text-cyan-600 font-semibold">Rs. @dish.Price.ToString("N0")</p>
+                                                <div class="flex-1 min-w-0 flex items-center gap-2">
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="font-medium text-gray-900 truncate">@dish.DishName</p>
+                                                        <p class="text-sm text-cyan-600 font-semibold">Rs. @dish.Price.ToString("N0")</p>
+                                                    </div>
+                                                    <button type="button" 
+                                                            onclick="showDeleteModal(@dish.DishPlanId, '@dish.DishName.Replace("'", "\'")')" 
+                                                            class="p-1 rounded-full hover:bg-red-100 text-red-400 hover:text-red-600 transition-colors" 
+                                                            title="Delete @dish.DishName">
+                                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                                    </button>
                                                 </div>
-                                                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
                                                     <a asp-action="Edit" asp-route-id="@dish.DishPlanId" class="p-1.5 rounded-lg hover:bg-blue-200 text-blue-700" title="Edit">
                                                         <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                                                    </a>
-                                                    <a asp-action="Delete" asp-route-id="@dish.DishPlanId" class="p-1.5 rounded-lg hover:bg-red-100 text-red-600" title="Delete">
-                                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                     </a>
                                                 </div>
                                             </div>
@@ -291,16 +301,21 @@
                                         @foreach (var dish in dayDishes)
                                         {
                                             <div class="flex items-center justify-between p-2 bg-purple-50 rounded-lg group">
-                                                <div class="flex-1 min-w-0">
-                                                    <p class="font-medium text-gray-900 truncate">@dish.DishName</p>
-                                                    <p class="text-sm text-purple-600 font-semibold">Rs. @dish.Price.ToString("N0")</p>
+                                                <div class="flex-1 min-w-0 flex items-center gap-2">
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="font-medium text-gray-900 truncate">@dish.DishName</p>
+                                                        <p class="text-sm text-purple-600 font-semibold">Rs. @dish.Price.ToString("N0")</p>
+                                                    </div>
+                                                    <button type="button" 
+                                                            onclick="showDeleteModal(@dish.DishPlanId, '@dish.DishName.Replace("'", "\'")')" 
+                                                            class="p-1 rounded-full hover:bg-red-100 text-red-400 hover:text-red-600 transition-colors" 
+                                                            title="Delete @dish.DishName">
+                                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                                    </button>
                                                 </div>
-                                                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
                                                     <a asp-action="Edit" asp-route-id="@dish.DishPlanId" class="p-1.5 rounded-lg hover:bg-purple-200 text-purple-700" title="Edit">
                                                         <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                                                    </a>
-                                                    <a asp-action="Delete" asp-route-id="@dish.DishPlanId" class="p-1.5 rounded-lg hover:bg-red-100 text-red-600" title="Delete">
-                                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                                     </a>
                                                 </div>
                                             </div>
@@ -376,7 +391,67 @@ else
 </div>
 
 @section Scripts {
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" onclick="hideDeleteModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full transform transition-all" onclick="event.stopPropagation()">
+                <!-- Modal Header -->
+                <div class="p-6 text-center">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 text-red-600"></i>
+                    </div>
+                    <h3 id="deleteModalTitle" class="text-xl font-bold text-gray-900 mb-2">Delete Dish</h3>
+                    <p class="text-gray-600">Are you sure you want to delete <strong id="deleteDishName" class="text-red-600"></strong>?</p>
+                    <p class="text-sm text-gray-500 mt-2">This action cannot be undone.</p>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="flex gap-3 p-4 bg-gray-50 rounded-b-2xl">
+                    <button type="button" onclick="hideDeleteModal()" class="flex-1 btn btn-secondary">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                        Cancel
+                    </button>
+                    <form id="deleteForm" method="post" class="flex-1">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="w-full btn btn-danger">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Initialize Lucide icons
         window.initLucideIcons();
+        
+        // Delete Modal Functions
+        function showDeleteModal(dishId, dishName) {
+            document.getElementById('deleteDishName').textContent = dishName;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete", "DishPlan")/' + dishId;
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Re-initialize icons in modal
+            setTimeout(() => window.initLucideIcons && window.initLucideIcons(), 50);
+        }
+        
+        function hideDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && !document.getElementById('deleteModal').classList.contains('hidden')) {
+                hideDeleteModal();
+            }
+        });
     </script>
 }
