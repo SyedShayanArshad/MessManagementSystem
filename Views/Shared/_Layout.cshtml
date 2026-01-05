@@ -64,11 +64,11 @@
                                     <i data-lucide="calendar-days" class="w-4 h-4 inline mr-1.5"></i>
                                     Periods
                                 </a>
-                                <a href="@Url.Action("Index", "Attendance")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Attendance" ? "active" : "")">
+                                <a href="@Url.Action("Index", "Attendance")" data-spa-ignore class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Attendance" ? "active" : "")">
                                     <i data-lucide="check-square" class="w-4 h-4 inline mr-1.5"></i>
                                     Attendance
                                 </a>
-                                <a href="@Url.Action("Index", "Tea")" class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tea" ? "active" : "")">
+                                <a href="@Url.Action("Index", "Tea")" data-spa-ignore class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Tea" ? "active" : "")">
                                     <i data-lucide="coffee" class="w-4 h-4 inline mr-1.5"></i>
                                     Tea
                                 </a>
@@ -203,11 +203,11 @@
                     <i data-lucide="calendar-range" class="w-4 h-4 inline mr-2"></i>
                     Periods
                 </a>
-                <a href="@Url.Action("Index", "Attendance")" class="mobile-nav-link">
+                <a href="@Url.Action("Index", "Attendance")" data-spa-ignore class="mobile-nav-link">
                     <i data-lucide="check-square" class="w-4 h-4 inline mr-2"></i>
                     Attendance
                 </a>
-                <a href="@Url.Action("Index", "Tea")" class="mobile-nav-link">
+                <a href="@Url.Action("Index", "Tea")" data-spa-ignore class="mobile-nav-link">
                     <i data-lucide="coffee" class="w-4 h-4 inline mr-2"></i>
                     Tea
                 </a>
