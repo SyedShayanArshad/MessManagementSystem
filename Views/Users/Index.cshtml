@@ -214,31 +214,32 @@
                                 <div class="flex items-center justify-center gap-2">
                                     <a asp-action="Details" asp-route-id="@item.UserId" class="table-action table-action-view"
                                         aria-label="View details for @item.FullName">
-                                        <i data-lucide="eye" class="w-3.5 h-3.5 mr-1"></i>
+                                        <i data-lucide="eye" class="w-5 h-5 mr-1"></i>
                                         View
                                     </a>
                                     <a asp-action="Edit" asp-route-id="@item.UserId" class="table-action table-action-edit"
                                         aria-label="Edit @item.FullName">
-                                        <i data-lucide="pencil" class="w-3.5 h-3.5 mr-1"></i>
+                                        <i data-lucide="pencil" class="w-5 h-5 mr-1"></i>
                                         Edit
                                     </a>
                                     @if (item.IsActive)
                                     {
-                                        <button type="button" class="table-action table-action-delete"
-                                                onclick="showDeactivateModal(@item.UserId, '@item.Username', '@item.FullName')">
-                                            <i data-lucide="user-x" class="w-3.5 h-3.5 mr-1"></i>
-                                            Deactivate
+                                        <button type="button" class="table-action table-action-delete flex items-center gap-2"
+                                            onclick="showDeactivateModal(@item.UserId, '@item.Username', '@item.FullName')">
+
+                                            <i data-lucide="user-x" class="w-5 h-5 mr-1"></i>
+                                            <span>Deactivate</span>
                                         </button>
                                     }
                                     else
                                     {
-                                        <button type="button" class="table-action table-action-edit"
-                                                onclick="showActivateModal(@item.UserId, '@item.FullName')">
-                                            <i data-lucide="user-check" class="w-3.5 h-3.5 mr-1"></i>
-                                            Activate
+                                        <button type="button" class="table-action table-action-edit flex items-center gap-2"
+                                            onclick="showActivateModal(@item.UserId, '@item.FullName')">
+
+                                            <i data-lucide="user-check" class="w-5 h-5 mr-1"></i>
+                                            <span>Activate</span>
                                         </button>
                                     }
-
                                 </div>
                             </td>
                         </tr>
@@ -266,7 +267,8 @@
 </div>
 
 <!-- Deactivate Modal -->
-<div id="deactivateModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" onclick="hideDeactivateModal(event)">
+<div id="deactivateModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+    onclick="hideDeactivateModal(event)">
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6" onclick="event.stopPropagation()">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
@@ -281,7 +283,7 @@
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" id="deactivateUserId" />
             <input type="hidden" id="deactivateUsername" />
-            
+
             <div class="mb-4">
                 <div class="p-4 bg-red-50 rounded-lg border border-red-200 mb-4">
                     <p class="text-sm text-red-800">
@@ -289,13 +291,15 @@
                         <strong>Warning:</strong> This member will lose access to the system.
                     </p>
                 </div>
-                
-                <label class="form-label">Type username to confirm: <span class="text-red-600 font-semibold" id="usernameToConfirm"></span></label>
-                <input type="text" id="usernameConfirmInput" class="form-input" 
-                       placeholder="Enter username to confirm" autocomplete="off" />
-                <p class="form-hint text-red-600" id="deactivateError" style="display: none;">Username does not match!</p>
+
+                <label class="form-label">Type username to confirm: <span class="text-red-600 font-semibold"
+                        id="usernameToConfirm"></span></label>
+                <input type="text" id="usernameConfirmInput" class="form-input" placeholder="Enter username to confirm"
+                    autocomplete="off" />
+                <p class="form-hint text-red-600" id="deactivateError" style="display: none;">Username does not match!
+                </p>
             </div>
-            
+
             <div class="flex justify-end gap-3">
                 <button type="button" class="btn btn-secondary" onclick="hideDeactivateModal()">Cancel</button>
                 <button type="submit" class="btn btn-error">
@@ -308,7 +312,8 @@
 </div>
 
 <!-- Activate Modal -->
-<div id="activateModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" onclick="hideActivateModal(event)">
+<div id="activateModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50"
+    onclick="hideActivateModal(event)">
     <div class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6" onclick="event.stopPropagation()">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
@@ -322,7 +327,7 @@
         <form asp-action="ToggleStatus" method="post" id="activateForm">
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" id="activateUserId" />
-            
+
             <div class="mb-4">
                 <div class="p-4 bg-green-50 rounded-lg border border-green-200">
                     <p class="text-sm text-green-800">
@@ -331,7 +336,7 @@
                     </p>
                 </div>
             </div>
-            
+
             <div class="flex justify-end gap-3">
                 <button type="button" class="btn btn-secondary" onclick="hideActivateModal()">Cancel</button>
                 <button type="submit" class="btn btn-success">
@@ -375,7 +380,7 @@
         const expectedUsername = document.getElementById('deactivateUsername').value;
         const enteredUsername = document.getElementById('usernameConfirmInput').value.trim();
         const errorMsg = document.getElementById('deactivateError');
-        
+
         if (enteredUsername !== expectedUsername) {
             errorMsg.style.display = 'block';
             document.getElementById('usernameConfirmInput').classList.add('border-red-500');
@@ -400,10 +405,10 @@
     }
 
     // Clear error on input
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const usernameInput = document.getElementById('usernameConfirmInput');
         if (usernameInput) {
-            usernameInput.addEventListener('input', function() {
+            usernameInput.addEventListener('input', function () {
                 document.getElementById('deactivateError').style.display = 'none';
                 this.classList.remove('border-red-500');
             });
@@ -411,7 +416,7 @@
     });
 
     // Close on Escape key
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             hideDeactivateModal();
             hideActivateModal();

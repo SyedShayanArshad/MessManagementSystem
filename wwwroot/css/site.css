@@ -1415,6 +1415,19 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #374151;
+    transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background-color: #F3F4F6;
+}
 
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -1424,4 +1437,26 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* ===========================================
+   GLOBAL CURSOR POINTER FOR INTERACTIVE ELEMENTS
+   =========================================== */
+a,
+button,
+[type="button"],
+[type="submit"],
+[type="reset"],
+[role="button"],
+[onclick],
+[data-action],
+.btn,
+.nav-link,
+.dropdown-item,
+.quick-action,
+.clickable,
+label[for],
+summary,
+[tabindex]:not([tabindex="-1"]) {
+  cursor: pointer;
 }
