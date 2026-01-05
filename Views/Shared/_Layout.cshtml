@@ -557,7 +557,6 @@
 
                     const html = await response.text();
                     this.updateContent(html, url, pushState);
-                    this.currentUrl = url;
 
                     // Update active nav links
                     this.updateActiveNavLinks(url);
@@ -630,6 +629,7 @@
                     // Update URL in browser
                     if (pushState && url !== this.currentUrl) {
                         history.pushState({ url: url }, '', url);
+                        this.currentUrl = url;  // Update currentUrl after pushState
                     }
 
                     // Re-initialize scripts
