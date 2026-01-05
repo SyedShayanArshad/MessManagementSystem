@@ -106,7 +106,7 @@
                             <span class="text-xs font-medium" :class="adminMode ? 'text-white/50' : 'text-cyan-200'">
                                 <i data-lucide="user" class="w-3.5 h-3.5 inline"></i>
                             </span>
-                            <button @@click="adminMode = !adminMode; $nextTick(() => lucide.createIcons())" 
+                            <button @@click="adminMode = !adminMode; $nextTick(() => window.initLucideIcons && window.initLucideIcons())" 
                                     class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-white/30"
                                     :class="adminMode ? 'bg-amber-500' : 'bg-cyan-400'"
                                     :title="adminMode ? 'Switch to User Mode' : 'Switch to Admin Mode'"
@@ -264,15 +264,45 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
     
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
+        // ============================================
+        // GLOBAL LUCIDE ICON INITIALIZER
+        // Safe icon initialization with retry mechanism
+        // Use this everywhere instead of direct lucide.createIcons()
+        // ============================================
+        window.initLucideIcons = function(maxRetries = 20) {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                try {
+                    lucide.createIcons();
+                    return true;
+                } catch (error) {
+                    console.error('Error initializing Lucide icons:', error);
+                    return false;
+                }
+            } else if (maxRetries > 0) {
+                // Retry if lucide hasn't loaded yet
+                setTimeout(() => window.initLucideIcons(maxRetries - 1), 50);
+                return false;
+            } else {
+                console.warn('Lucide library failed to load after retries');
+                return false;
+            }
+        };
+        
+        // Initialize on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => window.initLucideIcons());
+        } else {
+            window.initLucideIcons();
+        }
         
         // Mobile menu toggle
-        document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
-            const nav = document.getElementById('mobile-nav');
-            const isHidden = nav.classList.contains('hidden');
-            nav.classList.toggle('hidden');
-            this.setAttribute('aria-expanded', isHidden);
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+                const nav = document.getElementById('mobile-nav');
+                const isHidden = nav.classList.contains('hidden');
+                nav.classList.toggle('hidden');
+                this.setAttribute('aria-expanded', isHidden);
+            });
         });
 
         // ===========================================
@@ -391,7 +421,7 @@
                     </div>
                 `;
                 document.body.appendChild(toast);
-                lucide.createIcons();
+                window.initLucideIcons();
                 
                 setTimeout(() => {
                     toast.classList.add('toast-show');
@@ -639,9 +669,9 @@
 
             // Re-initialize scripts after content update
             reinitialize() {
-                // Re-create Lucide icons
-                if (window.lucide) {
-                    lucide.createIcons();
+                // Re-create Lucide icons using the global safe initializer
+                if (window.initLucideIcons) {
+                    window.initLucideIcons();
                 }
 
                 // Re-initialize jQuery validation

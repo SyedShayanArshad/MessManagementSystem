@@ -345,7 +345,7 @@
 
 @section Scripts {
     <script>
-        lucide.createIcons();
+        window.initLucideIcons();
     </script>
 }
 
@@ -360,7 +360,7 @@
         document.getElementById('deactivateError').style.display = 'none';
         document.getElementById('deactivateModal').classList.remove('hidden');
         document.getElementById('deactivateModal').classList.add('flex');
-        lucide.createIcons();
+        window.initLucideIcons();
     }
 
     function hideDeactivateModal(event) {
@@ -390,7 +390,7 @@
         document.getElementById('activateModalSubtitle').textContent = fullName;
         document.getElementById('activateModal').classList.remove('hidden');
         document.getElementById('activateModal').classList.add('flex');
-        lucide.createIcons();
+        window.initLucideIcons();
     }
 
     function hideActivateModal(event) {

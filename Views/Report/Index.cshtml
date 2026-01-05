@@ -597,13 +597,13 @@ else
 @section Scripts {
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
-        lucide.createIcons();
+        window.initLucideIcons();
         
         // Email All Modal Functions
         function openEmailAllModal() {
             document.getElementById('emailAllModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            setTimeout(() => lucide.createIcons(), 50);
+            setTimeout(() => window.initLucideIcons(), 50);
         }
         
         function closeEmailAllModal() {
@@ -619,7 +619,7 @@ else
             document.getElementById('userInitial').textContent = fullName.charAt(0).toUpperCase();
             document.getElementById('emailUserModal').classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            setTimeout(() => lucide.createIcons(), 50);
+            setTimeout(() => window.initLucideIcons(), 50);
         }
         
         function closeEmailUserModal() {
