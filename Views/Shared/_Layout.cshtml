@@ -184,44 +184,110 @@
         </div>
 
         <!-- Mobile Navigation -->
-        <nav class="mobile-nav hidden" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
-            <a href="@Url.Action("Index", "Home")" data-spa-ignore class="mobile-nav-link">
-                <i data-lucide="layout-dashboard" class="w-4 h-4 inline mr-2"></i>
-                Dashboard
-            </a>
-            @if (User?.IsInRole("Admin") == true)
-            {
-                <a href="@Url.Action("Index", "Users")" data-spa-ignore class="mobile-nav-link">
-                    <i data-lucide="users" class="w-4 h-4 inline mr-2"></i>
-                    Members
+        @if (User?.IsInRole("Admin") == true)
+        {
+            <!-- Admin Mobile Navigation with Mode Toggle -->
+            <nav class="mobile-nav hidden" id="mobile-nav" role="navigation" aria-label="Mobile navigation" x-data="{ adminMode: localStorage.getItem('adminMode') !== 'false' }" x-init="$watch('adminMode', val => localStorage.setItem('adminMode', val))">
+                <a href="@Url.Action("Index", "Home")" data-spa-ignore class="mobile-nav-link">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 inline mr-2"></i>
+                    Dashboard
                 </a>
-                <a href="@Url.Action("Index", "DishPlan")" data-spa-ignore class="mobile-nav-link">
-                    <i data-lucide="chef-hat" class="w-4 h-4 inline mr-2"></i>
-                    Dish Plans
+                
+                <!-- Admin Mode Links -->
+                <template x-if="adminMode">
+                    <div>
+                        <a href="@Url.Action("Index", "Users")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="users" class="w-4 h-4 inline mr-2"></i>
+                            Members
+                        </a>
+                        <a href="@Url.Action("Index", "DishPlan")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="chef-hat" class="w-4 h-4 inline mr-2"></i>
+                            Dish Plans
+                        </a>
+                        <a href="@Url.Action("Index", "MessPeriod")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="calendar-range" class="w-4 h-4 inline mr-2"></i>
+                            Periods
+                        </a>
+                        <a href="@Url.Action("Index", "Attendance")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="check-square" class="w-4 h-4 inline mr-2"></i>
+                            Attendance
+                        </a>
+                        <a href="@Url.Action("Index", "Tea")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="coffee" class="w-4 h-4 inline mr-2"></i>
+                            Tea
+                        </a>
+                        <a href="@Url.Action("Index", "Payment")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="wallet" class="w-4 h-4 inline mr-2"></i>
+                            Payments
+                        </a>
+                        <a href="@Url.Action("Index", "Report")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4 inline mr-2"></i>
+                            Reports
+                        </a>
+                    </div>
+                </template>
+                
+                <!-- User Mode Links -->
+                <template x-if="!adminMode">
+                    <div>
+                        <a href="@Url.Action("MyAttendance", "Attendance")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="calendar-check" class="w-4 h-4 inline mr-2"></i>
+                            My Attendance
+                        </a>
+                        <a href="@Url.Action("MyTea", "Tea")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="coffee" class="w-4 h-4 inline mr-2"></i>
+                            My Tea
+                        </a>
+                        <a href="@Url.Action("MyPayments", "Payment")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="wallet" class="w-4 h-4 inline mr-2"></i>
+                            My Payments
+                        </a>
+                        <a href="@Url.Action("Create", "Payment")" data-spa-ignore class="mobile-nav-link">
+                            <i data-lucide="plus-circle" class="w-4 h-4 inline mr-2"></i>
+                            Add Payment
+                        </a>
+                    </div>
+                </template>
+                
+                <!-- Mode Toggle Button -->
+                <div class="mobile-nav-link border-t border-white/20 mt-2 pt-2">
+                    <div class="flex items-center justify-between px-3 py-2">
+                        <div class="flex items-center gap-2 text-sm font-medium">
+                            <span :class="adminMode ? 'text-white/50' : 'text-cyan-300'">
+                                <i data-lucide="user" class="w-4 h-4 inline"></i>
+                                User
+                            </span>
+                        </div>
+                        <button @@click="adminMode = !adminMode; $nextTick(() => window.initLucideIcons && window.initLucideIcons())" 
+                                class="relative w-14 h-7 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-white/30"
+                                :class="adminMode ? 'bg-amber-500' : 'bg-cyan-400'"
+                                :title="adminMode ? 'Switch to User Mode' : 'Switch to Admin Mode'"
+                                role="switch"
+                                :aria-checked="adminMode"
+                                :aria-label="adminMode ? 'Switch to User Mode' : 'Switch to Admin Mode'">
+                            <span class="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 flex items-center justify-center"
+                                  :class="adminMode ? 'translate-x-7' : 'translate-x-0'">
+                                <i :data-lucide="adminMode ? 'shield' : 'user'" class="w-3.5 h-3.5" :class="adminMode ? 'text-amber-600' : 'text-cyan-600'"></i>
+                            </span>
+                        </button>
+                        <div class="flex items-center gap-2 text-sm font-medium">
+                            <span :class="adminMode ? 'text-amber-300' : 'text-white/50'">
+                                <i data-lucide="shield" class="w-4 h-4 inline"></i>
+                                Admin
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        }
+        else if (User?.Identity?.IsAuthenticated == true)
+        {
+            <!-- Regular User Mobile Navigation -->
+            <nav class="mobile-nav hidden" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
+                <a href="@Url.Action("Index", "Home")" data-spa-ignore class="mobile-nav-link">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 inline mr-2"></i>
+                    Dashboard
                 </a>
-                <a href="@Url.Action("Index", "MessPeriod")" data-spa-ignore class="mobile-nav-link">
-                    <i data-lucide="calendar-range" class="w-4 h-4 inline mr-2"></i>
-                    Periods
-                </a>
-                <a href="@Url.Action("Index", "Attendance")" data-spa-ignore class="mobile-nav-link">
-                    <i data-lucide="check-square" class="w-4 h-4 inline mr-2"></i>
-                    Attendance
-                </a>
-                <a href="@Url.Action("Index", "Tea")" data-spa-ignore class="mobile-nav-link">
-                    <i data-lucide="coffee" class="w-4 h-4 inline mr-2"></i>
-                    Tea
-                </a>
-                <a href="@Url.Action("Index", "Payment")" data-spa-ignore class="mobile-nav-link">
-                    <i data-lucide="wallet" class="w-4 h-4 inline mr-2"></i>
-                    Payments
-                </a>
-                <a href="@Url.Action("Index", "Report")" data-spa-ignore class="mobile-nav-link">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4 inline mr-2"></i>
-                    Reports
-                </a>
-            }
-            else if (User?.Identity?.IsAuthenticated == true)
-            {
                 <a href="@Url.Action("MyAttendance", "Attendance")" data-spa-ignore class="mobile-nav-link">
                     <i data-lucide="calendar-check" class="w-4 h-4 inline mr-2"></i>
                     My Attendance
@@ -238,8 +304,8 @@
                     <i data-lucide="plus-circle" class="w-4 h-4 inline mr-2"></i>
                     Add Payment
                 </a>
-            }
-        </nav>
+            </nav>
+        }
     </header>
 
     <!-- Main Content -->
