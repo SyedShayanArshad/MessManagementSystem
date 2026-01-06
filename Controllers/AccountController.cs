@@ -18,12 +18,14 @@ namespace MessManagement.Controllers
         private readonly ApplicationDbContext _db;
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly IEmailService _emailService;
+        private readonly IJwtService _jwtService;
 
-        public AccountController(ApplicationDbContext db, IEmailService emailService)
+        public AccountController(ApplicationDbContext db, IEmailService emailService, IJwtService jwtService)
         {
             _db = db;
             _passwordHasher = new PasswordHasher<User>();
             _emailService = emailService;
+            _jwtService = jwtService;
         }
 
         public IActionResult Login() => View(new LoginViewModel());
@@ -72,6 +74,11 @@ namespace MessManagement.Controllers
                 var principal = new ClaimsPrincipal(claimsIdentity);
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                
+                // Generate JWT token for browser storage (so user can see it in DevTools)
+                var jwtToken = _jwtService.GenerateToken(userExists);
+                TempData["JwtToken"] = jwtToken;
+                
                 return RedirectToAction("Index", "Home");
             }
 

@@ -353,6 +353,20 @@ else
     <script>
         window.initLucideIcons();
         
+        // Store JWT Token in localStorage (if available from login)
+        @if (TempData["JwtToken"] != null)
+        {
+            <text>
+            (function() {
+                const jwtToken = '@TempData["JwtToken"]';
+                localStorage.setItem('jwtToken', jwtToken);
+                console.log('✅ JWT Token stored in localStorage!');
+                console.log('📋 Token:', jwtToken);
+                console.log('👉 Check DevTools → Application → Local Storage');
+            })();
+            </text>
+        }
+        
         // Load dashboard stats using Fetch API (async - avoids page refresh)
         @if (isAdmin)
         {
